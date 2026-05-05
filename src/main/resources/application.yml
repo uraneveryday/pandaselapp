@@ -1,0 +1,39 @@
+# ==========================================
+# 1. 공통 설정 (모든 환경에서 공통으로 적용)
+# ==========================================
+spring:
+  application:
+    name: demo
+  profiles:
+    active: dev
+    include: secret
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+---
+# ==========================================
+# 2. Dev 환경 (Supabase - PostgreSQL)
+# ==========================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require
+    # username과 password는 application-secret.properties 에서 안전하게 가져옵니다!
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true

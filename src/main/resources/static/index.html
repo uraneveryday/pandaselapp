@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"> <title>한자 아이</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<h1>유치원 한자 학습 서비스</h1>
+<button id="testBtn">서버에게 인사하기</button>
+<p id="responseText"></p>
+
+<script>
+    document.getElementById('testBtn').onclick = function() {
+        // 서버의 /api/hello 주소로 GET 요청을 보냄
+        axios.get('/api/hello')
+            .then(response => {
+                document.getElementById('responseText').innerText = response.data;
+            })
+            .catch(error => console.error("연동 실패!", error));
+    };
+</script>
+</body>
+</html>
