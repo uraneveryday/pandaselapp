@@ -1,12 +1,13 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy JAR app to Azure Web App - pandasel-homework
+name: Build and deploy JAR app to Azure Web App - pandaselApp
 
 on:
   push:
     branches:
       - main
+    # frontend 폴더의 변경사항만 있을 때는 워크플로우를 실행하지 않음
     paths-ignore:
       - 'frontend/**'
   workflow_dispatch:
@@ -26,14 +27,20 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-      - name: Build with Maven
-        run: mvn clean install
+      # Gradle 래퍼(gradlew)에 실행 권한 부여
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
+      # Gradle을 사용하여 빌드 (테스트를 스킵하려면 ./gradlew build -x test 사용)
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      # Gradle 빌드 결과물 경로로 수정 (build/libs/)
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          path: '${{ github.workspace }}/build/libs/*.jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,15 +58,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_52E6A5109E6C48FF971FA4B393A57A24 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1C268D68838A4CDEB2BEE4A63EFB9E1D }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_872679A6B8134FBFB2123D15ED5DA7AF }}
+          # GitHub Repository의 Settings > Secrets and variables > Actions에 등록된 실제 시크릿 이름으로 매칭해야 합니다.
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'pandasel-homework'
+          app-name: 'pandaselApp'
           slot-name: 'Production'
           package: '*.jar'
-          
