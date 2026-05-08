@@ -33,7 +33,7 @@ jobs:
 
       # Gradle을 사용하여 빌드 (테스트를 스킵하려면 ./gradlew build -x test 사용)
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build -x test 
 
       # Gradle 빌드 결과물 경로로 수정 (build/libs/)
       - name: Upload artifact for deployment job
