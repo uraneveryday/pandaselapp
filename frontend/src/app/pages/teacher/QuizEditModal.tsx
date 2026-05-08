@@ -32,7 +32,7 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
     useEffect(() => {
         const fetchQuizData = async () => {
             try {
-                const res = await fetch(`/api/teacher/quizzes/${quizId}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/quizzes/${quizId}`, {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
 
@@ -130,7 +130,7 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
                 correctAnswer: type === "OX" ? oxAnswerIndex : chooseAnswerIndex,
             };
 
-            const response = await fetch(`/api/teacher/quizzes/${quizId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/quizzes/${quizId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
