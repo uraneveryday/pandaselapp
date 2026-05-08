@@ -27,7 +27,7 @@ public class AuthController {
     private final AuthService authService;
 
     // 💡 프론트엔드에서 POST 방식으로 /api/auth/login 주소로 요청이 오면 이 메서드가 실행됨
-    @PostMapping("/login")
+    @GetMapping("/login")
     public ResponseEntity<TokenInfo> login(@RequestBody LoginRequest request) { // 반환 타입 변경
         // 💡 로그인 성공 시 JWT 토큰(TokenInfo)을 생성하여 반환하도록 위임
         TokenInfo tokenInfo = authService.login(request.getLoginId(), request.getPassword());
