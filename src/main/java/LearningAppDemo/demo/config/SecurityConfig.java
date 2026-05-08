@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider; // 💡 필터 생성에 필요
     // 💡 yml 파일에서 allowed-origins 리스트를 주입받음
-    @Value("${app.cors.allowed-origins}")
+    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,https://pandasel-app.netlify.app}")
     private List<String> allowedOrigins;
 
     @Bean
