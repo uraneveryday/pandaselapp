@@ -28,7 +28,7 @@ export function ClassroomListPage() {
 
             try {
                 // 4. 추후 환경 변수로 뺄 것을 대비해 도메인 분리
-                const API_BASE_URL = "http://localhost:8080";
+                const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}`;
 
                 const response = await fetch(`${API_BASE_URL}/api/teacher/classrooms/list`, {
                     method: "GET",

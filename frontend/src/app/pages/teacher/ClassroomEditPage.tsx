@@ -32,7 +32,7 @@ export function ClassroomEditPage() {
         const fetchClassroomDetails = async () => {
             try {
                 const token = localStorage.getItem("jwt_token");
-                const res = await fetch(`http://localhost:8080/api/teacher/classrooms/${id}/edit`, {
+                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${id}/edit`, {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error("데이터 로드 실패");
@@ -118,7 +118,7 @@ export function ClassroomEditPage() {
                 phoneNumber: createForm.parentPhoneNumber // 백엔드가 phoneNumber라는 이름으로 학부모 번호를 받기로 했다면!
             };
 
-            const res = await fetch(`http://localhost:8080/api/teacher/classrooms/${id}/edit/student`, {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${id}/edit/student`, {
                 method: 'POST',
                 headers: { "Authorization": `Bearer ${token}`,
                             "Content-Type": "application/json" },

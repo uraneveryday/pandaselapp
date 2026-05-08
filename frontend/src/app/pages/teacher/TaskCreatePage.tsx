@@ -23,7 +23,7 @@ export function TaskCreatePage() {
         const token = localStorage.getItem("jwt_token");
 
         // ⭐️ 3. 백틱(`)을 사용하여 URL에 동적 id 삽입
-        fetch(`http://localhost:8080/api/teacher/classrooms/${id}/task/create`, {
+        fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${id}/task/create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

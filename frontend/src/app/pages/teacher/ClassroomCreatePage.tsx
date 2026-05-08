@@ -33,7 +33,7 @@ export function ClassroomCreatePage() {
 
 
             const token = localStorage.getItem("jwt_token");
-            const response = await fetch("http://localhost:8080/api/teacher/classrooms/new", {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/new`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

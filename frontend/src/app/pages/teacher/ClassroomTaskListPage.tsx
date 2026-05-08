@@ -34,7 +34,7 @@ export function ClassroomTaskListPage() {
         const fetchTasks = async () => {
             try {
                 const token = localStorage.getItem("jwt_token");
-                const response = await fetch(`http://localhost:8080/api/teacher/classrooms/${id}/task/list`, {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${id}/task/list`, {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
                 if (!response.ok) throw new Error("불러오기 실패");
@@ -105,7 +105,7 @@ function TaskListItem({task, sequence, onFinish, classroomId}: {
 
         try {
             const token = localStorage.getItem("jwt_token");
-            const response = await fetch(`http://localhost:8080/api/teacher/classrooms/${classroomId}/task/${task.id}/finish`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/task/${task.id}/finish`, {
                 method: "PATCH",
                 headers: { "Authorization": `Bearer ${token}` }
             });

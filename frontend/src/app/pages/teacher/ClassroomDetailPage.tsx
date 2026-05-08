@@ -36,7 +36,7 @@ export function ClassroomDetailPage() {
             }
 
             try {
-                const API_BASE_URL = "http://localhost:8080";
+                const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}`;
 
                 // 3. RESTful 표준에 맞게 Path Variable로 ID를 넘겨줍니다.
                 const response = await fetch(`${API_BASE_URL}/api/teacher/classrooms/${id}`, {
