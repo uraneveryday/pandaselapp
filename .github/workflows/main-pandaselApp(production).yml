@@ -40,7 +40,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/build/libs/*.jar'
+          # plain.jar를 제외하고 실제 실행 가능한 jar만 업로드. 기존에는 jar2개밟견되서 오류 
+          path: '${{ github.workspace }}/build/libs/!(*-plain).jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -69,4 +70,4 @@ jobs:
         with:
           app-name: 'pandaselApp'
           slot-name: 'Production'
-          package: '*.jar'
+          package: './**/*.jar'
