@@ -115,7 +115,7 @@ const QuizCreate: React.FC = () => {
 
             if (response.ok) {
                 alert("퀴즈가 성공적으로 생성되었습니다!");
-                navigate(`${import.meta.env.VITE_API_BASE_URL}/teacher/classrooms/${classroomId}/task/${taskId}`);
+                navigate(`/teacher/classrooms/${classroomId}/task/${taskId}`);
             } else {
                 alert("퀴즈 생성에 실패했습니다.");
             }
