@@ -28,20 +28,22 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 2. Gradle을 사용하여 빌드 (DB 연결 에러 방지를 위해 테스트 스킵)
+      # 2. Gradle을 사용하여 빌드 (테스트 스킵)
       - name: Build with Gradle
         run: ./gradlew build -x test 
 
-      # 3. ⭐️ [에러 박멸 핵심] plain.jar 파일을 삭제하여 배포 충돌을 원천 차단
-      - name: Remove plain jar to prevent deployment confusion
-        run: rm build/libs/*-plain.jar
+      # 3. ⭐️ [절대 방어] 방해되는 plain.jar는 지우고, 진짜 실행 파일 이름을 무조건 'app.jar'로 통일시킵니다.
+      - name: Rename to app.jar
+        run: |
+          rm -f build/libs/*-plain.jar
+          mv build/libs/*.jar build/libs/app.jar
 
-      # 4. 이제 하나만 남은 진짜 실행 가능한 .jar 파일만 안전하게 업로드
+      # 4. 이제 app.jar라는 정확한 이름의 파일 딱 1개만 업로드합니다.
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/build/libs/*.jar'
+          path: '${{ github.workspace }}/build/libs/app.jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -63,11 +65,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # 5. 최종 배포 (내려받은 단일 .jar 파일을 그대로 밀어넣음)
+      # 5. ⭐️ 어떤 파일인지 헤매지 않도록, 정확히 'app.jar'만 배포하라고 지정합니다.
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'pandaselApp'
           slot-name: 'Production'
-          package: '*.jar'
+          package: 'app.jar'
