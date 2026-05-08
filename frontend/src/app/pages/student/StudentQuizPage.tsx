@@ -31,7 +31,7 @@ export const StudentQuizPage = () => {
 
             const token = localStorage.getItem("jwt_token");
             try {
-                const response = await fetch(`/api/student/tasks/${taskId}`, {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/student/tasks/${taskId}`, {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
 
@@ -83,7 +83,7 @@ export const StudentQuizPage = () => {
         };
 
         try {
-            const response = await fetch(`/api/student/tasks/${taskId}/submit`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/student/tasks/${taskId}/submit`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

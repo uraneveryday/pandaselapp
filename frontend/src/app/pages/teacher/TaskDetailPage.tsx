@@ -66,7 +66,7 @@ export function TaskDetailPage() {
 
         const token = localStorage.getItem("jwt_token");
         try {
-            const response = await fetch(`/api/teacher/classrooms/${classroomId}/task/${taskId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/task/${taskId}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -89,7 +89,7 @@ export function TaskDetailPage() {
     const fetchQuizList = async () => {
         const token = localStorage.getItem("jwt_token");
         try {
-            const quizRes = await fetch(`/api/teacher/classrooms/${classroomId}/task/${taskId}`, {
+            const quizRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/task/${taskId}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (quizRes.ok) {
@@ -113,7 +113,8 @@ export function TaskDetailPage() {
             try {
                 // 1. Task 정보가 없을 경우 목록 API에서 검색 (기존과 동일하게 유지됨!)
                 if (!taskInfo) {
-                    const taskRes = await fetch(`/api/teacher/classrooms/${classroomId}/task/list`, { headers });
+                    const taskRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/task/list`,
+                        { headers });
                     if (taskRes.ok) {
                         const list: TaskDto[] = await taskRes.json();
                         const current = list.find(t => t.id === Number(taskId));

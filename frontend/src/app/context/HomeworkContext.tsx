@@ -57,7 +57,7 @@ export function HomeworkProvider({ children }: { children: ReactNode }) {
             const token = localStorage.getItem("jwt_token");
 
             // ⭐️ 403 에러 해결: Authorization 헤더 완벽 복구
-            const response = await fetch('/api/student/tasks/get', {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/student/tasks/get`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`,

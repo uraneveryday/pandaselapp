@@ -86,7 +86,7 @@ export function MyPage() {
     const { tasks, isLoading, hasNoClassroom } = useHomework();
 
     const handleStartTask = (taskId: number) => {
-        navigate(`/student/task/${taskId}/quizzes`);
+        navigate(`${import.meta.env.VITE_API_BASE_URL}/student/task/${taskId}/quizzes`);
     };
 
     useEffect(() => {
