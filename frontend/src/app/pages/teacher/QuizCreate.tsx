@@ -104,7 +104,8 @@ const QuizCreate: React.FC = () => {
             console.log("백엔드로 전송할 JSON:", JSON.stringify(requestData, null, 2));
 
             // 3. Spring Boot 백엔드로 POST 요청
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/task/${taskId}/add-quizzes`, {
+            const response =
+                    await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/task/${taskId}/add-quizzes`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
