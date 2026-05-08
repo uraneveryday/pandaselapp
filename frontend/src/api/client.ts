@@ -2,7 +2,7 @@ import axios, { InternalAxiosRequestConfig, AxiosError } from 'axios';
 
 // 1. 기본 설정으로 axios 인스턴스 생성
 export const apiClient = axios.create({
-    baseURL: 'http://localhost:8080/api',
+    baseURL: 'https://pandaselapp-btepevehbthaexbx.eastasia-01.azurewebsites.net/api',
 });
 
 // 2. 요청(Request) 인터셉터

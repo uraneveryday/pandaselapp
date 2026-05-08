@@ -16,7 +16,7 @@ export function TeacherLayout() {
         }
 
         // 3. 권한이 확인된 사람만 백엔드에 내 정보(me)를 요청
-        fetch("http://localhost:8080/api/users/me", {
+        fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/me`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
