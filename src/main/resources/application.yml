@@ -14,7 +14,12 @@ server:
       charset: UTF-8
       enabled: true
       force: true
-
+app:
+  cors:
+    allowed-origins:
+      - "http://localhost:3000"
+      - "http://localhost:5173"
+      - "https://pandasel-app.netlify.app" # 💡 끝에 슬래시(/)가 없어야 합니다!
 ---
 # ==========================================
 # 2. Dev 환경 (Supabase - PostgreSQL)

@@ -17,7 +17,7 @@ export function LoginPage() {
 
         try {
             // 1. 백엔드 로그인 API 호출
-            const response = await fetch("http://localhost:8080/api/auth/login", {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

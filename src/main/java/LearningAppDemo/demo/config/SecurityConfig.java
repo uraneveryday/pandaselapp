@@ -3,6 +3,7 @@ package LearningAppDemo.demo.config;
 import LearningAppDemo.demo.common.authority.JwtAuthenticationFilter;
 import LearningAppDemo.demo.common.authority.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,6 +24,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider; // 💡 필터 생성에 필요
+    // 💡 yml 파일에서 allowed-origins 리스트를 주입받음
+    @Value("${app.cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -66,11 +70,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 💡 보안을 위해 실제 서비스 시에는 특정 도메인만 허용하는 것이 좋습니다.
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "https://선생님의-프론트엔드-배포주소.com"));
-
+        configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
