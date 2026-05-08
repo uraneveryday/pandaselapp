@@ -71,6 +71,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
+
+
         // 💡 보안을 위해 실제 서비스 시에는 특정 도메인만 허용하는 것이 좋습니다.
         configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
@@ -81,4 +83,17 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+    @Bean
+    public org.springframework.web.filter.CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("https://pandasel-app.netlify.app"); // 내 프론트 주소
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new org.springframework.web.filter.CorsFilter(source);
+    }
+// 그리고 filterChain 메서드 안에서 .addFilter(corsFilter()) 를 추가하거나
+// http.cors(cors -> cors.disable()) 한 뒤 수동으로 필터 순서를 조정할 수 있습니다.
 }
