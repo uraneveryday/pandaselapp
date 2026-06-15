@@ -106,53 +106,45 @@ export function LoginPage() {
                 );
             }
 
-            const decodedPayload = jwtDecode<JwtPayload>(token);
 
+const decodedPayload = jwtDecode<JwtPayload>(token);
 
-            const rawRole =
-    decodedPayload.auth ||
-    decodedPayload.role ||
+const rawRole =
+    decodedPayload.auth ??
+    decodedPayload.role ??
     data.role;
 
-            const normalizedRole = rawRole?.startsWith("ROLE_")
+const normalizedRole = rawRole?.startsWith("ROLE_")
     ? rawRole
     : rawRole
       ? `ROLE_${rawRole}`
       : "";
 
-// 교사와 학생 역할만 정상 로그인 처리
 if (
     normalizedRole !== "ROLE_TEACHER" &&
     normalizedRole !== "ROLE_STUDENT"
 ) {
-    throw new Error(
-        "사용자 권한 정보를 확인할 수 없습니다."
-    );
+    throw new Error("사용자 권한 정보를 확인할 수 없습니다.");
 }
 
-// 토큰과 역할 저장
 localStorage.setItem("jwt_token", token);
 localStorage.setItem("user_role", normalizedRole);
 
-// 역할에 따른 페이지 이동
 if (normalizedRole === "ROLE_TEACHER") {
     navigate("/teacher/classrooms", {
         replace: true,
     });
-} else {
-    navigate("/student", {
-        replace: true,
-    });
+    return;
 }
 
+navigate("/student", {
+    replace: true,
+});
 
 
-            localStorage.setItem("jwt_token", token);
-            localStorage.setItem("user_role", normalizedRole);
 
-            navigate("/teacher/classrooms", {
-                replace: true,
-            });
+
+
         } catch (error) {
             localStorage.removeItem("jwt_token");
             localStorage.removeItem("user_role");
@@ -178,13 +170,13 @@ if (normalizedRole === "ROLE_TEACHER") {
                     </div>
 
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                        선생님 로그인
+                        로그인
                     </h1>
 
                     <p className="text-sm text-gray-500 mb-8 text-center leading-6">
-                        선생님 계정으로 로그인하여
+                        선생님 또는 학생 계정으로 로그인하여
                         <br />
-                        학급과 학습 활동을 관리해주세요.
+                        학습을 시작해보세요.
                     </p>
 
                     {successMessage && (
@@ -227,7 +219,7 @@ if (normalizedRole === "ROLE_TEACHER") {
                                         setLoginId(e.target.value)
                                     }
                                     className="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all bg-gray-50 focus:bg-white"
-                                    placeholder="선생님 아이디를 입력하세요"
+                                    placeholder="아이디를 입력하세요"
                                     autoComplete="username"
                                     required
                                     disabled={isLoading}
