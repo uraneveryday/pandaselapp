@@ -119,6 +119,31 @@ export function LoginPage() {
                   ? `ROLE_${rawRole}`
                   : "";
 
+// 교사와 학생 역할만 정상 로그인 처리
+if (
+    normalizedRole !== "ROLE_TEACHER" &&
+    normalizedRole !== "ROLE_STUDENT"
+) {
+    throw new Error(
+        "사용자 권한 정보를 확인할 수 없습니다."
+    );
+}
+
+// 토큰과 역할 저장
+localStorage.setItem("jwt_token", token);
+localStorage.setItem("user_role", normalizedRole);
+
+// 역할에 따른 페이지 이동
+if (normalizedRole === "ROLE_TEACHER") {
+    navigate("/teacher/classrooms", {
+        replace: true,
+    });
+} else {
+    navigate("/student", {
+        replace: true,
+    });
+}
+
 
 
             localStorage.setItem("jwt_token", token);
