@@ -108,16 +108,17 @@ export function LoginPage() {
 
             const decodedPayload = jwtDecode<JwtPayload>(token);
 
+
             const rawRole =
-                decodedPayload.auth ||
-                decodedPayload.role ||
-                data.role;
+    decodedPayload.auth ||
+    decodedPayload.role ||
+    data.role;
 
             const normalizedRole = rawRole?.startsWith("ROLE_")
-                ? rawRole
-                : rawRole
-                  ? `ROLE_${rawRole}`
-                  : "";
+    ? rawRole
+    : rawRole
+      ? `ROLE_${rawRole}`
+      : "";
 
 // 교사와 학생 역할만 정상 로그인 처리
 if (
