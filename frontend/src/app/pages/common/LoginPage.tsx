@@ -1,81 +1,150 @@
-import { useNavigate } from "react-router-dom";
-import { Lock, User } from "lucide-react";
-import { useState } from "react";
-// import { supabase} from "../../../utils/supabaseClient";
 
+import { useState, type FormEvent } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Lock, User, UserPlus } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
+
+interface LoginResponse {
+    accessToken?: string;
+    role?: string;
+    message?: string;
+    error?: string;
+}
+
+interface JwtPayload {
+    auth?: string;
+    role?: string;
+    sub?: string;
+    exp?: number;
+}
+
+interface LoginLocationState {
+    successMessage?: string;
+}
+
+async function readResponseBody(response: Response): Promise<LoginResponse> {
+    const text = await response.text();
+
+    if (!text) {
+        return {};
+    }
+
+    try {
+        return JSON.parse(text) as LoginResponse;
+    } catch {
+        return { message: text };
+    }
+}
 
 export function LoginPage() {
     const navigate = useNavigate();
-    const [username, setUsername] = useState("");
+    const location = useLocation();
+
+    const locationState = location.state as LoginLocationState | null;
+    const successMessage = locationState?.successMessage;
+
+    const [loginId, setLoginId] = useState("");
     const [password, setPassword] = useState("");
-    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
-    // 💡 비동기(async) 통신 로직으로 변경
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!username || !password) return;
 
+        if (!loginId.trim() || !password) {
+            setErrorMessage("아이디와 비밀번호를 모두 입력해주세요.");
+            return;
+        }
+
+        setErrorMessage("");
         setIsLoading(true);
 
         try {
-            // 1. 백엔드 로그인 API 호출
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                // 🚨 백엔드의 LoginRequest DTO 필드명(loginId, password)과 정확히 일치시켜야 합니다.
-                body: JSON.stringify({
-                    loginId: username,
-                    password: password,
-                }),
-            });
-
-            // 2. HTTP 상태 코드가 200번대(성공)가 아닐 경우 에러 처리
-            if (!response.ok) {
-                throw new Error("아이디 또는 비밀번호가 일치하지 않습니다.");
-            }
-
-            // 3. 백엔드에서 반환한 JSON 데이터 (TokenInfo 객체) 추출
-            const data = await response.json();
-
-
-            // 4. 데이터 안에 accessToken이 정상적으로 들어있는지 확인
-            if (data.accessToken) {
-                const token = data.accessToken;
-
-                // 💡 [추가된 로직] JWT 토큰 해독하기
-                // 토큰은 헤더.페이로드.서명 으로 이루어져 있으므로 [1]번째 인덱스인 페이로드를 가져옵니다.
-                const payloadBase64 = token.split('.')[1];
-
-                // Base64 문자열을 디코딩하여 JSON 객체로 변환합니다.
-                const decodedPayload = JSON.parse(atob(payloadBase64));
-                console.log("login auth ?:", decodedPayload.auth); // 👈 이 줄을 추가!
-                // 5. 토큰 저장
-                localStorage.setItem("jwt_token", token);
-                // 선택사항: 역할 정보도 따로 저장해두면 나중에 UI 분기처리가 편합니다.
-                localStorage.setItem("user_role", decodedPayload.auth);
-
-                alert("로그인 성공!");
-
-                // 💡 6. 역할(Role)에 따른 맞춤형 라우팅 (경로는 본인의 프로젝트에 맞게 수정하세요)
-                if (decodedPayload.auth === "ROLE_TEACHER") {
-                    navigate("/teacher");
-                } else if (decodedPayload.auth === "ROLE_STUDENT") {
-                    // 학생일 경우 학생 전용 경로로 이동
-                    navigate("/student");
-                } else {
-                    // 권한이 없거나 예외 상황일 경우
-                    navigate("/");
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        loginId: loginId.trim(),
+                        password,
+                    }),
                 }
+            );
 
-            } else {
-                throw new Error("서버로부터 정상적인 토큰을 발급받지 못했습니다.");
+            const data = await readResponseBody(response);
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                        data.error ||
+                        "아이디 또는 비밀번호가 일치하지 않습니다."
+                );
             }
 
+            /*
+             * 현재 코드는 두 가지 응답 형태를 모두 지원합니다.
+             *
+             * 1. 응답 JSON의 accessToken
+             * 2. Authorization 응답 헤더의 Bearer 토큰
+             */
+            const authorizationHeader =
+                response.headers.get("Authorization");
 
-        } catch (error: any) {
-            alert(error.message);
+            const headerToken = authorizationHeader?.replace(
+                /^Bearer\s+/i,
+                ""
+            );
+
+            const token = data.accessToken || headerToken;
+
+            if (!token) {
+                throw new Error(
+                    "서버로부터 로그인 토큰을 전달받지 못했습니다."
+                );
+            }
+
+            const decodedPayload = jwtDecode<JwtPayload>(token);
+
+            const rawRole =
+                decodedPayload.auth ||
+                decodedPayload.role ||
+                data.role;
+
+            const normalizedRole = rawRole?.startsWith("ROLE_")
+                ? rawRole
+                : rawRole
+                  ? `ROLE_${rawRole}`
+                  : "";
+
+            /*
+             * 이 로그인 페이지는 선생님 전용이므로
+             * 학생 계정의 로그인을 허용하지 않습니다.
+             */
+            if (normalizedRole !== "ROLE_TEACHER") {
+                throw new Error(
+                    "이 페이지에서는 선생님 계정만 로그인할 수 있습니다."
+                );
+            }
+
+            localStorage.setItem("jwt_token", token);
+            localStorage.setItem("user_role", normalizedRole);
+
+            navigate("/teacher/classrooms", {
+                replace: true,
+            });
+        } catch (error) {
+            localStorage.removeItem("jwt_token");
+            localStorage.removeItem("user_role");
+
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "로그인 중 오류가 발생했습니다.";
+
+            setErrorMessage(message);
             console.error("로그인 에러:", error);
         } finally {
             setIsLoading(false);
@@ -90,26 +159,58 @@ export function LoginPage() {
                         <span className="text-4xl">🐻</span>
                     </div>
 
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">반가워요!</h1>
-                    <p className="text-sm text-gray-500 mb-10 text-center">
-                        아이디와 비밀번호를 입력하고
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                        선생님 로그인
+                    </h1>
+
+                    <p className="text-sm text-gray-500 mb-8 text-center leading-6">
+                        선생님 계정으로 로그인하여
                         <br />
-                        재미있는 학습을 시작해볼까요?
+                        학급과 학습 활동을 관리해주세요.
                     </p>
 
-                    <form onSubmit={handleLogin} className="w-full space-y-5">
+                    {successMessage && (
+                        <div className="w-full mb-5 px-4 py-3 rounded-xl bg-green-50 border border-green-200 text-sm text-green-700 text-center">
+                            {successMessage}
+                        </div>
+                    )}
+
+                    {errorMessage && (
+                        <div
+                            role="alert"
+                            className="w-full mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600 text-center"
+                        >
+                            {errorMessage}
+                        </div>
+                    )}
+
+                    <form
+                        onSubmit={handleLogin}
+                        className="w-full space-y-5"
+                    >
                         <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600 ml-1">아이디</label>
+                            <label
+                                htmlFor="loginId"
+                                className="text-xs font-semibold text-gray-600 ml-1"
+                            >
+                                아이디
+                            </label>
+
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <User className="h-5 w-5 text-gray-400" />
                                 </div>
+
                                 <input
+                                    id="loginId"
                                     type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    value={loginId}
+                                    onChange={(e) =>
+                                        setLoginId(e.target.value)
+                                    }
                                     className="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all bg-gray-50 focus:bg-white"
-                                    placeholder="아이디를 입력하세요"
+                                    placeholder="선생님 아이디를 입력하세요"
+                                    autoComplete="username"
                                     required
                                     disabled={isLoading}
                                 />
@@ -117,17 +218,28 @@ export function LoginPage() {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600 ml-1">비밀번호</label>
+                            <label
+                                htmlFor="password"
+                                className="text-xs font-semibold text-gray-600 ml-1"
+                            >
+                                비밀번호
+                            </label>
+
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
+
                                 <input
+                                    id="password"
                                     type="password"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
                                     className="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all bg-gray-50 focus:bg-white"
                                     placeholder="비밀번호를 입력하세요"
+                                    autoComplete="current-password"
                                     required
                                     disabled={isLoading}
                                 />
@@ -138,18 +250,34 @@ export function LoginPage() {
                             type="submit"
                             disabled={isLoading}
                             className={`w-full mt-4 py-4 rounded-2xl font-bold text-lg shadow-sm transition-all active:scale-[0.98] ${
-                                isLoading
-                                    ? "bg-blue-300 cursor-not-allowed text-white"
-                                    : "bg-blue-400 hover:bg-blue-500 text-white hover:shadow-md"
-                            }`}
+    isLoading
+        ? "bg-blue-300 cursor-not-allowed text-white"
+        : "bg-blue-400 hover:bg-blue-500 text-white hover:shadow-md"
+}`}
                         >
                             {isLoading ? "로그인 중..." : "로그인"}
                         </button>
                     </form>
 
-                    <div className="mt-12 text-center w-full pb-4">
-                        <p className="text-xs text-gray-400 bg-gray-50 py-3 rounded-xl">
-                            계정이 없다면 선생님께 문의해주세요 😊
+                    <div className="w-full mt-8 pt-7 border-t border-gray-100">
+                        <p className="mb-3 text-xs text-center text-gray-500">
+                            아직 선생님 계정이 없으신가요?
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate("/register")}
+                            disabled={isLoading}
+                            className="w-full py-3.5 rounded-2xl border border-blue-300 text-blue-500 font-semibold text-sm hover:bg-blue-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            <UserPlus className="w-4 h-4" />
+                            선생님 회원가입
+                        </button>
+
+                        <p className="mt-4 text-xs text-gray-400 text-center leading-5">
+                            학생 계정은 담당 선생님이
+                            <br />
+                            학급 관리 화면에서 생성할 수 있습니다.
                         </p>
                     </div>
                 </div>
