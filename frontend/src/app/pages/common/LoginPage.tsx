@@ -119,15 +119,7 @@ export function LoginPage() {
                   ? `ROLE_${rawRole}`
                   : "";
 
-            /*
-             * 이 로그인 페이지는 선생님 전용이므로
-             * 학생 계정의 로그인을 허용하지 않습니다.
-             */
-            if (normalizedRole !== "ROLE_TEACHER") {
-                throw new Error(
-                    "이 페이지에서는 선생님 계정만 로그인할 수 있습니다."
-                );
-            }
+
 
             localStorage.setItem("jwt_token", token);
             localStorage.setItem("user_role", normalizedRole);
