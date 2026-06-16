@@ -1,6 +1,7 @@
 package LearningAppDemo.demo.controller.api.teacher.classrooms;
 
 import LearningAppDemo.demo.common.authority.CustomUserDetails;
+import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.dto.request.StudentSignUpRequest;
 import LearningAppDemo.demo.dto.response.ClassroomInfoResponse;
 import LearningAppDemo.demo.dto.response.ClassroomListResponse;
@@ -28,20 +29,16 @@ public class ClassroomController {
     private final AuthService authService;
 
     @PostMapping("/new")
-    public void createClassroom(@Valid @RequestBody String classroomName,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public void createClassroom(@Valid @RequestBody Classroom classroom,
+                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
-        String string = classroomName.split(":")[1];
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 1; i < string.length(); i++) {
-            if (string.charAt(i) == '"') {
-                break;
-            }
-            stringBuilder.append(string.charAt(i));
-        }
-        classroomName = stringBuilder.toString();
-        classRoomService.createClassroom(classroomName, userId);
+
+        String className = classroom.getClassName();
+
+        classRoomService.createClassroom(className, userId);
     }
+
+
     // 💡 프론트엔드의 fetch URL과 일치시켜야 합니다: /api/classrooms/classroomList
     @GetMapping("/list")
     public ResponseEntity<List<ClassroomListResponse>> getClassrooms(

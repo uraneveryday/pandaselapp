@@ -81,8 +81,8 @@ public class QuizService {
         // 1. Fetch Join으로 데이터 한 번에 조회
         Task task = taskRepository.findTaskWithQuizzesById(taskId)
                 .orElseThrow(() -> {
-                    log.error("There is no task with id: {}", taskId);
-                    return new IllegalArgumentException("존재하지 않는 task입니다."); // 커스텀 예외 권장
+                    log.error("There is no quizzes with task id: {}", taskId);
+                    return new IllegalArgumentException("quiz가 아직 존재하지 않음. "); // 커스텀 예외 권장
                 });
 
         // 2. 보안 검증: 해당 Task가 요청된 Classroom에 속해 있는지 반드시 확인해야 합니다.

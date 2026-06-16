@@ -42,14 +42,15 @@ public class ClassRoomService {
     }
 
 
-    public void createClassroom(String classroomName, Long teacherId) {
+    @Transactional
+    public void createClassroom(String classroomName, Long userId) {
+
+        Teacher teacher = teacherRepository.findTeacherById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("선생님 정보를 찾을 수 없습니다."));
         Classroom classroom = new Classroom();
-        classroom.setClassName(classroomName);
+        classroom.setClassName(classroomName.trim());
         classroom.setCreateDate(LocalDateTime.now());
-        Optional<Teacher> teacher = teacherRepository.findTeacherById(teacherId);
-        teacher.ifPresent(teacher1 -> {
-            classroom.setTeacher(teacher1);
-        });
+        classroom.setTeacher(teacher);
 
         classRoomRepository.save(classroom);
     }

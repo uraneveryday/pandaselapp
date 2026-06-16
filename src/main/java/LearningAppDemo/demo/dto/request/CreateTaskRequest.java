@@ -15,6 +15,8 @@ public class CreateTaskRequest {
 
     private Task.Category category;
 
+    private int reward;
+
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
