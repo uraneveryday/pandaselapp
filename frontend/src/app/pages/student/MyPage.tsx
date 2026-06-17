@@ -10,8 +10,8 @@ import { useHomework } from "../../context/HomeworkContext";
 // 1. API 응답 타입 정의 (필수)
 interface UserMeResponse {
     name: string;
-    totalStars: number; // 추후 백엔드에서 제공해야 할 데이터
-    streak: number;     // 추후 백엔드에서 제공해야 할 데이터
+    totalStars: number; // 토탈 스코어? 추후 백엔드에서 제공해야 할 데이터
+    streak: number;     // 연속 학습? 추후 백엔드에서 제공해야 할 데이터
 }
 
 // 2. 개별 과제(Task) 렌더링용 하위 컴포넌트 분리

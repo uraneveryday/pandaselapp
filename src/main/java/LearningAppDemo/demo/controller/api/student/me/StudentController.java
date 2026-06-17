@@ -1,13 +1,8 @@
 package LearningAppDemo.demo.controller.api.student.me;
 
 import LearningAppDemo.demo.common.authority.CustomUserDetails;
-import LearningAppDemo.demo.domain.user.Role;
 import LearningAppDemo.demo.domain.user.Student;
-import LearningAppDemo.demo.domain.user.User;
-import LearningAppDemo.demo.dto.StudentDto;
-import LearningAppDemo.demo.exception.FaildToValidate;
 import LearningAppDemo.demo.service.StudentService;
-import LearningAppDemo.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +21,7 @@ import java.util.Optional;
 public class StudentController {
 
     private final StudentService studentService;
-    @GetMapping("/stamp")
+    @GetMapping
     public ResponseEntity<?> getMyStamp(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         // 🚨 프론트에서 보낸 값이 아니라, JwtAuthenticationFilter가 토큰을 검증하고
         // SecurityContext에 심어둔 안전한 principal 객체를 사용함.

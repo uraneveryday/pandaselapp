@@ -1,6 +1,7 @@
 package LearningAppDemo.demo.controller.api.users;
 
 import LearningAppDemo.demo.common.authority.CustomUserDetails;
+import LearningAppDemo.demo.domain.user.Role;
 import LearningAppDemo.demo.domain.user.User;
 import LearningAppDemo.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,14 @@ public class UserController {
         // DB에서 최신 유저 정보 조회 (이름, 역할 등)
         User user = userService.findById(userId);
 
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("name", user.getUsername());
+            response.put("role", user.getRole());
+            return ResponseEntity.ok(response);
+
         // 프론트엔드에서 기대하는 JSON 형태로 반환 (data.name)
-        Map<String, Object> response = new HashMap<>();
-        response.put("name", user.getUsername());
-        response.put("role", user.getRole());
-        return ResponseEntity.ok(response);
+
     }
 
 }
