@@ -292,18 +292,20 @@ export function TaskDetailPage() {
                                         {quiz.quizName}
                                     </span>
                                 </div>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {/* ⭐️ 클릭 시 상태 업데이트 */}
+                                <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => setEditQuizId(quiz.quizId)}
-                                        className="p-2 text-gray-400 hover:text-blue-600 rounded-lg">
+                                        aria-label={`${quiz.quizName} 수정`}
+                                        className="p-2 text-gray-400 hover:text-blue-600 rounded-lg"
+                                    >
                                         <Edit size={18} />
                                     </button>
 
-                                    {/* ⭐️ 삭제 핸들러에 imageUrl 같이 넘겨주기 */}
                                     <button
                                         onClick={() => handleDeleteQuiz(quiz.quizId, quiz.quizImage)}
-                                        className="p-2 text-gray-400 hover:text-red-500 rounded-lg">
+                                        aria-label={`${quiz.quizName} 삭제`}
+                                        className="p-2 text-gray-400 hover:text-red-500 rounded-lg"
+                                    >
                                         <Trash2 size={18} />
                                     </button>
                                 </div>
