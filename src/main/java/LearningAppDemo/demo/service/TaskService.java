@@ -113,19 +113,7 @@ public class TaskService {
 
     }
 
-    @Transactional(readOnly = true)
-    public TaskDto getTaskWithCompletionRate(Long taskId) {
-        // 1. 숙제 엔티티 조회
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 숙제를 찾을 수 없습니다."));
 
-        // 2. 통계 데이터 조회 (long을 int로 변환하거나 DTO 타입을 long으로 설정)
-        int totalCount = (int) studentTaskRepository.countByTaskId(taskId);
-        int completedCount = (int) studentTaskRepository.countByTaskIdAndIsCompletedTrue(taskId);
-
-        // 3. DTO로 변환하여 반환
-        return new TaskDto(task, totalCount, completedCount);
-    }
 
     @Transactional
     public List<TaskDto> getTaskListWithCompletionRate(Long classRoomId) {

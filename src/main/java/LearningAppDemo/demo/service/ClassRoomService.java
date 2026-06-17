@@ -67,11 +67,10 @@ public class ClassRoomService {
         return convertToResponseWithStats(classroom);
     }
 
-    // --- 헬퍼 메서드 (중복되는 통계 계산 및 DTO 변환 로직 통합) ---
     private ClassroomListResponse convertToResponseWithStats(Classroom classroom) {
         List<TaskDto> taskDtos = classroom.getTasks().stream()
                 .map(task -> {
-                    int total = (int) studentTaskRepository.countByTaskId(task.getId());
+                    int total = classroom.studentCount();
                     int completed = (int) studentTaskRepository.countByTaskIdAndIsCompletedTrue(task.getId());
                     return new TaskDto(task, total, completed);
                 })

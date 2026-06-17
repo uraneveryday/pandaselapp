@@ -52,4 +52,7 @@ public class Classroom {
         if(student.getClassRoom() != this)
             student.setClassRoom(this);
     }
+    public int studentCount() {
+        return this.students.size();
+    }
 }

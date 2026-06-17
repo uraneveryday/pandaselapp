@@ -32,7 +32,10 @@ export const StudentQuizPage = () => {
             const token = localStorage.getItem("jwt_token");
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/student/tasks/${taskId}`, {
-                    headers: { "Authorization": `Bearer ${token}` }
+                    headers: { "Authorization": `Bearer ${token}`,
+                                "Content-Type": "application/json"
+                    }
+
                 });
 
                 if (response.ok) {
@@ -95,6 +98,7 @@ export const StudentQuizPage = () => {
             if (response.ok) {
                 alert("숙제가 성공적으로 제출되었습니다!");
                 navigate("/student/my-page");
+                window.location.reload()
             } else {
                 // 중복 제출 시 에러 팝업 표시
                 alert("제출 중 오류가 발생했습니다. (이미 제출된 과제일 수 있습니다)");
