@@ -31,6 +31,7 @@ public class ClassRoomService {
     private final StudentTaskRepository studentTaskRepository;
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
+    private final TaskResultRepository taskResultRepository;
 
     public List<ClassroomListResponse> getClassroomsByTeacherId(Long teacherId) {
         List<Classroom> classrooms = classRoomRepository.findByTeacherId(teacherId);
@@ -67,11 +68,14 @@ public class ClassRoomService {
         return convertToResponseWithStats(classroom);
     }
 
+
     private ClassroomListResponse convertToResponseWithStats(Classroom classroom) {
+
         List<TaskDto> taskDtos = classroom.getTasks().stream()
                 .map(task -> {
                     int total = classroom.studentCount();
-                    int completed = (int) studentTaskRepository.countByTaskIdAndIsCompletedTrue(task.getId());
+//                    int completed = (int) studentTaskRepository.countByTaskIdAndIsCompletedTrue(task.getId());
+                    int completed = taskResultRepository.studentsCompleted(task.getId());
                     return new TaskDto(task, total, completed);
                 })
                 .toList();
