@@ -11,9 +11,6 @@ public interface QuizRepository extends CrudRepository<Quiz, Long> {
 
     List<Quiz> findAllByTaskId(Long taskId);
 
-
-
-
     Long task(Task task);
 
     Quiz findQuizById(Long id);

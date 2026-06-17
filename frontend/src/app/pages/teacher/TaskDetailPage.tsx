@@ -157,7 +157,7 @@ export function TaskDetailPage() {
 
         // 2. 백엔드 DB에서 퀴즈 삭제
         try {
-            const response = await fetch(`/api/teacher/quizzes/${quizId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/quizzes/${quizId}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -216,8 +216,6 @@ export function TaskDetailPage() {
                         </button>
                     </div>
 
-                    {/* ... (이하 진행률 등 기존 코드 동일) ... */}
-
                     {/* 그리드형 정보 섹션 */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         {/* 진행률 (completionRate) */}
@@ -270,7 +268,7 @@ export function TaskDetailPage() {
                         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                             <CheckCircle size={22} className="text-blue-500" /> 등록된 퀴즈 구성
                         </h2>
-                        <p className="text-sm text-gray-500">해당 숙제에는 총 {quizList.length}개의 문항이 포함되어 있습니다.</p>
+                        <p className="text-sm text-gray-500">해당 숙제에는 총 {quizList.length}개의 퀴즈가 포함되어 있습니다.</p>
                     </div>
                     <button
                         onClick={() => navigate(`/teacher/classrooms/${classroomId}/task/${taskId}/add-quizzes`)}
