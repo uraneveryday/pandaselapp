@@ -16,12 +16,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController @Slf4j
-@RequestMapping("/api/student/me")
+@RequestMapping("/api/student")
 @RequiredArgsConstructor
 public class StudentController {
 
     private final StudentService studentService;
-    @GetMapping
+    @GetMapping("/stamp")
     public ResponseEntity<?> getMyStamp(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         // 🚨 프론트에서 보낸 값이 아니라, JwtAuthenticationFilter가 토큰을 검증하고
         // SecurityContext에 심어둔 안전한 principal 객체를 사용함.
@@ -40,7 +40,6 @@ public class StudentController {
         data.put("currentStamps", student.getStamp());
         data.put("currentCoupons", student.getCoupon());
         data.put("maxStamps", 10);
-
 
         response.put("success", true);
         response.put("data", data);

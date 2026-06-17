@@ -27,7 +27,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                 }
 
                 // Fetch API를 이용한 백엔드 통신 (토큰 헤더 포함)
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/student/me/stamp`, {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/student/stamp`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`,
