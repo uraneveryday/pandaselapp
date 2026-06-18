@@ -10,6 +10,7 @@ import LearningAppDemo.demo.dto.response.TaskListItemResponse;
 import LearningAppDemo.demo.service.ClassRoomService;
 import LearningAppDemo.demo.service.QuizService;
 import LearningAppDemo.demo.service.TaskService;
+import LearningAppDemo.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,11 +27,12 @@ public class TaskController {
 
     private final QuizService quizService;
     private final ClassRoomService classRoomService;
+    private final UserService userService;
 
     @GetMapping // 숙제 목록(간단한것들만)
     public ResponseEntity<List<TaskListItemResponse>> getTaskList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                   @PathVariable Long classroomId) {
-        if(customUserDetails.getUserId().equals(Role.TEACHER)) {
+        if(userService.findById(customUserDetails.getUserId()).getRole().equals(Role.TEACHER)) {
             return ResponseEntity.ok(classRoomService.getTasksList(classroomId));
         }
 
