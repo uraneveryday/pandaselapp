@@ -13,10 +13,10 @@ public class TaskDto {
     private String description;
     private LocalDateTime startDate;
     private LocalDateTime expiredDate;
+    private int rewardStamp;
 
     @JsonProperty("isDone")
     private boolean isDone;
-    // teacherName 삭제됨
     private String className;
     private double completionRate;
 
@@ -27,7 +27,7 @@ public class TaskDto {
         this.startDate = task.getStartDate();
         this.expiredDate = task.getExpiredDate();
         this.isDone = task.isDone();
-
+        this.rewardStamp = task.getRewardStamp();
         this.className = task.getClassRoom().getClassName();
 
         if (totalStudentCount > 0) {

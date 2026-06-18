@@ -71,7 +71,7 @@ public class TaskController {
 
 
     @GetMapping("/{taskId}/detail") //task deatil Dto
-    public ResponseEntity<TaskDto> listTasks(@PathVariable("classroomId") Long classRoomId,
+    public ResponseEntity<TaskDto> TasksDetail(@PathVariable("classroomId") Long classRoomId,
                                              @PathVariable("taskId") Long taskId){
 
         return ResponseEntity.ok(taskService.getTaskDetailWithCompletionRate(classRoomId, taskId));

@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
-    ArrowLeft, Plus, Edit, Trash2,
-    Calendar, CheckCircle, Clock, Users, BookOpen
+    ArrowLeft,
+    Plus,
+    Edit,
+    Trash2,
+    Calendar,
+    CheckCircle,
+    Clock,
+    BookOpen,
+    Award,
+    Sparkles,
+    ClipboardList,
+    Users,
 } from "lucide-react";
-
 import { QuizEditModal } from "./QuizEditModal";
 import {supabase} from "../../../utils/supabaseClient";
 const getFileNameFromUrl = (url: string) => {
@@ -36,6 +45,7 @@ export interface TaskDto {
     description: string;
     startDate: string;
     expiredDate: string;
+    rewardStamp: number;
     isDone: boolean;
     className: string;
     completionRate: number;
@@ -57,8 +67,17 @@ export function TaskDetailPage() {
     // 날짜 포맷 함수
     const formatDate = (dateString?: string) => {
         if (!dateString) return "-";
+
         const date = new Date(dateString);
-        return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        return new Intl.DateTimeFormat("ko-KR", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+        }).format(date);
     };
 // ⭐️ 숙제(Task) 삭제 핸들러
     const handleDeleteTask = async () => {
@@ -101,28 +120,33 @@ export function TaskDetailPage() {
         }
     };
 
+
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
+
             const token = localStorage.getItem("jwt_token");
-            const headers = {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            };
 
             try {
-                // 1. Task 정보가 없을 경우 목록 API에서 검색 (기존과 동일하게 유지됨!)
-                if (!taskInfo) {
-                    const taskRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/tasks/${taskId}/detail`,
-                        { headers });
-                    if (taskRes.ok) {
-                        const list: TaskDto[] = await taskRes.json();
-                        const current = list.find(t => t.id === Number(taskId));
-                        if (current) setTaskInfo(current);
+                const taskRes = await fetch(
+                    `${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/tasks/${taskId}/detail`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
                     }
+                );
+
+                if (!taskRes.ok) {
+                    throw new Error(`숙제 상세 조회 실패: ${taskRes.status}`);
                 }
 
-                // 2. 퀴즈 목록 조회
+                const taskData: TaskDto = await taskRes.json();
+
+                console.log("숙제 상세 정보:", taskData);
+
+                setTaskInfo(taskData);
+
                 await fetchQuizList();
             } catch (error) {
                 console.error("데이터 로딩 오류:", error);
@@ -133,6 +157,7 @@ export function TaskDetailPage() {
 
         fetchData();
     }, [classroomId, taskId]);
+
 
     //
     // ⭐️ 퀴즈 삭제 핸들러 (imageUrl 파라미터 추가)
@@ -175,8 +200,42 @@ export function TaskDetailPage() {
     };
 
     if (isLoading && !taskInfo) {
-        return <div className="p-10 text-center font-bold text-gray-500">데이터를 불러오는 중...</div>;
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-9 h-9 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" />
+                    <p className="text-sm font-semibold text-slate-500">
+                        숙제 정보를 불러오고 있습니다.
+                    </p>
+                </div>
+            </div>
+        );
     }
+
+    if (!taskInfo) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-lg font-bold text-slate-800">
+                        숙제 정보를 찾을 수 없습니다.
+                    </p>
+                    <button
+                        onClick={() =>
+                            navigate(`/teacher/classrooms/${classroomId}/task`)
+                        }
+                        className="mt-4 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                    >
+                        숙제 목록으로 돌아가기
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const completionRate = Math.min(
+        100,
+        Math.max(0, taskInfo.completionRate ?? 0)
+    );
 
     return (
         <div className="max-w-5xl mx-auto p-6 mt-6 space-y-6">
