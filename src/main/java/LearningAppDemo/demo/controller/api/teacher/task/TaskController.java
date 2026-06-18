@@ -47,7 +47,7 @@ public class TaskController {
     }
 
 
-    @GetMapping("/{taskId}")
+    @GetMapping("/{taskId}") //quizzes 배열로 나열
     public ResponseEntity<List<QuizzesResponse>> getAllQuizzes(
             @PathVariable("classroomId") Long classroomId,
             @PathVariable("taskId") Long taskId) {

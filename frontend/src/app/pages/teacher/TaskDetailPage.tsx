@@ -66,7 +66,7 @@ export function TaskDetailPage() {
 
         const token = localStorage.getItem("jwt_token");
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/task/${taskId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/tasks/${taskId}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -89,7 +89,7 @@ export function TaskDetailPage() {
     const fetchQuizList = async () => {
         const token = localStorage.getItem("jwt_token");
         try {
-            const quizRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/task/${taskId}`, {
+            const quizRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/tasks/${taskId}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (quizRes.ok) {

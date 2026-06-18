@@ -128,7 +128,7 @@ export function TaskCreatePage() {
             setIsSubmitting(true);
 
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${id}/task/create`,
+                `${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${id}/tasks/create`,
                 {
                     method: "POST",
                     headers: {
