@@ -70,7 +70,7 @@ public class TaskController {
     }
 
 
-    @GetMapping("/{taskId}") //task deatil Dto
+    @GetMapping("/{taskId}/detail") //task deatil Dto
     public ResponseEntity<TaskDto> listTasks(@PathVariable("classroomId") Long classRoomId,
                                              @PathVariable("taskId") Long taskId){
 

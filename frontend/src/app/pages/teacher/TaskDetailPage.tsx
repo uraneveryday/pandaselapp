@@ -113,7 +113,7 @@ export function TaskDetailPage() {
             try {
                 // 1. Task 정보가 없을 경우 목록 API에서 검색 (기존과 동일하게 유지됨!)
                 if (!taskInfo) {
-                    const taskRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/tasks/{taskId}`,
+                    const taskRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${classroomId}/tasks/{taskId}/detail`,
                         { headers });
                     if (taskRes.ok) {
                         const list: TaskDto[] = await taskRes.json();
