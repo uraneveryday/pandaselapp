@@ -1,176 +1,617 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Settings } from "lucide-react"; // 아이콘 라이브러리 가정
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+    ArrowLeft,
+    BookOpen,
+    LoaderCircle,
+    Phone,
+    Settings,
+    Sparkles,
+    Ticket,
+    Users
+} from "lucide-react";
 
-// 1. 상세 페이지에서 받을 데이터의 타입 정의 (백엔드 DTO 구조)
+import "./ClassroomDetailPage.css";
+
+type Gender = "MALE" | "FEMALE";
+
 interface Student {
     id: number;
-    name: string; // 혹은 userName 등 백엔드 변수명과 일치
-    // 필요한 추가 학생 정보들...
+    name: string;
+    gender: Gender;
+    parentPhoneNumber: string | null;
+    stampCount: number;
+    couponCount: number;
 }
 
 interface ClassroomDetail {
     id: number;
     className: string;
-    studentCount: number;
-    students: Student[]; // 상세 페이지이므로 소속된 학생들 전체 목록이 들어옵니다.
+    studentCount?: number;
+    students: Student[];
+}
+
+interface CouponUseResponse {
+    studentId: number;
+    stampCount: number;
+    couponCount: number;
+}
+
+interface ApiResponse<T> {
+    success: boolean;
+    data: T;
+    message?: string;
+}
+
+function unwrapResponse<T>(response: ApiResponse<T> | T): T {
+    if (
+        typeof response === "object" &&
+        response !== null &&
+        "success" in response &&
+        "data" in response
+    ) {
+        return (response as ApiResponse<T>).data;
+    }
+
+    return response as T;
 }
 
 export function ClassroomDetailPage() {
-    // 2. URL 경로에서 id 값을 추출 (예: /teacher/classrooms/5 -> id는 "5")
-    const { id } = useParams<{ id: string }>();
+    const { id: classroomId } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
+    const [classroom, setClassroom] =
+        useState<ClassroomDetail | null>(null);
+
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // 현재 쿠폰 사용 요청 중인 학생 ID
+    const [usingCouponStudentId, setUsingCouponStudentId] =
+        useState<number | null>(null);
 
     useEffect(() => {
         const fetchClassroomDetail = async () => {
             const token = localStorage.getItem("jwt_token");
 
             if (!token) {
-                alert("로그인이 필요합니다.");
                 navigate("/login", { replace: true });
                 return;
             }
 
-            try {
-                const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}`;
+            if (!classroomId) {
+                setError("클래스룸 ID가 올바르지 않습니다.");
+                setIsLoading(false);
+                return;
+            }
 
-                // 3. RESTful 표준에 맞게 Path Variable로 ID를 넘겨줍니다.
-                const response = await fetch(`${API_BASE_URL}/api/teacher/classrooms/${id}`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
+            try {
+                setIsLoading(true);
+                setError(null);
+
+                const API_BASE_URL =
+                    import.meta.env.VITE_API_BASE_URL;
+
+                const response = await fetch(
+                    `${API_BASE_URL}/api/teacher/classrooms/${classroomId}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Accept: "application/json",
+                            Authorization: `Bearer ${token}`
+                        }
                     }
-                });
+                );
 
                 if (!response.ok) {
-                    if (response.status === 404) throw new Error("해당 클래스룸을 찾을 수 없습니다.");
-                    throw new Error("데이터를 불러오는데 실패했습니다.");
+                    if (response.status === 401) {
+                        throw new Error("로그인이 만료되었습니다.");
+                    }
+
+                    if (response.status === 403) {
+                        throw new Error(
+                            "이 클래스룸을 조회할 권한이 없습니다."
+                        );
+                    }
+
+                    if (response.status === 404) {
+                        throw new Error(
+                            "해당 클래스룸을 찾을 수 없습니다."
+                        );
+                    }
+
+                    throw new Error(
+                        "클래스룸 정보를 불러오지 못했습니다."
+                    );
                 }
 
-                const result = await response.json();
+                const json = await response.json();
 
-                // 4. 공통 응답 포맷({ success, data }) 파싱
-                if (result.success && result.data) {
-                    setClassroom(result.data);
-                } else {
-                    // 백엔드가 래퍼 없이 DTO만 바로 리턴할 경우를 대비한 폴백
-                    setClassroom(result);
-                }
-            } catch (err: any) {
-                console.error("상세 정보 통신 에러:", err);
-                setError(err.message || "알 수 없는 에러가 발생했습니다.");
+                const data =
+                    unwrapResponse<ClassroomDetail>(json);
+
+                setClassroom({
+                    ...data,
+                    students: data.students ?? []
+                });
+            } catch (caughtError) {
+                console.error(
+                    "클래스룸 상세 조회 실패:",
+                    caughtError
+                );
+
+                setError(
+                    caughtError instanceof Error
+                        ? caughtError.message
+                        : "알 수 없는 오류가 발생했습니다."
+                );
             } finally {
                 setIsLoading(false);
             }
         };
 
-        // id가 존재할 때만 함수 실행
-        if (id) {
-            fetchClassroomDetail();
-        }
-    }, [id, navigate]); // id가 바뀔 때마다 재실행되도록 의존성 배열에 추가
+        void fetchClassroomDetail();
+    }, [classroomId, navigate]);
 
-    // ---------------------------------------------------------
-    // 렌더링 영역: 로딩 처리, 에러 처리, 정상 렌더링 분기
-    // ---------------------------------------------------------
+    const handleUseCoupon = async (student: Student) => {
+        if (!classroomId || student.couponCount <= 0) {
+            return;
+        }
+
+        const shouldUseCoupon = window.confirm(
+            `${student.name} 학생의 쿠폰 1개를 사용하시겠어요?`
+        );
+
+        if (!shouldUseCoupon) {
+            return;
+        }
+
+        const token = localStorage.getItem("jwt_token");
+
+        if (!token) {
+            navigate("/login", { replace: true });
+            return;
+        }
+
+        try {
+            setUsingCouponStudentId(student.id);
+
+            const API_BASE_URL =
+                import.meta.env.VITE_API_BASE_URL;
+
+            const response = await fetch(
+                `${API_BASE_URL}/api/teacher/classrooms/${classroomId}/students/${student.id}/coupons/use`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                const errorBody = await response
+                    .json()
+                    .catch(() => null);
+
+                throw new Error(
+                    errorBody?.message ??
+                    "쿠폰을 사용하지 못했습니다."
+                );
+            }
+
+            const json = await response.json();
+
+            const updatedReward =
+                unwrapResponse<CouponUseResponse>(json);
+
+            // 전체 목록을 다시 요청하지 않고
+            // 변경된 학생만 업데이트
+            setClassroom((previous) => {
+                if (!previous) {
+                    return previous;
+                }
+
+                return {
+                    ...previous,
+                    students: previous.students.map(
+                        (currentStudent) =>
+                            currentStudent.id ===
+                            updatedReward.studentId
+                                ? {
+                                    ...currentStudent,
+                                    stampCount:
+                                    updatedReward.stampCount,
+                                    couponCount:
+                                    updatedReward.couponCount
+                                }
+                                : currentStudent
+                    )
+                };
+            });
+        } catch (caughtError) {
+            console.error("쿠폰 사용 실패:", caughtError);
+
+            alert(
+                caughtError instanceof Error
+                    ? caughtError.message
+                    : "쿠폰 사용 중 오류가 발생했습니다."
+            );
+        } finally {
+            setUsingCouponStudentId(null);
+        }
+    };
 
     if (isLoading) {
-        return <div style={centerStyle}>데이터를 불러오는 중입니다... ⏳</div>;
+        return (
+            <main className="classroom-page centered-state">
+                <motion.div
+                    className="loading-card"
+                    initial={{ opacity: 0, scale: 0.92 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                >
+                    <LoaderCircle
+                        className="loading-spinner"
+                        size={34}
+                    />
+
+                    <strong>우리 반 친구들을 불러오는 중이에요</strong>
+                    <span>조금만 기다려 주세요 ✨</span>
+                </motion.div>
+            </main>
+        );
     }
 
     if (error || !classroom) {
         return (
-            <div style={centerStyle}>
-                <h3 style={{ color: "red" }}>앗! 문제가 발생했어요.</h3>
-                <p>{error}</p>
-                <button onClick={() => navigate(-1)} style={backButtonStyle}>뒤로 가기</button>
-            </div>
+            <main className="classroom-page centered-state">
+                <motion.div
+                    className="error-card"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    <span className="error-emoji">🥲</span>
+                    <h2>앗, 문제가 생겼어요</h2>
+                    <p>{error}</p>
+
+                    <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => navigate(-1)}
+                    >
+                        <ArrowLeft size={17} />
+                        뒤로 가기
+                    </button>
+                </motion.div>
+            </main>
         );
     }
 
+    const studentCount = classroom.students.length;
+
     return (
-        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-            {/* 상단 헤더 및 뒤로가기 버튼 */}
-            <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "30px" }}>
-                <button onClick={() => navigate("/teacher/classrooms")} style={iconButtonStyle}>
-                    <ArrowLeft size={24} />
-                </button>
-                <h2 style={{ margin: 0, fontSize: "24px" }}>{classroom.className}</h2>
+        <main className="classroom-page">
+            <motion.header
+                className="classroom-header"
+                initial={{ opacity: 0, y: -14 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <div className="header-main">
+                    <button
+                        type="button"
+                        className="round-icon-button"
+                        aria-label="클래스룸 목록으로 이동"
+                        onClick={() =>
+                            navigate("/teacher/classrooms")
+                        }
+                    >
+                        <ArrowLeft size={22} />
+                    </button>
 
-                {/* ⭐️ Task 이동 버튼 추가 */}
-                <button
-                    onClick={() => navigate(`/teacher/classrooms/${id}/task`)}
-                    style={taskButtonStyle}
-                >
-                    Task
-                </button>
+                    <div className="title-group">
+                        <div className="title-label">
+                            <Sparkles size={15} />
+                            Classroom
+                        </div>
 
-                <button style={{ ...iconButtonStyle, marginLeft: "auto" }}>
-                    <Settings size={20} />
-                </button>
-            </div>
-
-            {/* 클래스룸 요약 정보 카드 */}
-            <div style={summaryCardStyle}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <Users size={24} color="#4CAF50" />
-                    <span style={{ fontSize: "18px", fontWeight: "bold" }}>총 학생 수: {classroom.studentCount}명</span>
-                </div>
-            </div>
-
-            {/* 학생 목록 리스트 */}
-            <div>
-                <h3 style={{ marginBottom: "15px" }}>소속 학생 목록</h3>
-
-                {classroom.students && classroom.students.length > 0 ? (
-                    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                        {classroom.students.map((student) => (
-                            <li key={student.id} style={studentItemStyle}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                                    <div style={avatarStyle}>
-                                        {/* 이름의 첫 글자만 따서 프로필 아이콘처럼 표시 */}
-                                        {student.name.charAt(0)}
-                                    </div>
-                                    <span style={{ fontSize: "16px", fontWeight: "500" }}>{student.name}</span>
-                                </div>
-                                <button style={actionButtonStyle}>과제 보기</button>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <div style={emptyBoxStyle}>
-                        아직 이 클래스룸에 등록된 학생이 없습니다.
+                        <h1>{classroom.className}</h1>
                     </div>
+                </div>
+
+                <div className="header-actions">
+                    <button
+                        type="button"
+                        className="task-button"
+                        onClick={() =>
+                            navigate(
+                                `/teacher/classrooms/${classroomId}/task`
+                            )
+                        }
+                    >
+                        <BookOpen size={18} />
+                        과제 관리
+                    </button>
+
+                    <button
+                        type="button"
+                        className="round-icon-button"
+                        aria-label="클래스룸 설정"
+                    >
+                        <Settings size={20} />
+                    </button>
+                </div>
+            </motion.header>
+
+            <motion.section
+                className="classroom-summary"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.08 }}
+            >
+                <div className="summary-icon">
+                    <Users size={25} />
+                </div>
+
+                <div>
+                    <span className="summary-label">
+                        함께 공부하는 친구들
+                    </span>
+
+                    <strong>{studentCount}명</strong>
+                </div>
+
+                <div className="summary-decoration">
+                    ★
+                </div>
+            </motion.section>
+
+            <section className="student-section">
+                <div className="section-heading">
+                    <div>
+                        <span className="section-eyebrow">
+                            STUDENTS
+                        </span>
+                        <h2>우리 반 학생</h2>
+                    </div>
+
+                    <span className="student-count-badge">
+                        {studentCount}명
+                    </span>
+                </div>
+
+                {studentCount > 0 ? (
+                    <div className="student-grid">
+                        {classroom.students.map(
+                            (student, index) => (
+                                <StudentRewardCard
+                                    key={student.id}
+                                    student={student}
+                                    index={index}
+                                    isUsingCoupon={
+                                        usingCouponStudentId ===
+                                        student.id
+                                    }
+                                    onUseCoupon={
+                                        handleUseCoupon
+                                    }
+                                />
+                            )
+                        )}
+                    </div>
+                ) : (
+                    <motion.div
+                        className="empty-student-card"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                    >
+                        <span>🌱</span>
+                        <h3>아직 등록된 학생이 없어요</h3>
+                        <p>
+                            학생을 초대하면 이곳에 귀여운
+                            카드로 표시됩니다.
+                        </p>
+                    </motion.div>
                 )}
-            </div>
-        </div>
+            </section>
+        </main>
     );
 }
 
-// 간단한 인라인 스타일 정의
-const centerStyle = { padding: "50px", textAlign: "center" as const, color: "#666" };
-const backButtonStyle = { marginTop: "20px", padding: "8px 16px", backgroundColor: "#eee", border: "none", borderRadius: "5px", cursor: "pointer" };
-const iconButtonStyle = { background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", borderRadius: "50%", backgroundColor: "#f5f5f5" };
-const summaryCardStyle = { padding: "20px", backgroundColor: "white", borderRadius: "12px", border: "1px solid #eaeaea", marginBottom: "30px", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" };
-const studentItemStyle = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px 20px", marginBottom: "10px", backgroundColor: "white", border: "1px solid #eaeaea", borderRadius: "8px" };
-const avatarStyle = { width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#e3f2fd", color: "#1976d2", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "16px" };
-const actionButtonStyle = { padding: "6px 12px", backgroundColor: "white", color: "#1976d2", border: "1px solid #1976d2", borderRadius: "4px", cursor: "pointer", fontSize: "14px" };
-const emptyBoxStyle = { padding: "40px", textAlign: "center" as const, backgroundColor: "#f9f9f9", borderRadius: "8px", color: "#888" };
+interface StudentRewardCardProps {
+    student: Student;
+    index: number;
+    isUsingCoupon: boolean;
+    onUseCoupon: (student: Student) => Promise<void>;
+}
 
-// ⭐️ Task 버튼 전용 스타일 추가
-const taskButtonStyle = {
-    padding: "6px 14px",
-    backgroundColor: "#1976d2",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "bold",
-    boxShadow: "0 2px 4px rgba(25, 118, 210, 0.2)"
-};
+function StudentRewardCard({
+                               student,
+                               index,
+                               isUsingCoupon,
+                               onUseCoupon
+                           }: StudentRewardCardProps) {
+    const safeStampCount = Math.max(
+        0,
+        Math.min(student.stampCount, 10)
+    );
+
+    const genderLabel =
+        student.gender === "MALE" ? "남학생" : "여학생";
+
+    return (
+        <motion.article
+            className="student-card"
+            initial={{
+                opacity: 0,
+                y: 22,
+                scale: 0.97
+            }}
+            animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1
+            }}
+            transition={{
+                delay: index * 0.06,
+                type: "spring",
+                stiffness: 180,
+                damping: 18
+            }}
+            whileHover={{
+                y: -5,
+                rotate: index % 2 === 0 ? 0.3 : -0.3
+            }}
+        >
+            <div className="student-profile">
+                <motion.div
+                    className={`student-avatar ${
+                        student.gender === "MALE"
+                            ? "avatar-blue"
+                            : "avatar-pink"
+                    }`}
+                    whileHover={{
+                        rotate: [0, -7, 7, 0],
+                        scale: 1.06
+                    }}
+                >
+                    {student.name.charAt(0).toUpperCase()}
+                </motion.div>
+
+                <div className="student-name-area">
+                    <div className="student-name-row">
+                        <h3>{student.name}</h3>
+                        <span className="gender-chip">
+                            {genderLabel}
+                        </span>
+                    </div>
+
+                    <div className="phone-info">
+                        <Phone size={13} />
+                        {student.parentPhoneNumber ??
+                            "보호자 연락처 미등록"}
+                    </div>
+                </div>
+            </div>
+
+            <div className="reward-panel">
+                <div className="reward-heading">
+                    <div>
+                        <span className="reward-title">
+                            오늘의 스탬프
+                        </span>
+                        <span className="reward-description">
+                            10개를 모으면 쿠폰 1개!
+                        </span>
+                    </div>
+
+                    <strong>
+                        {safeStampCount}
+                        <span>/10</span>
+                    </strong>
+                </div>
+
+                <div
+                    className="stamp-board"
+                    aria-label={`스탬프 ${safeStampCount}개`}
+                >
+                    {Array.from({ length: 10 }).map(
+                        (_, stampIndex) => {
+                            const isFilled =
+                                stampIndex <
+                                safeStampCount;
+
+                            return (
+                                <motion.div
+                                    key={stampIndex}
+                                    className={
+                                        isFilled
+                                            ? "stamp-dot filled"
+                                            : "stamp-dot"
+                                    }
+                                    initial={false}
+                                    animate={{
+                                        scale: isFilled
+                                            ? 1
+                                            : 0.92,
+                                        rotate: isFilled
+                                            ? 0
+                                            : -4
+                                    }}
+                                    whileHover={{
+                                        scale: 1.18,
+                                        rotate: 8
+                                    }}
+                                >
+                                    {isFilled ? "★" : ""}
+                                </motion.div>
+                            );
+                        }
+                    )}
+                </div>
+            </div>
+
+            <div
+                className={
+                    student.couponCount > 0
+                        ? "coupon-panel coupon-available"
+                        : "coupon-panel"
+                }
+            >
+                <div className="coupon-information">
+                    <div className="coupon-icon">
+                        <Ticket size={21} />
+                    </div>
+
+                    <div>
+                        <span>보유 쿠폰</span>
+                        <strong>
+                            {student.couponCount}개
+                        </strong>
+                    </div>
+                </div>
+
+                {student.couponCount > 0 ? (
+                    <motion.button
+                        type="button"
+                        className="coupon-use-button"
+                        disabled={isUsingCoupon}
+                        whileHover={
+                            isUsingCoupon
+                                ? undefined
+                                : { scale: 1.04 }
+                        }
+                        whileTap={
+                            isUsingCoupon
+                                ? undefined
+                                : { scale: 0.96 }
+                        }
+                        onClick={() =>
+                            void onUseCoupon(student)
+                        }
+                    >
+                        {isUsingCoupon ? (
+                            <>
+                                <LoaderCircle
+                                    className="button-spinner"
+                                    size={16}
+                                />
+                                사용 중
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles size={16} />
+                                쿠폰 사용
+                            </>
+                        )}
+                    </motion.button>
+                ) : (
+                    <span className="no-coupon-message">
+                        스탬프를 조금 더 모아봐요
+                    </span>
+                )}
+            </div>
+        </motion.article>
+    );
+}
