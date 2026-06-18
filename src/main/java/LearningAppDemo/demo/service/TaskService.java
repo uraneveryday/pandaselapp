@@ -137,5 +137,6 @@ public class TaskService {
 
         Task task = taskRepository.findById(taskId).orElseThrow( () -> new EntityNotFoundException("숙제를 찾을 수 없습니다"));
         task.setDone(true);
+
     }
 }
