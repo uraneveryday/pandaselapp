@@ -1,6 +1,7 @@
 package LearningAppDemo.demo.controller.api.teacher.task;
 
 import LearningAppDemo.demo.common.authority.CustomUserDetails;
+import LearningAppDemo.demo.domain.user.Role;
 import LearningAppDemo.demo.dto.response.TaskDto;
 import LearningAppDemo.demo.dto.request.CreateTaskRequest;
 import LearningAppDemo.demo.dto.request.QuizRequestDto;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController @RequiredArgsConstructor
@@ -26,9 +28,13 @@ public class TaskController {
     private final ClassRoomService classRoomService;
 
     @GetMapping // 숙제 목록(간단한것들만)
-    public List<TaskListItemResponse> getTaskList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+    public ResponseEntity<List<TaskListItemResponse>> getTaskList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                   @PathVariable Long classroomId) {
-        return classRoomService.getTasksList(classroomId);
+        if(customUserDetails.getUserId().equals(Role.TEACHER)) {
+            return ResponseEntity.ok(classRoomService.getTasksList(classroomId));
+        }
+
+        throw new IllegalStateException("it's not teacher role");
     }
 
 
@@ -57,13 +63,14 @@ public class TaskController {
 
 
     @PostMapping("/create") //task 생성
-    public void createTask(@PathVariable Long classroomId,
+    public ResponseEntity<Void> createTask(@PathVariable Long classroomId,
                             @RequestBody CreateTaskRequest createTaskRequest,
                            @AuthenticationPrincipal CustomUserDetails customUserDetails){
         Long userId = customUserDetails.getUserId();
         createTaskRequest.setClassRoomId(classroomId);
         taskService.createTask(createTaskRequest, userId);
 
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/list") //task 조회
