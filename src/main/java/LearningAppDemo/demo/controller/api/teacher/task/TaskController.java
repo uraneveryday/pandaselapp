@@ -19,7 +19,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController @RequiredArgsConstructor
@@ -71,6 +70,13 @@ public class TaskController {
     }
 
 
+    @GetMapping("/{taskId}") //task deatil Dto
+    public ResponseEntity<TaskDto> listTasks(@PathVariable("classroomId") Long classRoomId,
+                                             @PathVariable("taskId") Long taskId){
+
+        return ResponseEntity.ok(taskService.getTaskDetailWithCompletionRate(classRoomId, taskId));
+    }
+
     @PostMapping("/create") //task 생성
     public ResponseEntity<Void> createTask(@PathVariable Long classroomId,
                             @RequestBody CreateTaskRequest createTaskRequest,
@@ -80,12 +86,6 @@ public class TaskController {
         taskService.createTask(createTaskRequest, userId);
 
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/list") //task 조회
-    public ResponseEntity<List<TaskDto>> listTasks(@PathVariable("classroomId") Long classRoomId){
-
-        return ResponseEntity.ok(taskService.getTaskListWithCompletionRate(classRoomId));
     }
 
 

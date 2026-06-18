@@ -116,23 +116,18 @@ public class TaskService {
 
 
     @Transactional
-    public List<TaskDto> getTaskListWithCompletionRate(Long classRoomId) {
+    public TaskDto getTaskDetailWithCompletionRate(Long classRoomId, Long taskId) {
 
-        // 1. 해당 반의 전체 숙제 엔티티 목록을 가져옵니다.
-        List<Task> tasks = taskRepository.findByClassRoom_Id(classRoomId);
+        //classroom 가져오기 (인원수 세야하니까)
+        Classroom classroom = classRoomRepository.findById(classRoomId).orElseThrow(()-> {
+            throw new IllegalArgumentException("no classroom with id: " + classRoomId);});
 
-        // 2. Stream을 사용하여 각 Task 엔티티를 TaskDto로 변환합니다.
-        return tasks.stream().map(task -> {
+        Task task = taskRepository.findTaskById(taskId)
+                .orElseThrow(()-> {throw new IllegalStateException("there's no  task with id: " + taskId);});
 
-            // 3. StudentTask 테이블(레포지토리)에 쿼리를 날려 전체/완료 학생 수를 구합니다.
-            int totalCount = (int) studentTaskRepository.countByTaskId(task.getId());
-            int completedCount = (int) studentTaskRepository.countByTaskIdAndIsCompletedTrue(task.getId());
+        int completed = taskResultRepository.studentsCompleted(task.getId());
 
-            // 4. 완성해두신 DTO 생성자에 변수 3개를 딱 맞게 넣어줍니다.
-            return new TaskDto(task, totalCount, completedCount);
-
-        }).toList(); // 최종적으로 List<TaskDto> 형태로 반환
-
+        return new TaskDto(task,classroom.studentCount(),completed);
 
     }
 
