@@ -2,6 +2,7 @@ package LearningAppDemo.demo.controller.api.teacher.task;
 
 import LearningAppDemo.demo.common.authority.CustomUserDetails;
 import LearningAppDemo.demo.domain.user.Role;
+import LearningAppDemo.demo.domain.user.User;
 import LearningAppDemo.demo.dto.response.TaskDto;
 import LearningAppDemo.demo.dto.request.CreateTaskRequest;
 import LearningAppDemo.demo.dto.request.QuizRequestDto;
@@ -12,9 +13,11 @@ import LearningAppDemo.demo.service.QuizService;
 import LearningAppDemo.demo.service.TaskService;
 import LearningAppDemo.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +35,15 @@ public class TaskController {
     @GetMapping // 숙제 목록(간단한것들만)
     public ResponseEntity<List<TaskListItemResponse>> getTaskList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                   @PathVariable Long classroomId) {
-        if(userService.findById(customUserDetails.getUserId()).getRole().equals(Role.TEACHER)) {
-            return ResponseEntity.ok(classRoomService.getTasksList(classroomId));
+        Long userId = customUserDetails.getUserId();
+        User thisUser = userService.findById(userId);
+        if(thisUser.getRole() != Role.TEACHER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "it's not teacher role"
+            );
         }
 
-        throw new IllegalStateException("it's not teacher role");
+        return ResponseEntity.ok(classRoomService.getTasksList(classroomId));
     }
 
 
