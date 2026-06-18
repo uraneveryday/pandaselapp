@@ -4,7 +4,7 @@ import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.domain.task.Task;
 import LearningAppDemo.demo.domain.user.Role;
 import LearningAppDemo.demo.domain.user.User;
-import LearningAppDemo.demo.dto.TaskDto;
+import LearningAppDemo.demo.dto.response.TaskDto;
 import LearningAppDemo.demo.dto.request.CreateTaskRequest;
 import LearningAppDemo.demo.exception.FaildToValidate;
 import LearningAppDemo.demo.repository.*;

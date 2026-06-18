@@ -2,7 +2,6 @@ package LearningAppDemo.demo.dto.response;
 
 import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.dto.StudentDto;
-import LearningAppDemo.demo.dto.TaskDto;
 import lombok.Data;
 
 import java.util.List;

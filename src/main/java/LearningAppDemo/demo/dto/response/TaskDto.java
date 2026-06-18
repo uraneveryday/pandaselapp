@@ -1,4 +1,4 @@
-package LearningAppDemo.demo.dto;
+package LearningAppDemo.demo.dto.response;
 
 import LearningAppDemo.demo.domain.task.Task;
 import com.fasterxml.jackson.annotation.JsonProperty;

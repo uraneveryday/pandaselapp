@@ -3,10 +3,10 @@ package LearningAppDemo.demo.service;
 import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.domain.user.Student;
 import LearningAppDemo.demo.domain.user.Teacher;
-import LearningAppDemo.demo.domain.user.User;
-import LearningAppDemo.demo.dto.TaskDto;
+import LearningAppDemo.demo.dto.response.TaskDto;
 import LearningAppDemo.demo.dto.response.ClassroomInfoResponse;
 import LearningAppDemo.demo.dto.response.ClassroomListResponse;
+import LearningAppDemo.demo.dto.response.TaskListItemResponse;
 import LearningAppDemo.demo.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,8 +29,7 @@ public class ClassRoomService {
     // (본인의 Repository 클래스명에 맞게 대소문자를 맞춰주세요)
     private final ClassroomRepository classRoomRepository;
     private final TeacherRepository teacherRepository;
-    private final StudentTaskRepository studentTaskRepository;
-    private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
     private final StudentRepository studentRepository;
     private final TaskResultRepository taskResultRepository;
 
@@ -92,5 +92,21 @@ public class ClassRoomService {
     public Long getClassroomIdByStudentId(Long userId) {
         Optional<Student> student = studentRepository.findById(userId);
         return student.orElseThrow().getClassRoom().getId();
+    }
+
+    public List<TaskListItemResponse> getTasksList(Long classroomId) {
+
+        List<TaskListItemResponse> list = new ArrayList<>();
+
+        taskRepository.findByClassRoom_Id(classroomId)
+                .forEach(task -> {
+                    list.add(
+                            new TaskListItemResponse(task.getId(), task.getTaskName(), task.isDone())
+                    );
+                    //taskOrder은 뭔지모르겠어서 일단 뺐음
+
+                });
+
+        return list;
     }
 }

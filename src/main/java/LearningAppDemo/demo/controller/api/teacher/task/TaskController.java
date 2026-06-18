@@ -1,11 +1,12 @@
 package LearningAppDemo.demo.controller.api.teacher.task;
 
 import LearningAppDemo.demo.common.authority.CustomUserDetails;
-import LearningAppDemo.demo.dto.TaskDto;
+import LearningAppDemo.demo.dto.response.TaskDto;
 import LearningAppDemo.demo.dto.request.CreateTaskRequest;
 import LearningAppDemo.demo.dto.request.QuizRequestDto;
-import LearningAppDemo.demo.dto.response.QuizDetailResponse;
 import LearningAppDemo.demo.dto.response.QuizzesResponse;
+import LearningAppDemo.demo.dto.response.TaskListItemResponse;
+import LearningAppDemo.demo.service.ClassRoomService;
 import LearningAppDemo.demo.service.QuizService;
 import LearningAppDemo.demo.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController @RequiredArgsConstructor
-@RequestMapping("/api/teacher/classrooms/{classroomId}/task")
+@RequestMapping("/api/teacher/classrooms/{classroomId}/tasks")
 public class TaskController {
 
     private final TaskService taskService;
 
     private final QuizService quizService;
+    private final ClassRoomService classRoomService;
+
+    @GetMapping // 숙제 목록(간단한것들만)
+    public List<TaskListItemResponse> getTaskList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                  @PathVariable Long classroomId) {
+        return classRoomService.getTasksList(classroomId);
+    }
+
 
     @GetMapping("/{taskId}")
     public ResponseEntity<List<QuizzesResponse>> getAllQuizzes(
