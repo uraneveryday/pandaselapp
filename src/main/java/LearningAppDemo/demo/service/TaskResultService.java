@@ -14,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -35,12 +37,26 @@ public class TaskResultService {
         Task task = taskRepository.findById(taskId).orElseThrow();
         Student student = studentRepository.findStudentById(studentId).orElseThrow();
 
+
+        //takes time 계산
+        LocalDateTime startTime = request.getStartTime();
+        LocalDateTime endTime = request.getEndTime();
+        long seconds = Duration.between(startTime, endTime).getSeconds();
+
+        int rewardStamp = task.getRewardStamp(); //숙제의 스탬프 부여된거 가져오기
+        student.setStamp(rewardStamp + student.getStamp()); // 스탬프 더하기
+
         TaskResult taskResult = new TaskResult();
+
         taskResult.setTask(task);
         taskResult.setStudent(student);
         taskResult.setCompleted(true);
         taskResult.setStartTime(request.getStartTime());
         taskResult.setEndTime(request.getEndTime());
+        taskResult.setTakesTime(seconds);
+
+
+
 
         int correctCount=0;
 
@@ -68,4 +84,6 @@ public class TaskResultService {
         // 6. DB 저장 (Cascade 옵션 덕분에 TaskResult만 save해도 QuizResult N개가 한 번에 저장됨)
         taskResultRepository.save(taskResult);
     }
+
+
 }

@@ -48,7 +48,5 @@ public class Quiz {
     private List<String> options; //선택지들
 
     @Column(nullable = false)
-    private Integer correctAnswer;
-
-
+    private String correctAnswer;
 }
