@@ -435,6 +435,8 @@ export function TaskDetailPage() {
 
                 {activeTab === "analytics" && (
                     <TaskAnalyticsTab
+                        taskId={taskId}
+                        token={token}
                         completionRate={completionRate}
                         quizCount={quizList.length}
                     />
