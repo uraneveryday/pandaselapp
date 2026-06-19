@@ -91,7 +91,6 @@ public class ClassRoomService {
                     list.add(
                             new TaskListItemResponse(task.getId(), task.getTaskName(), task.isDone())
                     );
-                    //taskOrder은 뭔지모르겠어서 일단 뺐음
 
                 });
 

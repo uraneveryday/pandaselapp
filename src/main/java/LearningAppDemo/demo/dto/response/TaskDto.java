@@ -27,7 +27,7 @@ public class TaskDto {
         this.startDate = task.getStartDate();
         this.expiredDate = task.getExpiredDate();
         this.isDone = task.isDone();
-        this.rewardStamp = task.getStampCount();
+        this.rewardStamp = task.getRewardStamp();
         this.className = task.getClassRoom().getClassName();
 
         if (totalStudentCount > 0) {
