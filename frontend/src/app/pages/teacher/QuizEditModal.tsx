@@ -5,7 +5,7 @@ import {supabase} from "../../../utils/supabaseClient"; // 아이콘 추가
 
 interface QuizEditModalProps {
     taskId: string;
-    quizId: bigint;
+    quizId: number;
     onClose: () => void;
     onSuccess: () => void;
 }
