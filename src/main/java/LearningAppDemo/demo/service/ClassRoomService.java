@@ -4,7 +4,7 @@ import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.domain.user.Student;
 import LearningAppDemo.demo.domain.user.Teacher;
 import LearningAppDemo.demo.dto.response.TaskDto;
-import LearningAppDemo.demo.dto.response.ClassroomInfoResponse;
+import LearningAppDemo.demo.dto.response.ClassroomDetailResponse;
 import LearningAppDemo.demo.dto.response.ClassroomListResponse;
 import LearningAppDemo.demo.dto.response.TaskListItemResponse;
 import LearningAppDemo.demo.repository.*;
@@ -84,9 +84,9 @@ public class ClassRoomService {
     }
 
 
-    public ClassroomInfoResponse getInfo(Long classroomId) {
+    public ClassroomDetailResponse getInfo(Long classroomId) {
         Classroom classrooms = classRoomRepository.findClassroomById(classroomId);
-        return new ClassroomInfoResponse(classrooms);
+        return new ClassroomDetailResponse(classrooms);
     }
 
     public Long getClassroomIdByStudentId(Long userId) {

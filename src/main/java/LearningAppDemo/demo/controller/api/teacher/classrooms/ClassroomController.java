@@ -3,7 +3,7 @@ package LearningAppDemo.demo.controller.api.teacher.classrooms;
 import LearningAppDemo.demo.common.authority.CustomUserDetails;
 import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.dto.request.StudentSignUpRequest;
-import LearningAppDemo.demo.dto.response.ClassroomInfoResponse;
+import LearningAppDemo.demo.dto.response.ClassroomDetailResponse;
 import LearningAppDemo.demo.dto.response.ClassroomListResponse;
 import LearningAppDemo.demo.dto.response.SignUpResopnse;
 import LearningAppDemo.demo.service.AuthService;
@@ -53,10 +53,10 @@ public class ClassroomController {
         return ResponseEntity.ok(list);
     }
     @GetMapping("/{id}/edit") // 반 정보 수정 등
-    public ResponseEntity<ClassroomInfoResponse> editClassroom (
+    public ResponseEntity<ClassroomDetailResponse> editClassroom (
             @PathVariable("id") Long classroomId) {
 
-        ClassroomInfoResponse response = classRoomService.getInfo(classroomId);
+        ClassroomDetailResponse response = classRoomService.getInfo(classroomId);
 
         return ResponseEntity.ok(response);
     }
@@ -71,7 +71,7 @@ public class ClassroomController {
     }
 
     @GetMapping("/{id}") //정보출력
-    public ResponseEntity<ClassroomInfoResponse> getClassroomById(@PathVariable("id") Long classroomId)  {
+    public ResponseEntity<ClassroomDetailResponse> getClassroomById(@PathVariable("id") Long classroomId)  {
         return ResponseEntity.ok(classRoomService.getInfo(classroomId));
     }
 
