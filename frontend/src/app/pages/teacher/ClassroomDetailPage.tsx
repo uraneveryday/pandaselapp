@@ -304,6 +304,31 @@ export function ClassroomDetailPage() {
 
     return (
         <main className="classroom-page">
+            <AnimatePresence>
+                {couponSuccessMessage && (
+                    <motion.div
+                        className="coupon-success-toast"
+                        initial={{ opacity: 0, y: -20, scale: 0.92 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.92 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 260,
+                            damping: 20
+                        }}
+                    >
+                        <div className="coupon-success-icon">
+                            <Ticket size={22} />
+                        </div>
+
+                        <div>
+                            <strong>쿠폰 사용 완료</strong>
+                            <p>{couponSuccessMessage}</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <motion.header
                 className="classroom-header"
                 initial={{ opacity: 0, y: -14 }}
