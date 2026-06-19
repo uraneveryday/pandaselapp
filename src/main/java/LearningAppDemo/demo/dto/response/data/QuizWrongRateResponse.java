@@ -1,9 +1,9 @@
 package LearningAppDemo.demo.dto.response.data;
 
 import LearningAppDemo.demo.repository.QuizWrongRateProjection;
-import lombok.Data;
 
-@Data
+
+
 public record QuizWrongRateResponse( Long quizId,
                                      Integer quizNum,
                                      String questionText,

@@ -1,6 +1,7 @@
 package LearningAppDemo.demo.domain.task;
 
 
+import LearningAppDemo.demo.domain.StudentTask;
 import LearningAppDemo.demo.domain.classroom.Classroom;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -63,4 +64,6 @@ public class Task {
     public enum Category {
         MATH, CHINESE
     }
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private List<StudentTask> studentTasks = new ArrayList<>();
 }

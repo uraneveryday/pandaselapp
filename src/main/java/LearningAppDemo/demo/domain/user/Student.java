@@ -1,7 +1,8 @@
 package LearningAppDemo.demo.domain.user;
 
+import LearningAppDemo.demo.domain.StudentTask;
 import LearningAppDemo.demo.domain.classroom.Classroom;
-import LearningAppDemo.demo.domain.task.StudentTask;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
