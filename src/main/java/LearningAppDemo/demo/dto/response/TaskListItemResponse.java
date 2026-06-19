@@ -10,7 +10,6 @@ public class TaskListItemResponse {
 
     private Long id;
 
-//    private int taskOrder;
 
     private String taskName;
 
