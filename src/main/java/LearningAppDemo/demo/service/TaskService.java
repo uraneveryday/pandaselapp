@@ -40,7 +40,7 @@ public class TaskService {
         Classroom classRoom = validateAndGetClassRoom(userId, request.getClassRoomId());
         // 2. ⭐️ 연관관계 세팅 (이 숙제가 어느 반 것인지 DB에 알려주기 위함)
         task.setClassRoom(classRoom);
-        task.setRewardStamp(request.getRewardStamp());
+        task.setStampCount(request.getStampCount());
         task.setTaskName(request.getTaskName());
         task.setDescription(request.getDescription());
         task.setCategory(request.getCategory());

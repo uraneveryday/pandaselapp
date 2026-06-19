@@ -27,8 +27,8 @@ public class Task {
     @JoinColumn(name = "classRoom")
     private Classroom classRoom; //반 이름
 
-    @Column(name = "reward_stamp")
-    private int rewardStamp; //이거풀면 스탬프 몇개?
+    @Column(name = "stamp_count")
+    private int stampCount; //이거풀면 스탬프 몇개?
 
     @Enumerated(EnumType.STRING)
     private Category category; //한자인지 숫자인지
