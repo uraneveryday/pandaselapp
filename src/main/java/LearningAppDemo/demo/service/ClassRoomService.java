@@ -84,8 +84,10 @@ public class ClassRoomService {
     }
 
 
+    @Transactional
     public ClassroomDetailResponse getInfo(Long classroomId) {
-        Classroom classrooms = classRoomRepository.findClassroomById(classroomId);
+        Classroom classrooms = classRoomRepository.findById(classroomId)
+                .orElseThrow();
         return new ClassroomDetailResponse(classrooms);
     }
 
