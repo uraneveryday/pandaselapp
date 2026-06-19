@@ -53,7 +53,7 @@ public class StudentService {
     public CouponUseResponse useCoupons(Long classroomId, Long studentId) {
         Student student = studentRepository.findStudentById(studentId)
                 .orElseThrow();
-        if (student.getClassRoom().getId().equals(classroomId)) {
+        if (!(student.getClassRoom().getId().equals(classroomId))) {
             throw new EntityNotFoundException("선택한 학생이 해당 classroom에 존재하지 않습니다");
             } else if (student.getCoupon()<=0) {
             throw new IllegalArgumentException("쿠폰이 0개 이하입니다");
