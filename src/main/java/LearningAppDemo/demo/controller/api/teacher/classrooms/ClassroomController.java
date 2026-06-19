@@ -56,6 +56,7 @@ public class ClassroomController {
     public ResponseEntity<ClassroomDetailResponse> editClassroom (
             @PathVariable("id") Long classroomId) {
 
+
         ClassroomDetailResponse response = classRoomService.getInfo(classroomId);
 
         return ResponseEntity.ok(response);

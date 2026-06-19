@@ -1,300 +1,541 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, X } from "lucide-react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+    ArrowLeft,
+    Pencil,
+    Save,
+    Search,
+    Trash2,
+    UserPlus,
+    X,
+} from "lucide-react";
+
+type Gender = "MALE" | "FEMALE";
+
+interface Student {
+    id: number; // 화면에는 표시하지 않고, key/API 요청용으로만 사용
+    name?: string;
+    username?: string;
+    gender: Gender;
+    parentPhoneNumber: string | null;
+    stampCount: number;
+    couponCount: number;
+}
+
+interface Classroom {
+    id: number;
+    className: string;
+    studentCount: number;
+    students: Student[];
+}
+
+interface CreateStudentForm {
+    loginId: string;
+    password: string;
+    username: string;
+    parentPhoneNumber: string;
+    gender: Gender;
+}
+
+interface EditStudentForm {
+    name: string;
+    gender: Gender;
+    parentPhoneNumber: string;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function ClassroomEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [classroom, setClassroom] = useState<any>(null);
+    const [classroom, setClassroom] = useState<Classroom | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    const [isEditingName, setIsEditingName] = useState(false);
-    const [editNameValue, setEditNameValue] = useState("");
-
-    const [isAddingStudent, setIsAddingStudent] = useState(false);
-    const [newStudentId, setNewStudentId] = useState("");
-
-    // 🌟 엔티티 구조에 맞춰 폼 상태 확장 (username, phoneNumber, parentPhoneNumber, gender 추가)
     const [isCreatingStudent, setIsCreatingStudent] = useState(false);
-    const [createForm, setCreateForm] = useState({
+    const [isCreating, setIsCreating] = useState(false);
+
+    const [searchKeyword, setSearchKeyword] = useState("");
+
+    const [editingStudentId, setEditingStudentId] = useState<number | null>(null);
+    const [updatingStudentId, setUpdatingStudentId] = useState<number | null>(null);
+
+    const [createForm, setCreateForm] = useState<CreateStudentForm>({
         loginId: "",
         password: "",
         username: "",
-        //phoneNumber: "",
         parentPhoneNumber: "",
-        gender: "MALE" // 기본값 설정 (MALE / FEMALE)
+        gender: "MALE",
     });
-    const [isCreating, setIsCreating] = useState(false);
+
+    const [editForm, setEditForm] = useState<EditStudentForm>({
+        name: "",
+        gender: "MALE",
+        parentPhoneNumber: "",
+    });
 
     useEffect(() => {
-        const fetchClassroomDetails = async () => {
-            try {
-                const token = localStorage.getItem("jwt_token");
-                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${id}/edit`, {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-                if (!res.ok) throw new Error("데이터 로드 실패");
-                const result = await res.json();
-
-                // 공통 응답 포맷 대응
-                const data = result.success ? result.data : result;
-                setClassroom(data);
-                setEditNameValue(data.className);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchClassroomDetails();
     }, [id]);
 
-    const handleSaveName = async () => {
-        if (!editNameValue.trim()) return alert("이름을 입력해주세요.");
-        setClassroom({ ...classroom, className: editNameValue });
-        setIsEditingName(false);
+    const getToken = () => localStorage.getItem("jwt_token");
+
+    const unwrapData = (result: any) => {
+        return result?.success ? result.data : result;
     };
 
-    const handleAddStudent = async () => {
-        if (!newStudentId.trim()) return;
-        setNewStudentId("");
-        setIsAddingStudent(false);
-    };
-
-
-    const handleRemoveStudent = async (studentId: number) => {
-        if (!window.confirm("정말 이 학생을 클래스룸에서 제외하시겠습니까?")) return;
-
+    const fetchClassroomDetails = async () => {
         try {
-            const token = localStorage.getItem("jwt_token");
+            setIsLoading(true);
 
-            // id : classroom ID
-            const response = await fetch(`/api/teacher/classrooms/${id}/students/${studentId}`, {
-                method: "DELETE", // 또는 상태 변경이라면 PUT/PATCH
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                }
-            });
+            const res = await fetch(
+                `${API_BASE_URL}/api/teacher/classrooms/${id}/edit`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${getToken()}`,
+                    },
+                },
+            );
 
-            // 2. 서버에서 삭제가 성공적으로 완료되었을 때만 UI 상태 업데이트 (비관적 업데이트 방식)
-            if (response.ok) {
-                const filtered = classroom.students.filter((s: any) => s.id !== studentId);
-                setClassroom({ ...classroom, students: filtered });
-                // alert("학생이 제외되었습니다."); // 필요시 주석 해제
-            } else {
-                // 4xx, 5xx 에러 발생 시 처리
-                alert("학생 제외 처리에 실패했습니다. 다시 시도해주세요.");
+            if (!res.ok) {
+                throw new Error("클래스룸 정보를 불러오지 못했습니다.");
             }
 
+            const result = await res.json();
+            const data = unwrapData(result);
+
+            setClassroom({
+                ...data,
+                students: data.students ?? [],
+            });
         } catch (error) {
-            // 3. 네트워크 단절 등 서버 통신 자체가 실패했을 때의 예외 처리
-            console.error("학생 삭제 API 오류:", error);
-            alert("서버 통신 중 오류가 발생했습니다.");
+            console.error(error);
+            alert("클래스룸 정보를 불러오는 중 오류가 발생했습니다.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleCreateStudent = async (e: React.FormEvent) => {
+    const filteredStudents = useMemo(() => {
+        if (!classroom?.students) return [];
+
+        const keyword = searchKeyword.trim().toLowerCase();
+
+        if (!keyword) return classroom.students;
+
+        return classroom.students.filter((student) => {
+            const name = student.name || student.username || "";
+            const parentPhoneNumber = student.parentPhoneNumber || "";
+
+            return (
+                name.toLowerCase().includes(keyword) ||
+                parentPhoneNumber.includes(keyword)
+            );
+        });
+    }, [classroom, searchKeyword]);
+
+    const handleCreateStudent = async (e: FormEvent) => {
         e.preventDefault();
 
-        // 필수 값 검증
-        if (!createForm.loginId || !createForm.password || !createForm.username) {
-            return alert("필수 정보(이름, 아이디, 비밀번호)를 모두 입력해주세요.");
+        if (!createForm.username.trim()) {
+            return alert("학생 이름을 입력해주세요.");
         }
 
-        setIsCreating(true);
-        try {
-            const token = localStorage.getItem("jwt_token");
+        if (!createForm.loginId.trim()) {
+            return alert("로그인 ID를 입력해주세요.");
+        }
 
-            // 클래스룸 ID도 함께 넘겨주어야 백엔드에서 매핑하기 편합니다.
+        if (!createForm.password.trim()) {
+            return alert("초기 비밀번호를 입력해주세요.");
+        }
+
+        try {
+            setIsCreating(true);
+
             const requestData = {
-                studentName: createForm.username,        // username을 studentName으로 포장
-                studentLoginId: createForm.loginId,      // loginId를 studentLoginId로 포장
-                studentPassword: createForm.password,    // password를 studentPassword로 포장
+                studentName: createForm.username.trim(),
+                studentLoginId: createForm.loginId.trim(),
+                studentPassword: createForm.password.trim(),
                 gender: createForm.gender,
-                phoneNumber: createForm.parentPhoneNumber // 백엔드가 phoneNumber라는 이름으로 학부모 번호를 받기로 했다면!
+
+                // 현재 기존 코드에서 phoneNumber로 보내고 있었기 때문에 유지
+                // 백엔드 DTO가 parentPhoneNumber라면 이 키만 parentPhoneNumber로 바꾸면 됨
+                phoneNumber: createForm.parentPhoneNumber.trim() || null,
             };
 
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teacher/classrooms/${id}/edit/student`, {
-                method: 'POST',
-                headers: { "Authorization": `Bearer ${token}`,
-                            "Content-Type": "application/json" },
-                body: JSON.stringify(requestData) // 👈 예쁘게 포장한 데이터를 전송
+            const res = await fetch(
+                `${API_BASE_URL}/api/teacher/classrooms/${id}/edit/student`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${getToken()}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestData),
+                },
+            );
+
+            if (!res.ok) {
+                throw new Error("학생 계정 생성에 실패했습니다.");
+            }
+
+            const result = await res.json();
+            const newStudent = unwrapData(result);
+
+            setClassroom((prev) => {
+                if (!prev) return prev;
+
+                return {
+                    ...prev,
+                    studentCount: prev.students.length + 1,
+                    students: [...prev.students, newStudent],
+                };
             });
 
-            if (!res.ok) throw new Error("학생 가입에 실패했습니다.");
-            const newStudent = await res.json();
-
-            setClassroom({
-                ...classroom,
-                students: [...classroom.students, newStudent.data || newStudent]
-            });
-
-            alert(`🎉 ${createForm.username} 학생이 성공적으로 가입되었습니다!`);
-
-            // 폼 초기화
             setCreateForm({
-                loginId: "", password: "", username: "",
-                parentPhoneNumber: "", gender: "MALE"
+                loginId: "",
+                password: "",
+                username: "",
+                parentPhoneNumber: "",
+                gender: "MALE",
             });
-            setIsCreatingStudent(false);
 
+            setIsCreatingStudent(false);
+            alert("학생 계정이 생성되었습니다.");
         } catch (error: any) {
-            alert(error.message);
             console.error(error);
+            alert(error.message || "학생 계정 생성 중 오류가 발생했습니다.");
         } finally {
             setIsCreating(false);
         }
     };
 
-    if (isLoading) return <div style={{ padding: "40px", textAlign: "center" }}>데이터 로딩 중... ⏳</div>;
-    if (!classroom) return <div style={{ padding: "40px", textAlign: "center" }}>데이터를 찾을 수 없습니다.</div>;
+    const handleStartEdit = (student: Student) => {
+        setEditingStudentId(student.id);
+        setEditForm({
+            name: student.name || student.username || "",
+            gender: student.gender,
+            parentPhoneNumber: student.parentPhoneNumber || "",
+        });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingStudentId(null);
+        setEditForm({
+            name: "",
+            gender: "MALE",
+            parentPhoneNumber: "",
+        });
+    };
+
+    const handleUpdateStudent = async (studentId: number) => {
+        if (!editForm.name.trim()) {
+            return alert("학생 이름을 입력해주세요.");
+        }
+
+        try {
+            setUpdatingStudentId(studentId);
+
+            const requestData = {
+                studentName: editForm.name.trim(),
+                gender: editForm.gender,
+
+                // 백엔드 DTO가 parentPhoneNumber라면 이 키만 parentPhoneNumber로 변경
+                phoneNumber: editForm.parentPhoneNumber.trim() || null,
+            };
+
+            /*
+             * 백엔드에 학생 수정 API가 아직 없다면 아래 형태로 하나 만들면 됨.
+             *
+             * PATCH /api/teacher/students/{studentId}
+             *
+             * 또는 클래스룸 기준으로 관리하고 싶으면:
+             * PATCH /api/teacher/classrooms/{classroomId}/students/{studentId}
+             *
+             * 아래 코드는 첫 번째 방식을 기준으로 작성.
+             */
+            const res = await fetch(
+                `${API_BASE_URL}/api/teacher/students/${studentId}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${getToken()}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestData),
+                },
+            );
+
+            if (!res.ok) {
+                throw new Error("학생 정보 수정에 실패했습니다.");
+            }
+
+            let updatedStudent: Partial<Student> | null = null;
+
+            try {
+                const result = await res.json();
+                updatedStudent = unwrapData(result);
+            } catch {
+                updatedStudent = null;
+            }
+
+            setClassroom((prev) => {
+                if (!prev) return prev;
+
+                return {
+                    ...prev,
+                    students: prev.students.map((student) => {
+                        if (student.id !== studentId) return student;
+
+                        return {
+                            ...student,
+                            ...updatedStudent,
+                            name: editForm.name.trim(),
+                            gender: editForm.gender,
+                            parentPhoneNumber:
+                                editForm.parentPhoneNumber.trim() || null,
+                        };
+                    }),
+                };
+            });
+
+            handleCancelEdit();
+        } catch (error: any) {
+            console.error(error);
+            alert(error.message || "학생 정보 수정 중 오류가 발생했습니다.");
+        } finally {
+            setUpdatingStudentId(null);
+        }
+    };
+
+    const handleRemoveStudent = async (student: Student) => {
+        const studentName = student.name || student.username || "해당 학생";
+
+        if (
+            !window.confirm(
+                `${studentName} 학생을 이 클래스룸에서 제외하시겠습니까?`,
+            )
+        ) {
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `${API_BASE_URL}/api/teacher/classrooms/${id}/students/${student.id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${getToken()}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            if (!res.ok) {
+                throw new Error("학생 제외 처리에 실패했습니다.");
+            }
+
+            setClassroom((prev) => {
+                if (!prev) return prev;
+
+                const nextStudents = prev.students.filter(
+                    (s) => s.id !== student.id,
+                );
+
+                return {
+                    ...prev,
+                    studentCount: nextStudents.length,
+                    students: nextStudents,
+                };
+            });
+        } catch (error: any) {
+            console.error(error);
+            alert(error.message || "학생 제외 중 오류가 발생했습니다.");
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div style={centerStyle}>
+                <p style={loadingTextStyle}>클래스룸 정보를 불러오는 중입니다...</p>
+            </div>
+        );
+    }
+
+    if (!classroom) {
+        return (
+            <div style={centerStyle}>
+                <p style={emptyTextStyle}>클래스룸 정보를 찾을 수 없습니다.</p>
+            </div>
+        );
+    }
 
     return (
-        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
+        <main style={pageStyle}>
+            <div style={headerStyle}>
+                <button
+                    type="button"
+                    onClick={() => navigate("/teacher")}
+                    style={backButtonStyle}
+                >
+                    <ArrowLeft size={18} />
+                    목록으로
+                </button>
 
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-                <h2 style={{ margin: 0 }}>⚙️ 클래스룸 관리</h2>
-                <button onClick={() => navigate("/teacher")} style={btnStyle("gray")}>목록으로</button>
+                <div>
+                    <p style={eyebrowStyle}>Classroom Edit</p>
+                    <h1 style={titleStyle}>{classroom.className}</h1>
+                    <p style={subtitleStyle}>
+                        학생 계정 생성, 정보 수정, 클래스룸 제외를 관리합니다.
+                    </p>
+                </div>
             </div>
 
-            {/* --- 1. 기본 정보 섹션 --- */}
-            <section style={sectionStyle}>
-                <h3 style={sectionTitleStyle}>기본 정보</h3>
-                <div style={rowStyle}>
-                    <span style={labelStyle}>클래스 이름</span>
-                    {isEditingName ? (
-                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                            <input
-                                value={editNameValue}
-                                onChange={(e) => setEditNameValue(e.target.value)}
-                                style={inputStyle}
-                            />
-                            {/*<button onClick={handleSaveName} style={btnStyle("blue")}>저장</button>*/}
+            <section style={summaryGridStyle}>
+                <div style={summaryCardStyle}>
+                    <span style={summaryLabelStyle}>클래스룸</span>
+                    <strong style={summaryValueStyle}>{classroom.className}</strong>
+                </div>
 
-                            <button onClick={() => { setIsEditingName(false); setEditNameValue(classroom.className); }} style={btnStyle("white")}>취소</button>
-                        </div>
-                    ) : (
-                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                            <span style={{ fontSize: "18px", fontWeight: "bold" }}>{classroom.className}</span>
-                            {/*<button onClick={() => setIsEditingName(true)} style={btnStyle("white")}>✏️ 수정</button>*/}
-                        </div>
-                    )}
+                <div style={summaryCardStyle}>
+                    <span style={summaryLabelStyle}>등록 학생</span>
+                    <strong style={summaryValueStyle}>
+                        {classroom.students.length}명
+                    </strong>
                 </div>
             </section>
 
-            {/* --- 2. 학생 관리 섹션 --- */}
             <section style={sectionStyle}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-                    <h3 style={{ margin: 0, ...sectionTitleStyle, border: "none", padding: 0 }}>학생 목록 ({classroom.students?.length || 0}명)</h3>
-
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <button onClick={() => setIsAddingStudent(!isAddingStudent)} style={btnStyle("white")}>
-                            기존 학생 연동
-                        </button>
-                        <button
-                            onClick={() => setIsCreatingStudent(!isCreatingStudent)}
-                            style={btnStyle("tossBlue")}
-                        >
-                            <UserPlus size={16} style={{ marginRight: "4px", display: "inline-block", verticalAlign: "text-bottom" }} />
-                            새 학생 가입
-                        </button>
+                <div style={sectionHeaderStyle}>
+                    <div>
+                        <h2 style={sectionTitleStyle}>학생 관리</h2>
+                        <p style={sectionDescriptionStyle}>
+                            DB PK는 화면에 표시하지 않고, 내부 요청에만 사용합니다.
+                        </p>
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={() => setIsCreatingStudent((prev) => !prev)}
+                        style={primaryButtonStyle}
+                    >
+                        {isCreatingStudent ? <X size={17} /> : <UserPlus size={17} />}
+                        {isCreatingStudent ? "닫기" : "새 학생 만들기"}
+                    </button>
                 </div>
 
-                {isAddingStudent && (
-                    <div style={{ marginBottom: "15px", padding: "15px", backgroundColor: "#f9fafb", borderRadius: "8px", display: "flex", gap: "10px" }}>
-                        <input
-                            placeholder="추가할 학생의 로그인 ID 입력"
-                            value={newStudentId}
-                            onChange={(e) => setNewStudentId(e.target.value)}
-                            style={inputStyle}
-                        />
-                        <button onClick={handleAddStudent} style={btnStyle("gray")}>추가</button>
-                    </div>
-                )}
-
-                {/* 🌟 확장된 새 학생 가입 폼 */}
                 <AnimatePresence>
                     {isCreatingStudent && (
                         <motion.form
                             onSubmit={handleCreateStudent}
-                            initial={{ opacity: 0, height: 0, y: -10 }}
-                            animate={{ opacity: 1, height: "auto", y: 0 }}
-                            exit={{ opacity: 0, height: 0, y: -10 }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                            style={{ overflow: "hidden", marginBottom: "20px" }}
+                            initial={{ opacity: 0, y: -8, height: 0 }}
+                            animate={{ opacity: 1, y: 0, height: "auto" }}
+                            exit={{ opacity: 0, y: -8, height: 0 }}
+                            transition={{ duration: 0.22 }}
+                            style={{ overflow: "hidden" }}
                         >
-                            <div style={{ backgroundColor: "#f2f4f6", padding: "24px", borderRadius: "16px", position: "relative" }}>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCreatingStudent(false)}
-                                    style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", cursor: "pointer", color: "#8b95a1" }}
-                                >
-                                    <X size={20} />
-                                </button>
-
-                                <h4 style={{ margin: "0 0 16px 0", fontSize: "16px", color: "#333d4b" }}>✨ 새 학생 계정 만들기</h4>
-
-                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-
-                                    {/* 이름 & 성별 (나란히 배치) */}
-                                    <div style={{ display: "flex", gap: "12px" }}>
+                            <div style={createBoxStyle}>
+                                <div style={formGridStyle}>
+                                    <label style={fieldStyle}>
+                                        <span style={fieldLabelStyle}>학생 이름 *</span>
                                         <input
-                                            placeholder="학생 이름 (예: 김민지) *"
                                             value={createForm.username}
-                                            onChange={(e) => setCreateForm({...createForm, username: e.target.value})}
-                                            style={{ ...tossInputStyle, flex: 2 }} required
+                                            onChange={(e) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    username: e.target.value,
+                                                })
+                                            }
+                                            placeholder="예: 김민지"
+                                            style={inputStyle}
                                         />
+                                    </label>
+
+                                    <label style={fieldStyle}>
+                                        <span style={fieldLabelStyle}>성별</span>
                                         <select
                                             value={createForm.gender}
-                                            onChange={(e) => setCreateForm({...createForm, gender: e.target.value})}
-                                            style={{ ...tossInputStyle, flex: 1, cursor: "pointer" }}
+                                            onChange={(e) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    gender: e.target.value as Gender,
+                                                })
+                                            }
+                                            style={inputStyle}
                                         >
-                                            <option value="MALE">남성</option>
-                                            <option value="FEMALE">여성</option>
+                                            <option value="MALE">남학생</option>
+                                            <option value="FEMALE">여학생</option>
                                         </select>
-                                    </div>
+                                    </label>
 
-                                    {/* 계정 정보 */}
-                                    <input
-                                        placeholder="로그인 ID *"
-                                        value={createForm.loginId}
-                                        onChange={(e) => setCreateForm({...createForm, loginId: e.target.value})}
-                                        style={tossInputStyle} required
-                                    />
-                                    <input
-                                        type="password"
-                                        placeholder="초기 비밀번호 *"
-                                        value={createForm.password}
-                                        onChange={(e) => setCreateForm({...createForm, password: e.target.value})}
-                                        style={tossInputStyle} required
-                                    />
+                                    <label style={fieldStyle}>
+                                        <span style={fieldLabelStyle}>로그인 ID *</span>
+                                        <input
+                                            value={createForm.loginId}
+                                            onChange={(e) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    loginId: e.target.value,
+                                                })
+                                            }
+                                            placeholder="학생 로그인 ID"
+                                            style={inputStyle}
+                                        />
+                                    </label>
 
-                                    {/* 연락처 정보 */}
-                                    <input
-                                        type="tel"
-                                        placeholder="학부모 전화번호 (선택)"
-                                        value={createForm.parentPhoneNumber}
-                                        onChange={(e) => setCreateForm({...createForm, parentPhoneNumber: e.target.value})}
-                                        style={tossInputStyle}
-                                    />
+                                    <label style={fieldStyle}>
+                                        <span style={fieldLabelStyle}>초기 비밀번호 *</span>
+                                        <input
+                                            type="password"
+                                            value={createForm.password}
+                                            onChange={(e) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    password: e.target.value,
+                                                })
+                                            }
+                                            placeholder="초기 비밀번호"
+                                            style={inputStyle}
+                                        />
+                                    </label>
 
+                                    <label style={{ ...fieldStyle, gridColumn: "1 / -1" }}>
+                                        <span style={fieldLabelStyle}>
+                                            학부모 전화번호
+                                        </span>
+                                        <input
+                                            value={createForm.parentPhoneNumber}
+                                            onChange={(e) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    parentPhoneNumber: e.target.value,
+                                                })
+                                            }
+                                            placeholder="선택 입력"
+                                            style={inputStyle}
+                                        />
+                                    </label>
+                                </div>
+
+                                <div style={formButtonRowStyle}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCreatingStudent(false)}
+                                        style={secondaryButtonStyle}
+                                    >
+                                        취소
+                                    </button>
                                     <button
                                         type="submit"
                                         disabled={isCreating}
                                         style={{
-                                            ...btnStyle("tossBlue"),
-                                            padding: "14px",
-                                            fontSize: "16px",
-                                            marginTop: "8px",
-                                            opacity: isCreating ? 0.6 : 1
+                                            ...primaryButtonStyle,
+                                            opacity: isCreating ? 0.65 : 1,
                                         }}
                                     >
-                                        {isCreating ? "계정 생성 중..." : "계정 생성 및 클래스룸 추가"}
+                                        <UserPlus size={17} />
+                                        {isCreating ? "생성 중..." : "계정 생성"}
                                     </button>
                                 </div>
                             </div>
@@ -302,47 +543,586 @@ export function ClassroomEditPage() {
                     )}
                 </AnimatePresence>
 
-                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                    {classroom.students?.map((student: any) => (
-                        <li key={student.id} style={listItemStyle}>
-                            <span style={{ fontWeight: 500, color: "#333d4b" }}>
-                                👤 {student.name || student.username}
-                                <span style={{ color: "#8b95a1", fontSize: "13px", marginLeft: "4px" }}>(ID: {student.loginId || student.id})</span>
-                            </span>
-                            <button onClick={() => handleRemoveStudent(student.id)} style={btnStyle("red")}>제외</button>
-                        </li>
-                    ))}
-                    {(!classroom.students || classroom.students.length === 0) && <p style={{ color: "#888", fontSize: "14px", padding: "10px 0" }}>등록된 학생이 없습니다.</p>}
-                </ul>
+                <div style={toolbarStyle}>
+                    <div style={searchBoxStyle}>
+                        <Search size={17} color="#94a3b8" />
+                        <input
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            placeholder="학생 이름 또는 학부모 번호 검색"
+                            style={searchInputStyle}
+                        />
+                    </div>
+
+                    <span style={countBadgeStyle}>
+                        {filteredStudents.length}명 표시 중
+                    </span>
+                </div>
+
+                <div style={tableWrapperStyle}>
+                    <table style={tableStyle}>
+                        <thead>
+                        <tr>
+                            <th style={thStyle}>학생 이름</th>
+                            <th style={thStyle}>성별</th>
+                            <th style={thStyle}>학부모 번호</th>
+                            <th style={thStyle}>스탬프</th>
+                            <th style={thStyle}>쿠폰</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>관리</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {filteredStudents.map((student) => {
+                            const isEditing = editingStudentId === student.id;
+                            const isUpdating = updatingStudentId === student.id;
+
+                            return (
+                                <tr key={student.id} style={trStyle}>
+                                    <td style={tdStyle}>
+                                        {isEditing ? (
+                                            <input
+                                                value={editForm.name}
+                                                onChange={(e) =>
+                                                    setEditForm({
+                                                        ...editForm,
+                                                        name: e.target.value,
+                                                    })
+                                                }
+                                                style={smallInputStyle}
+                                            />
+                                        ) : (
+                                            <div style={studentNameBoxStyle}>
+                                                    <span style={avatarStyle}>
+                                                        {(student.name || student.username || "?").slice(
+                                                            0,
+                                                            1,
+                                                        )}
+                                                    </span>
+                                                <strong style={studentNameStyle}>
+                                                    {student.name || student.username || "이름 없음"}
+                                                </strong>
+                                            </div>
+                                        )}
+                                    </td>
+
+                                    <td style={tdStyle}>
+                                        {isEditing ? (
+                                            <select
+                                                value={editForm.gender}
+                                                onChange={(e) =>
+                                                    setEditForm({
+                                                        ...editForm,
+                                                        gender: e.target.value as Gender,
+                                                    })
+                                                }
+                                                style={smallInputStyle}
+                                            >
+                                                <option value="MALE">남학생</option>
+                                                <option value="FEMALE">여학생</option>
+                                            </select>
+                                        ) : (
+                                            <span style={genderBadgeStyle(student.gender)}>
+                                                    {student.gender === "MALE" ? "남학생" : "여학생"}
+                                                </span>
+                                        )}
+                                    </td>
+
+                                    <td style={tdStyle}>
+                                        {isEditing ? (
+                                            <input
+                                                value={editForm.parentPhoneNumber}
+                                                onChange={(e) =>
+                                                    setEditForm({
+                                                        ...editForm,
+                                                        parentPhoneNumber: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="선택 입력"
+                                                style={smallInputStyle}
+                                            />
+                                        ) : (
+                                            <span style={mutedTextStyle}>
+                                                    {student.parentPhoneNumber || "-"}
+                                                </span>
+                                        )}
+                                    </td>
+
+                                    <td style={tdStyle}>
+                                            <span style={numberBadgeStyle}>
+                                                {student.stampCount ?? 0}
+                                            </span>
+                                    </td>
+
+                                    <td style={tdStyle}>
+                                            <span style={numberBadgeStyle}>
+                                                {student.couponCount ?? 0}
+                                            </span>
+                                    </td>
+
+                                    <td style={{ ...tdStyle, textAlign: "right" }}>
+                                        {isEditing ? (
+                                            <div style={actionRowStyle}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleUpdateStudent(student.id)}
+                                                    disabled={isUpdating}
+                                                    style={iconPrimaryButtonStyle}
+                                                >
+                                                    <Save size={15} />
+                                                    {isUpdating ? "저장 중" : "저장"}
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCancelEdit}
+                                                    style={iconSecondaryButtonStyle}
+                                                >
+                                                    <X size={15} />
+                                                    취소
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div style={actionRowStyle}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleStartEdit(student)}
+                                                    style={iconSecondaryButtonStyle}
+                                                >
+                                                    <Pencil size={15} />
+                                                    수정
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveStudent(student)}
+                                                    style={dangerButtonStyle}
+                                                >
+                                                    <Trash2 size={15} />
+                                                    제외
+                                                </button>
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                        </tbody>
+                    </table>
+
+                    {filteredStudents.length === 0 && (
+                        <div style={emptyBoxStyle}>
+                            <p style={emptyTitleStyle}>표시할 학생이 없습니다.</p>
+                            <p style={emptyTextStyle}>
+                                검색어를 지우거나 새 학생을 추가해주세요.
+                            </p>
+                        </div>
+                    )}
+                </div>
             </section>
-        </div>
+        </main>
     );
 }
 
-// ==== UI 스타일 정의 ====
-const sectionStyle = {
-    backgroundColor: "white", padding: "24px", borderRadius: "16px",
-    border: "1px solid #f2f4f6", marginBottom: "20px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
+const pageStyle: React.CSSProperties = {
+    maxWidth: 1120,
+    margin: "0 auto",
+    padding: "32px 24px 56px",
+    fontFamily:
+        "Inter, Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+    color: "#0f172a",
 };
-const sectionTitleStyle = { borderBottom: "2px solid #f2f4f6", paddingBottom: "12px", marginBottom: "20px", color: "#191f28", fontSize: "18px" };
-const rowStyle = { display: "flex", alignItems: "center", marginBottom: "15px" };
-const labelStyle = { width: "150px", fontWeight: "600", color: "#4e5968", fontSize: "14px" };
-const inputStyle = { padding: "10px 12px", border: "1px solid #e5e8eb", borderRadius: "8px", flex: 1, outline: "none" };
-const tossInputStyle = { padding: "14px 16px", backgroundColor: "white", border: "1px solid #e5e8eb", borderRadius: "12px", outline: "none", fontSize: "15px", transition: "border 0.2s ease" };
-const listItemStyle = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid #f2f4f6" };
 
-const btnStyle = (color: "blue" | "white" | "red" | "gray" | "green" | "tossBlue") => {
-    const styles = {
-        tossBlue: { bg: "#3182f6", color: "white", border: "none" },
-        blue: { bg: "#1565C0", color: "white", border: "none" },
-        green: { bg: "#4CAF50", color: "white", border: "none" },
-        red: { bg: "#fee50000", color: "#f04452", border: "none" },
-        white: { bg: "white", color: "#4e5968", border: "1px solid #e5e8eb" },
-        gray: { bg: "#f2f4f6", color: "#4e5968", border: "none" }
-    };
-    return {
-        padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "600", fontSize: "14px",
-        backgroundColor: styles[color].bg, color: styles[color].color, border: styles[color].border,
-        transition: "background-color 0.2s ease"
-    };
+const centerStyle: React.CSSProperties = {
+    minHeight: "60vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+};
+
+const headerStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 18,
+    marginBottom: 24,
+};
+
+const backButtonStyle: React.CSSProperties = {
+    width: "fit-content",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    border: "1px solid #e2e8f0",
+    backgroundColor: "#ffffff",
+    color: "#475569",
+    borderRadius: 999,
+    padding: "9px 14px",
+    fontWeight: 800,
+    cursor: "pointer",
+};
+
+const eyebrowStyle: React.CSSProperties = {
+    margin: "0 0 6px",
+    color: "#2563eb",
+    fontSize: 13,
+    fontWeight: 900,
+    letterSpacing: "0.04em",
+};
+
+const titleStyle: React.CSSProperties = {
+    margin: 0,
+    fontSize: 34,
+    lineHeight: 1.15,
+    fontWeight: 950,
+    letterSpacing: "-0.04em",
+};
+
+const subtitleStyle: React.CSSProperties = {
+    margin: "8px 0 0",
+    color: "#64748b",
+    fontSize: 15,
+    fontWeight: 600,
+};
+
+const summaryGridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 14,
+    marginBottom: 18,
+};
+
+const summaryCardStyle: React.CSSProperties = {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 22,
+    padding: 20,
+    boxShadow: "0 12px 28px rgba(15, 23, 42, 0.05)",
+};
+
+const summaryLabelStyle: React.CSSProperties = {
+    display: "block",
+    marginBottom: 8,
+    color: "#64748b",
+    fontSize: 13,
+    fontWeight: 800,
+};
+
+const summaryValueStyle: React.CSSProperties = {
+    display: "block",
+    color: "#0f172a",
+    fontSize: 24,
+    fontWeight: 950,
+};
+
+const sectionStyle: React.CSSProperties = {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 26,
+    padding: 24,
+    boxShadow: "0 16px 40px rgba(15, 23, 42, 0.06)",
+};
+
+const sectionHeaderStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 16,
+    marginBottom: 18,
+};
+
+const sectionTitleStyle: React.CSSProperties = {
+    margin: 0,
+    fontSize: 22,
+    fontWeight: 950,
+    letterSpacing: "-0.03em",
+};
+
+const sectionDescriptionStyle: React.CSSProperties = {
+    margin: "6px 0 0",
+    color: "#64748b",
+    fontSize: 14,
+    fontWeight: 600,
+};
+
+const createBoxStyle: React.CSSProperties = {
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    borderRadius: 22,
+    padding: 20,
+    marginBottom: 18,
+};
+
+const formGridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 14,
+};
+
+const fieldStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 7,
+};
+
+const fieldLabelStyle: React.CSSProperties = {
+    color: "#334155",
+    fontSize: 13,
+    fontWeight: 850,
+};
+
+const inputStyle: React.CSSProperties = {
+    height: 46,
+    border: "1px solid #cbd5e1",
+    borderRadius: 14,
+    padding: "0 14px",
+    outline: "none",
+    fontSize: 14,
+    fontWeight: 650,
+    backgroundColor: "#ffffff",
+};
+
+const smallInputStyle: React.CSSProperties = {
+    width: "100%",
+    minWidth: 120,
+    height: 38,
+    border: "1px solid #cbd5e1",
+    borderRadius: 12,
+    padding: "0 12px",
+    outline: "none",
+    fontSize: 14,
+    fontWeight: 650,
+    backgroundColor: "#ffffff",
+};
+
+const formButtonRowStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 16,
+};
+
+const primaryButtonStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    border: "none",
+    backgroundColor: "#2563eb",
+    color: "#ffffff",
+    borderRadius: 14,
+    padding: "11px 16px",
+    fontWeight: 900,
+    cursor: "pointer",
+};
+
+const secondaryButtonStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    border: "1px solid #e2e8f0",
+    backgroundColor: "#ffffff",
+    color: "#475569",
+    borderRadius: 14,
+    padding: "11px 16px",
+    fontWeight: 850,
+    cursor: "pointer",
+};
+
+const toolbarStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 14,
+};
+
+const searchBoxStyle: React.CSSProperties = {
+    flex: 1,
+    display: "flex",
+    alignItems: "center",
+    gap: 9,
+    height: 46,
+    border: "1px solid #e2e8f0",
+    borderRadius: 16,
+    padding: "0 14px",
+    backgroundColor: "#ffffff",
+};
+
+const searchInputStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    border: "none",
+    outline: "none",
+    fontSize: 14,
+    fontWeight: 650,
+};
+
+const countBadgeStyle: React.CSSProperties = {
+    whiteSpace: "nowrap",
+    backgroundColor: "#f1f5f9",
+    color: "#475569",
+    borderRadius: 999,
+    padding: "9px 13px",
+    fontSize: 13,
+    fontWeight: 850,
+};
+
+const tableWrapperStyle: React.CSSProperties = {
+    overflowX: "auto",
+    border: "1px solid #e2e8f0",
+    borderRadius: 18,
+};
+
+const tableStyle: React.CSSProperties = {
+    width: "100%",
+    borderCollapse: "collapse",
+    minWidth: 860,
+};
+
+const thStyle: React.CSSProperties = {
+    backgroundColor: "#f8fafc",
+    color: "#64748b",
+    textAlign: "left",
+    padding: "13px 16px",
+    fontSize: 13,
+    fontWeight: 900,
+    borderBottom: "1px solid #e2e8f0",
+};
+
+const trStyle: React.CSSProperties = {
+    borderBottom: "1px solid #f1f5f9",
+};
+
+const tdStyle: React.CSSProperties = {
+    padding: "14px 16px",
+    verticalAlign: "middle",
+    fontSize: 14,
+};
+
+const studentNameBoxStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+};
+
+const avatarStyle: React.CSSProperties = {
+    width: 34,
+    height: 34,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: "#eff6ff",
+    color: "#2563eb",
+    fontWeight: 950,
+};
+
+const studentNameStyle: React.CSSProperties = {
+    color: "#0f172a",
+    fontSize: 15,
+    fontWeight: 900,
+};
+
+const mutedTextStyle: React.CSSProperties = {
+    color: "#64748b",
+    fontWeight: 650,
+};
+
+const genderBadgeStyle = (gender: Gender): React.CSSProperties => ({
+    display: "inline-flex",
+    alignItems: "center",
+    borderRadius: 999,
+    padding: "6px 10px",
+    backgroundColor: gender === "MALE" ? "#eff6ff" : "#fdf2f8",
+    color: gender === "MALE" ? "#2563eb" : "#db2777",
+    fontSize: 13,
+    fontWeight: 900,
+});
+
+const numberBadgeStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 34,
+    height: 28,
+    borderRadius: 999,
+    backgroundColor: "#f8fafc",
+    color: "#334155",
+    fontSize: 13,
+    fontWeight: 900,
+};
+
+const actionRowStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 8,
+};
+
+const iconPrimaryButtonStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    border: "none",
+    backgroundColor: "#2563eb",
+    color: "#ffffff",
+    borderRadius: 12,
+    padding: "8px 11px",
+    fontSize: 13,
+    fontWeight: 900,
+    cursor: "pointer",
+};
+
+const iconSecondaryButtonStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    border: "1px solid #e2e8f0",
+    backgroundColor: "#ffffff",
+    color: "#475569",
+    borderRadius: 12,
+    padding: "8px 11px",
+    fontSize: 13,
+    fontWeight: 900,
+    cursor: "pointer",
+};
+
+const dangerButtonStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    border: "none",
+    backgroundColor: "#fff1f2",
+    color: "#e11d48",
+    borderRadius: 12,
+    padding: "8px 11px",
+    fontSize: 13,
+    fontWeight: 900,
+    cursor: "pointer",
+};
+
+const emptyBoxStyle: React.CSSProperties = {
+    padding: 36,
+    textAlign: "center",
+    backgroundColor: "#ffffff",
+};
+
+const emptyTitleStyle: React.CSSProperties = {
+    margin: "0 0 6px",
+    color: "#334155",
+    fontSize: 16,
+    fontWeight: 900,
+};
+
+const emptyTextStyle: React.CSSProperties = {
+    margin: 0,
+    color: "#94a3b8",
+    fontSize: 14,
+    fontWeight: 650,
+};
+
+const loadingTextStyle: React.CSSProperties = {
+    color: "#64748b",
+    fontSize: 16,
+    fontWeight: 800,
 };

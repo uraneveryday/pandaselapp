@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class StudentSummaryResponse {
     private final Long id;
+    private final String loginId;
     private final String name;
     private final Gender gender;
     private final String parentPhoneNumber;
@@ -16,6 +17,7 @@ public class StudentSummaryResponse {
 
     public StudentSummaryResponse(Student student) {
         this.id = student.getId();
+        this.loginId = student.getLoginId();
         this.name = student.getUsername();
         this.gender = student.getGender();
         this.parentPhoneNumber = student.getParentPhoneNumber();
