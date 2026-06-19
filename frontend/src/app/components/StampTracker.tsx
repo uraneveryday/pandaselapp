@@ -1,68 +1,82 @@
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
-import { Gift } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Gift, Ticket } from "lucide-react";
+import { apiClient } from "../../api/client";
 
 interface StampTrackerProps {
     onRewardClick?: () => void;
 }
 
+interface StampData {
+    currentStamps: number;
+    currentCoupons: number;
+    maxStamps?: number;
+    canExchange?: boolean;
+}
+
+const MAX_STAMPS = 10;
+
 export function StampTracker({ onRewardClick }: StampTrackerProps) {
-    // 1. API 통신 결과를 담을 상태(State) 정의
     const [currentStamps, setCurrentStamps] = useState<number>(0);
     const [currentCoupons, setCurrentCoupons] = useState<number>(0);
-    const [maxStamps, setMaxStamps] = useState<number>(10); // 기본값 10
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isExchanging, setIsExchanging] = useState<boolean>(false);
+    const [showCouponEffect, setShowCouponEffect] = useState<boolean>(false);
+    const [message, setMessage] = useState<string | null>(null);
 
-    // 2. 컴포넌트가 화면에 처음 나타날 때(Mount) API 호출
+    const canExchange = currentStamps >= MAX_STAMPS;
+
     useEffect(() => {
         const fetchStampData = async () => {
             try {
-                // 로컬 스토리지에서 앞서 저장한 JWT 토큰 꺼내기
-                const token = localStorage.getItem("jwt_token");
+                const res = await apiClient.get<{ data: StampData }>("/student/stamp");
 
-                if (!token) {
-                    console.error("로그인 토큰이 없습니다.");
-                    setIsLoading(false);
-                    return;
-                }
+                const data = res.data.data;
 
-                // Fetch API를 이용한 백엔드 통신 (토큰 헤더 포함)
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/student/stamp`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error("스탬프 데이터를 불러오는데 실패했습니다.");
-                }
-
-                // 응답 데이터 파싱
-                const result = await response.json();
-
-                // 🚨 주의: 백엔드 응답 JSON 구조에 맞춰 아래 코드를 수정해야 합니다.
-                // 예시 구조: { success: true, data: { currentStamps: 5, currentCoupon : 1 } }
-                if (result.data) {
-                    setCurrentStamps(result.data.currentStamps);
-                    setCurrentCoupons(result.data.currentCoupons);
-                    if (result.data.maxStamps) {
-                        setMaxStamps(result.data.maxStamps);
-                    }
-                }
+                setCurrentStamps(data.currentStamps);
+                setCurrentCoupons(data.currentCoupons);
             } catch (error) {
-                console.error("API 통신 에러:", error);
+                console.error("스탬프 데이터 조회 실패:", error);
             } finally {
-                // 성공하든 실패하든 로딩 상태 종료
                 setIsLoading(false);
             }
         };
 
         fetchStampData();
-    }, []); // 빈 배열([])을 넣어야 무한 반복되지 않고 처음 한 번만 실행됩니다.
+    }, []);
 
-    // 3. 로딩 중 UI 처리 (데이터가 오기 전에 애니메이션이 깨지는 것 방지)
+    const handleExchangeCoupon = async () => {
+        if (!canExchange || isExchanging) return;
+
+        try {
+            setIsExchanging(true);
+
+            const res = await apiClient.post<{ data: StampData; message?: string }>(
+                "/student/stamp/exchange-coupon"
+            );
+
+            const data = res.data.data;
+
+            setCurrentStamps(data.currentStamps);
+            setCurrentCoupons(data.currentCoupons);
+
+            setShowCouponEffect(true);
+            setMessage("🎁 쿠폰으로 바뀌었어요! 유치원에 가면 선생님이 선물을 줄 거예요!");
+
+            onRewardClick?.();
+
+            setTimeout(() => {
+                setShowCouponEffect(false);
+                setMessage(null);
+            }, 2500);
+        } catch (error) {
+            console.error("쿠폰 교환 실패:", error);
+            alert("아직 쿠폰으로 바꿀 수 없어요.");
+        } finally {
+            setIsExchanging(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="bg-white rounded-3xl p-6 shadow-sm flex items-center justify-center min-h-[200px]">
@@ -71,29 +85,34 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
         );
     }
 
-    // 데이터 로딩 완료 후 배열 생성
-    const stamps = Array.from({ length: maxStamps }, (_, i) => i < currentStamps);
+    const displayStamps = Math.min(currentStamps, MAX_STAMPS);
+    const stamps = Array.from({ length: MAX_STAMPS }, (_, i) => i < displayStamps);
 
     return (
-        <div className="bg-white rounded-3xl p-6 shadow-sm">
+        <div className="relative bg-white rounded-3xl p-6 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h3 className="mb-1">스탬프 모으기</h3>
+                    <h3 className="mb-1 font-bold">스탬프 모으기</h3>
                     <p className="text-sm text-muted-foreground">
-                        {currentStamps} / {maxStamps} 개
+                        {currentStamps} / {MAX_STAMPS} 개
+                    </p>
+                    <p className="text-xs text-purple-500 mt-1">
+                        보유 쿠폰: {currentCoupons}장
                     </p>
                 </div>
+
                 <motion.button
-                    onClick={onRewardClick}
+                    onClick={handleExchangeCoupon}
+                    disabled={!canExchange || isExchanging}
                     className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        currentStamps >= maxStamps
-                            ? "bg-gradient-to-br from-[#FF9ECD] to-[#D4A5FF]"
-                            : "bg-muted"
+                        canExchange
+                            ? "bg-gradient-to-br from-[#FF9ECD] to-[#D4A5FF] cursor-pointer"
+                            : "bg-muted cursor-default"
                     }`}
-                    whileHover={{ scale: currentStamps >= maxStamps ? 1.1 : 1 }}
-                    whileTap={{ scale: currentStamps >= maxStamps ? 0.9 : 1 }}
+                    whileHover={{ scale: canExchange ? 1.1 : 1 }}
+                    whileTap={{ scale: canExchange ? 0.9 : 1 }}
                     animate={
-                        currentStamps >= maxStamps
+                        canExchange
                             ? {
                                 rotate: [0, -10, 10, -10, 0],
                                 transition: { repeat: Infinity, duration: 2 },
@@ -103,7 +122,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                 >
                     <Gift
                         className={`w-6 h-6 ${
-                            currentStamps >= maxStamps ? "text-white" : "text-muted-foreground"
+                            canExchange ? "text-white" : "text-muted-foreground"
                         }`}
                     />
                 </motion.button>
@@ -143,15 +162,46 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                 ))}
             </div>
 
-            {currentStamps >= maxStamps && (
+            {canExchange && (
                 <motion.div
                     className="mt-4 p-3 rounded-2xl bg-gradient-to-r from-[#FF9ECD] to-[#D4A5FF] text-white text-center text-sm"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
-                    🎉 축하해요! 선물을 받을 수 있어요!
+                    🎉 스탬프가 다 모였어요! 선물상자를 눌러 쿠폰으로 바꿔요!
                 </motion.div>
             )}
+
+            <AnimatePresence>
+                {showCouponEffect && (
+                    <motion.div
+                        className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-10"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0, rotate: -20 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0 }}
+                            transition={{ type: "spring", stiffness: 250, damping: 15 }}
+                            className="w-28 h-20 rounded-2xl bg-gradient-to-br from-yellow-200 to-pink-200 flex items-center justify-center shadow-md"
+                        >
+                            <Ticket className="w-10 h-10 text-pink-500" />
+                        </motion.div>
+
+                        {message && (
+                            <motion.p
+                                className="mt-4 px-6 text-center text-sm font-bold text-gray-700"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                            >
+                                {message}
+                            </motion.p>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

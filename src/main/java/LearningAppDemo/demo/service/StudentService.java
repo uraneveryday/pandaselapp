@@ -3,6 +3,7 @@ package LearningAppDemo.demo.service;
 import LearningAppDemo.demo.domain.user.Student;
 import LearningAppDemo.demo.dto.request.TaskSubmitRequestDto;
 import LearningAppDemo.demo.dto.response.CouponUseResponse;
+import LearningAppDemo.demo.dto.response.StampDto;
 import LearningAppDemo.demo.repository.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -52,17 +53,28 @@ public class StudentService {
     public CouponUseResponse useCoupons(Long classroomId, Long studentId) {
         Student student = studentRepository.findStudentById(studentId)
                 .orElseThrow();
-        if (student.getClassRoom().getId()!=(classroomId)) {
+        if (student.getClassRoom().getId().equals(classroomId)) {
             throw new EntityNotFoundException("선택한 학생이 해당 classroom에 존재하지 않습니다");
-        } else if (student.getCoupon()<=0) {
+            } else if (student.getCoupon()<=0) {
             throw new IllegalArgumentException("쿠폰이 0개 이하입니다");
-        }
+                }
         student.setCoupon(student.getCoupon()-1);
         return new CouponUseResponse(student);
     }
 
+    @Transactional
+    public StampDto exchangeCoupons(Long studentId) {
+        Student student = studentRepository.findStudentById(studentId).orElseThrow();
 
+        if (student.getStamp() < StampDto.MAX_STAMPS) {
+            throw new IllegalArgumentException("스탬프가 부족합니다");
         }
+        student.setStamp(student.getStamp()-StampDto.MAX_STAMPS);
+        student.setCoupon(student.getCoupon()+1);
+        return new StampDto(student);
+    }
+
+}
 
 
 

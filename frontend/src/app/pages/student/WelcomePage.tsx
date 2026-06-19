@@ -39,10 +39,10 @@ export function WelcomePage() {
               <span className="text-lg">학습 시작하기</span>
               <ArrowRight className="w-6 h-6" />
           </motion.button>
-        {/* Ranking Preview */}
+       {/*  Ranking Preview
         <RankingPreview topRegion="서울특별시" topScore={45820} />
 
-        {/* Quick Stats */}
+         Quick Stats
         <div className="grid grid-cols-3 gap-3">
           <motion.div
             className="bg-white rounded-2xl p-4 shadow-sm text-center"
@@ -84,7 +84,7 @@ export function WelcomePage() {
           </motion.div>
         </div>
 
-        {/* Features */}
+         Features
         <div className="bg-white rounded-3xl p-6 shadow-sm">
           <h3 className="mb-4">어떤 것을 배울 수 있나요?</h3>
           <div className="space-y-3">
@@ -109,7 +109,7 @@ export function WelcomePage() {
               </motion.div>
             ))}
           </div>
-        </div>
+        </div>*/}
 
         {/* CTA Button */}
 
