@@ -117,7 +117,7 @@ export function TaskCreatePage() {
             taskName: formData.taskName.trim(),
             description: formData.description.trim(),
             category: formData.category,
-            stampCount: formData.rewardStamp,
+            rewardStamp: formData.rewardStamp,
 
             // 시·분·초는 자동으로 00:00:00 설정
             startDate: toLocalMidnightString(dateRange.from),
