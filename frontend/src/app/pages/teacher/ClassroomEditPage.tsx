@@ -15,6 +15,7 @@ type Gender = "MALE" | "FEMALE";
 
 interface Student {
     id: number; // 화면에는 표시하지 않고, key/API 요청용으로만 사용
+    loginId?: string;
     name?: string;
     username?: string;
     gender: Gender;
@@ -40,6 +41,7 @@ interface CreateStudentForm {
 
 interface EditStudentForm {
     name: string;
+    loginId: string;
     gender: Gender;
     parentPhoneNumber: string;
 }
@@ -71,6 +73,7 @@ export function ClassroomEditPage() {
 
     const [editForm, setEditForm] = useState<EditStudentForm>({
         name: "",
+        loginId: "",
         gender: "MALE",
         parentPhoneNumber: "",
     });
@@ -126,10 +129,12 @@ export function ClassroomEditPage() {
 
         return classroom.students.filter((student) => {
             const name = student.name || student.username || "";
+            const loginId = student.loginId || "";
             const parentPhoneNumber = student.parentPhoneNumber || "";
 
             return (
                 name.toLowerCase().includes(keyword) ||
+                loginId.toLowerCase().includes(keyword) ||
                 parentPhoneNumber.includes(keyword)
             );
         });
@@ -215,6 +220,7 @@ export function ClassroomEditPage() {
         setEditingStudentId(student.id);
         setEditForm({
             name: student.name || student.username || "",
+            loginId: student.loginId || "",
             gender: student.gender,
             parentPhoneNumber: student.parentPhoneNumber || "",
         });
@@ -224,6 +230,7 @@ export function ClassroomEditPage() {
         setEditingStudentId(null);
         setEditForm({
             name: "",
+            loginId: "",
             gender: "MALE",
             parentPhoneNumber: "",
         });
@@ -549,7 +556,7 @@ export function ClassroomEditPage() {
                         <input
                             value={searchKeyword}
                             onChange={(e) => setSearchKeyword(e.target.value)}
-                            placeholder="학생 이름 또는 학부모 번호 검색"
+                            placeholder="학생 이름, 로그인 ID, 학부모 번호 검색"
                             style={searchInputStyle}
                         />
                     </div>
@@ -564,6 +571,7 @@ export function ClassroomEditPage() {
                         <thead>
                         <tr>
                             <th style={thStyle}>학생 이름</th>
+                            <th style={thStyle}>로그인 ID</th>
                             <th style={thStyle}>성별</th>
                             <th style={thStyle}>학부모 번호</th>
                             <th style={thStyle}>스탬프</th>
@@ -605,7 +613,25 @@ export function ClassroomEditPage() {
                                             </div>
                                         )}
                                     </td>
-
+                                    <td style={tdStyle}>
+                                        {isEditing ? (
+                                            <input
+                                                value={editForm.loginId}
+                                                onChange={(e) =>
+                                                    setEditForm({
+                                                        ...editForm,
+                                                        loginId: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="로그인 ID"
+                                                style={smallInputStyle}
+                                            />
+                                        ) : (
+                                            <span style={loginIdBadgeStyle}>
+            {student.loginId || "-"}
+        </span>
+                                        )}
+                                    </td>
                                     <td style={tdStyle}>
                                         {isEditing ? (
                                             <select
@@ -723,7 +749,18 @@ export function ClassroomEditPage() {
         </main>
     );
 }
-
+const loginIdBadgeStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    borderRadius: 999,
+    padding: "6px 10px",
+    backgroundColor: "#f8fafc",
+    color: "#475569",
+    fontSize: 13,
+    fontWeight: 850,
+    fontFamily:
+        "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+};
 const pageStyle: React.CSSProperties = {
     maxWidth: 1120,
     margin: "0 auto",
