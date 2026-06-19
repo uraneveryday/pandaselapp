@@ -2,7 +2,9 @@ package LearningAppDemo.demo.service;
 
 import LearningAppDemo.demo.domain.user.Student;
 import LearningAppDemo.demo.dto.request.TaskSubmitRequestDto;
+import LearningAppDemo.demo.dto.response.CouponUseResponse;
 import LearningAppDemo.demo.repository.StudentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +48,21 @@ public class StudentService {
         return studentRepository.findStudentById((userId));
     }
 
+    @Transactional
+    public CouponUseResponse useCoupons(Long classroomId, Long studentId) {
+        Student student = studentRepository.findStudentById(studentId)
+                .orElseThrow();
+        if (student.getClassRoom().getId()!=(classroomId)) {
+            throw new EntityNotFoundException("선택한 학생이 해당 classroom에 존재하지 않습니다");
+        } else if (student.getCoupon()<=0) {
+            throw new IllegalArgumentException("쿠폰이 0개 이하입니다");
+        }
+        student.setCoupon(student.getCoupon()-1);
+        return new CouponUseResponse(student);
     }
+
+
+        }
 
 
 
