@@ -78,12 +78,12 @@ public class TaskController {
     }
 
     @PostMapping("/create") //task 생성
-    public ResponseEntity<Void> createTask(@PathVariable Long classroomId,
+    public ResponseEntity<Void> create(@PathVariable Long classroomId,
                             @RequestBody CreateTaskRequest createTaskRequest,
                            @AuthenticationPrincipal CustomUserDetails customUserDetails){
         Long userId = customUserDetails.getUserId();
-        createTaskRequest.setClassRoomId(classroomId);
-        taskService.createTask(createTaskRequest, userId);
+
+        taskService.createTask(createTaskRequest,userId,classroomId);
 
         return ResponseEntity.ok().build();
     }

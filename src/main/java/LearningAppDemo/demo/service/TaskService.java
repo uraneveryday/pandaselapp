@@ -33,19 +33,19 @@ public class TaskService {
     private final TaskResultRepository taskResultRepository;
 
 
-    public Long createTask(CreateTaskRequest createTaskRequest,Long userId) {
+    public Long createTask(CreateTaskRequest request,Long userId,Long classroomId) {
 
         Task task = new Task();
         // 1. 유저 및 학급 검증, 그리고 학급 엔티티 가져오기
-        Classroom classRoom = validateAndGetClassRoom(userId, createTaskRequest.getClassRoomId());
+        Classroom classRoom = validateAndGetClassRoom(userId, request.getClassRoomId());
         // 2. ⭐️ 연관관계 세팅 (이 숙제가 어느 반 것인지 DB에 알려주기 위함)
         task.setClassRoom(classRoom);
-        task.setRewardStamp(createTaskRequest.getReward());
-        task.setTaskName(createTaskRequest.getTaskName());
-        task.setDescription(createTaskRequest.getDescription());
-        task.setCategory(createTaskRequest.getCategory());
-        task.setExpiredDate(createTaskRequest.getEndDate());
-        task.setStartDate(createTaskRequest.getStartDate());
+        task.setRewardStamp(request.getRewardStamp());
+        task.setTaskName(request.getTaskName());
+        task.setDescription(request.getDescription());
+        task.setCategory(request.getCategory());
+        task.setExpiredDate(request.getEndDate());
+        task.setStartDate(request.getStartDate());
         task.setGeneratedDate(LocalDateTime.now());
         // 3. DB 저장
         taskRepository.save(task);

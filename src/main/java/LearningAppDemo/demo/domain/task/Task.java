@@ -27,7 +27,7 @@ public class Task {
     @JoinColumn(name = "classRoom")
     private Classroom classRoom; //반 이름
 
-    @Column
+    @Column(name = "reward_stamp")
     private int rewardStamp; //이거풀면 스탬프 몇개?
 
     @Enumerated(EnumType.STRING)

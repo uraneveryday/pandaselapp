@@ -13,7 +13,7 @@ interface TaskFormData {
     taskName: string;
     description: string;
     category: TaskCategory;
-    stampCount: number;
+    rewardStamp: number;
 }
 
 /**
@@ -66,7 +66,7 @@ export function TaskCreatePage() {
         taskName: "",
         description: "",
         category: "MATH",
-        stampCount: 1,
+        rewardStamp: 1,
     });
 
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -98,8 +98,8 @@ export function TaskCreatePage() {
         }
 
         if (
-            !Number.isInteger(formData.stampCount) ||
-            formData.stampCount < 1
+            !Number.isInteger(formData.rewardStamp) ||
+            formData.rewardStamp < 1
         ) {
             setErrorMessage("스탬프 개수는 1개 이상의 정수로 입력해주세요.");
             return;
@@ -117,7 +117,7 @@ export function TaskCreatePage() {
             taskName: formData.taskName.trim(),
             description: formData.description.trim(),
             category: formData.category,
-            stampCount: formData.stampCount,
+            stampCount: formData.rewardStamp,
 
             // 시·분·초는 자동으로 00:00:00 설정
             startDate: toLocalMidnightString(dateRange.from),
@@ -258,10 +258,10 @@ export function TaskCreatePage() {
                                         type="number"
                                         min={1}
                                         step={1}
-                                        value={formData.stampCount}
+                                        value={formData.rewardStamp}
                                         onChange={(event) =>
                                             updateField(
-                                                "stampCount",
+                                                "rewardStamp",
                                                 Number(event.target.value),
                                             )
                                         }
