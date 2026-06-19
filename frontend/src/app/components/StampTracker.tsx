@@ -15,6 +15,7 @@ interface StampData {
 }
 
 const MAX_STAMPS = 10;
+const PARTICLE_COUNT = 18;
 
 export function StampTracker({ onRewardClick }: StampTrackerProps) {
     const [currentStamps, setCurrentStamps] = useState<number>(0);
@@ -25,6 +26,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
     const [message, setMessage] = useState<string | null>(null);
 
     const canExchange = currentStamps >= MAX_STAMPS;
+    const isRewardReady = canExchange && !showCouponEffect;
 
     useEffect(() => {
         const fetchStampData = async () => {
@@ -61,14 +63,14 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
             setCurrentCoupons(data.currentCoupons);
 
             setShowCouponEffect(true);
-            setMessage("🎁 쿠폰으로 바뀌었어요! 유치원에 가면 선생님이 선물을 줄 거예요!");
+            setMessage("유치원에 가면 선생님이 선물을 줄 거예요!");
 
             onRewardClick?.();
 
             setTimeout(() => {
                 setShowCouponEffect(false);
                 setMessage(null);
-            }, 2500);
+            }, 2600);
         } catch (error) {
             console.error("쿠폰 교환 실패:", error);
             alert("아직 쿠폰으로 바꿀 수 없어요.");
@@ -79,7 +81,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
 
     if (isLoading) {
         return (
-            <div className="bg-white rounded-3xl p-6 shadow-sm flex items-center justify-center min-h-[200px]">
+            <div className="bg-white rounded-3xl p-6 shadow-sm flex items-center justify-center min-h-[220px]">
                 <p className="text-muted-foreground text-sm">스탬프 정보를 불러오는 중...</p>
             </div>
         );
@@ -89,46 +91,36 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
     const stamps = Array.from({ length: MAX_STAMPS }, (_, i) => i < displayStamps);
 
     return (
-        <div className="relative bg-white rounded-3xl p-6 shadow-sm overflow-hidden">
+        <div className="relative bg-white rounded-3xl p-6 shadow-sm overflow-hidden min-h-[300px]">
             <div className="flex items-center justify-between mb-4">
                 <div>
                     <h3 className="mb-1 font-bold">스탬프 모으기</h3>
+
                     <p className="text-sm text-muted-foreground">
-                        {currentStamps} / {MAX_STAMPS} 개
+                        {displayStamps} / {MAX_STAMPS} 개
+                        {currentStamps > MAX_STAMPS && (
+                            <span className="ml-1 text-xs text-purple-500">
+                                보유 {currentStamps}개
+                            </span>
+                        )}
                     </p>
+
                     <p className="text-xs text-purple-500 mt-1">
                         보유 쿠폰: {currentCoupons}장
                     </p>
                 </div>
-
-                <motion.button
-                    onClick={handleExchangeCoupon}
-                    disabled={!canExchange || isExchanging}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        canExchange
-                            ? "bg-gradient-to-br from-[#FF9ECD] to-[#D4A5FF] cursor-pointer"
-                            : "bg-muted cursor-default"
-                    }`}
-                    whileHover={{ scale: canExchange ? 1.1 : 1 }}
-                    whileTap={{ scale: canExchange ? 0.9 : 1 }}
-                    animate={
-                        canExchange
-                            ? {
-                                rotate: [0, -10, 10, -10, 0],
-                                transition: { repeat: Infinity, duration: 2 },
-                            }
-                            : {}
-                    }
-                >
-                    <Gift
-                        className={`w-6 h-6 ${
-                            canExchange ? "text-white" : "text-muted-foreground"
-                        }`}
-                    />
-                </motion.button>
             </div>
 
-            <div className="grid grid-cols-5 gap-3">
+            {/* 스탬프판: 10개가 다 차면 흐려짐 */}
+            <motion.div
+                className="grid grid-cols-5 gap-3"
+                animate={{
+                    opacity: isRewardReady ? 0.25 : 1,
+                    filter: isRewardReady ? "blur(1.5px)" : "blur(0px)",
+                    scale: isRewardReady ? 0.98 : 1,
+                }}
+                transition={{ duration: 0.35 }}
+            >
                 {stamps.map((filled, index) => (
                     <motion.div
                         key={index}
@@ -160,41 +152,142 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                         )}
                     </motion.div>
                 ))}
-            </div>
+            </motion.div>
 
-            {canExchange && (
-                <motion.div
-                    className="mt-4 p-3 rounded-2xl bg-gradient-to-r from-[#FF9ECD] to-[#D4A5FF] text-white text-center text-sm"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                >
-                    🎉 스탬프가 다 모였어요! 선물상자를 눌러 쿠폰으로 바꿔요!
-                </motion.div>
-            )}
-
+            {/* 스탬프 10개 완성 시 중앙 선물상자 등장 */}
             <AnimatePresence>
-                {showCouponEffect && (
+                {isRewardReady && (
                     <motion.div
-                        className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-10"
+                        className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 bg-white/40"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        <motion.div
-                            initial={{ scale: 0, rotate: -20 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            exit={{ scale: 0 }}
-                            transition={{ type: "spring", stiffness: 250, damping: 15 }}
-                            className="w-28 h-20 rounded-2xl bg-gradient-to-br from-yellow-200 to-pink-200 flex items-center justify-center shadow-md"
+                        <motion.button
+                            onClick={handleExchangeCoupon}
+                            disabled={isExchanging}
+                            className="flex flex-col items-center justify-center"
+                            initial={{ scale: 0, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.7, opacity: 0 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 260,
+                                damping: 16,
+                            }}
+                            whileHover={{ scale: 1.08 }}
+                            whileTap={{ scale: 0.92 }}
                         >
-                            <Ticket className="w-10 h-10 text-pink-500" />
+                            <motion.div
+                                className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#FF9ECD] to-[#D4A5FF] shadow-lg flex items-center justify-center"
+                                animate={{
+                                    y: [0, -8, 0],
+                                    rotate: [0, -5, 5, -5, 0],
+                                    scale: [1, 1.04, 1],
+                                }}
+                                transition={{
+                                    repeat: Infinity,
+                                    duration: 1.6,
+                                    ease: "easeInOut",
+                                }}
+                            >
+                                <Gift className="w-12 h-12 text-white" />
+                            </motion.div>
+
+                            <motion.div
+                                className="mt-4 px-4 py-2 rounded-full bg-white shadow-sm text-sm font-bold text-pink-500"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                🎉 선물상자를 눌러 쿠폰 받기!
+                            </motion.div>
+                        </motion.button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* 클릭 후 펑! 쿠폰 획득 애니메이션 */}
+            <AnimatePresence>
+                {showCouponEffect && (
+                    <motion.div
+                        className="absolute inset-0 z-20 bg-white/95 flex flex-col items-center justify-center overflow-hidden"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        {/* 폭죽 파티클 */}
+                        <div className="absolute inset-0 pointer-events-none">
+                            {Array.from({ length: PARTICLE_COUNT }).map((_, index) => {
+                                const angle = (index / PARTICLE_COUNT) * Math.PI * 2;
+                                const distance = index % 2 === 0 ? 130 : 95;
+
+                                return (
+                                    <motion.span
+                                        key={index}
+                                        className="absolute left-1/2 top-1/2 text-2xl"
+                                        initial={{
+                                            x: 0,
+                                            y: 0,
+                                            scale: 0,
+                                            opacity: 1,
+                                            rotate: 0,
+                                        }}
+                                        animate={{
+                                            x: Math.cos(angle) * distance,
+                                            y: Math.sin(angle) * distance,
+                                            scale: [0, 1.2, 0.6],
+                                            opacity: [1, 1, 0],
+                                            rotate: 360,
+                                        }}
+                                        transition={{
+                                            duration: 1.1,
+                                            ease: "easeOut",
+                                            delay: index * 0.015,
+                                        }}
+                                    >
+                                        {index % 3 === 0 ? "⭐" : index % 3 === 1 ? "✨" : "🎉"}
+                                    </motion.span>
+                                );
+                            })}
+                        </div>
+
+                        {/* 쿠폰 카드 */}
+                        <motion.div
+                            className="relative w-32 h-24 rounded-3xl bg-gradient-to-br from-yellow-200 via-pink-200 to-purple-200 flex flex-col items-center justify-center shadow-xl border-4 border-white"
+                            initial={{ scale: 0, rotate: -20 }}
+                            animate={{
+                                scale: [0, 1.2, 1],
+                                rotate: [-20, 8, 0],
+                            }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 250,
+                                damping: 16,
+                            }}
+                        >
+                            <Ticket className="w-10 h-10 text-pink-500 mb-1" />
+                            <span className="text-xs font-bold text-pink-600">
+                                선물 쿠폰
+                            </span>
                         </motion.div>
+
+                        <motion.h3
+                            className="mt-5 text-xl font-extrabold text-gray-800"
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.25 }}
+                        >
+                            쿠폰 1개 획득!
+                        </motion.h3>
 
                         {message && (
                             <motion.p
-                                className="mt-4 px-6 text-center text-sm font-bold text-gray-700"
+                                className="mt-2 px-8 text-center text-sm font-bold text-gray-600"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4 }}
                             >
                                 {message}
                             </motion.p>
