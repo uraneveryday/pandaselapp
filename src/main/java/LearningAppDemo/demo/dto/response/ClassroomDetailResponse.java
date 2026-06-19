@@ -15,7 +15,10 @@ public class ClassroomDetailResponse {
     public ClassroomDetailResponse(Classroom classroom) {
         this.id = classroom.getId();
         this.className = classroom.getClassName();
-        this.students = classroom.getStudents().stream().map(StudentSummaryResponse::new).toList();
+        this.students = classroom.getStudents()
+                .stream()
+                .map(StudentSummaryResponse::new)
+                .toList();
         this.studentCount = this.students.size();
     }
 }

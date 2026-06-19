@@ -3,7 +3,6 @@ package LearningAppDemo.demo.service;
 import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.domain.user.Student;
 import LearningAppDemo.demo.domain.user.Teacher;
-import LearningAppDemo.demo.dto.response.TaskDto;
 import LearningAppDemo.demo.dto.response.ClassroomDetailResponse;
 import LearningAppDemo.demo.dto.response.ClassroomListResponse;
 import LearningAppDemo.demo.dto.response.TaskListItemResponse;
@@ -18,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -38,8 +36,8 @@ public class ClassRoomService {
 
         // stream의 map 안에서 직접 헬퍼 메서드를 호출하여 리스트 반환
         return classrooms.stream()
-                .map(this::convertToResponseWithStats)
-                .collect(Collectors.toList());
+                .map(ClassroomListResponse::new)
+                .toList();
     }
 
 
@@ -65,23 +63,11 @@ public class ClassRoomService {
         }
 
         // 여기서도 기존의 new ClassroomResponse(classroom) 대신 헬퍼 메서드 사용
-        return convertToResponseWithStats(classroom);
+        return new ClassroomListResponse(classroom);
     }
 
 
-    private ClassroomListResponse convertToResponseWithStats(Classroom classroom) {
 
-        List<TaskDto> taskDtos = classroom.getTasks().stream()
-                .map(task -> {
-                    int total = classroom.studentCount();
-//                    int completed = (int) studentTaskRepository.countByTaskIdAndIsCompletedTrue(task.getId());
-                    int completed = taskResultRepository.studentsCompleted(task.getId());
-                    return new TaskDto(task, total, completed);
-                })
-                .toList();
-
-        return new ClassroomListResponse(classroom, taskDtos);
-    }
 
 
     @Transactional
