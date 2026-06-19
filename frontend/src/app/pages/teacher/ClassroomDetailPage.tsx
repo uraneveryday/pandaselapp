@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
 import {
     ArrowLeft,
     BookOpen,
@@ -70,6 +71,8 @@ export function ClassroomDetailPage() {
     // 현재 쿠폰 사용 요청 중인 학생 ID
     const [usingCouponStudentId, setUsingCouponStudentId] =
         useState<number | null>(null);
+    const [couponSuccessMessage, setCouponSuccessMessage] =
+        useState<string | null>(null);
 
     useEffect(() => {
         const fetchClassroomDetail = async () => {
@@ -231,6 +234,14 @@ export function ClassroomDetailPage() {
                     )
                 };
             });
+            setCouponSuccessMessage(
+                `${student.name} 학생의 쿠폰 1개가 사용되었습니다!`
+            );
+
+            setTimeout(() => {
+                setCouponSuccessMessage(null);
+            }, 2200);
+
         } catch (caughtError) {
             console.error("쿠폰 사용 실패:", caughtError);
 
