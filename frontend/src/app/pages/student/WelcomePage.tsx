@@ -22,7 +22,7 @@ export function WelcomePage() {
           >
             🎓
           </motion.div>
-          <h1 className="mb-2 text-foreground">즐거운 학습 여행</h1>
+          <h1 className="mb-2 text-foreground">Panda trip!!#@</h1>
           <p className="text-muted-foreground">
             매일 조금씩, 재미있게 공부해요!
           </p>
