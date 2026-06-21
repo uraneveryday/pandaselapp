@@ -1,16 +1,19 @@
 import { Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
+    const { t } = useTranslation();
+
     // 💡 키 이름을 로그인 로직과 정확히 통일하세요! (여기서는 teacher_token으로 가정)
     const token = localStorage.getItem("jwt_token");
 
     // 1. 아예 로그인을 안 한 사람
     if (!token) {
-        alert("로그인이 필요한 서비스입니다.");
+        alert(t("common.auth.loginRequired"));
         return <Navigate to="/login" replace />;
     }
 
@@ -20,7 +23,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         const decodedPayload = JSON.parse(atob(payloadBase64));
 
         if (decodedPayload.auth !== "ROLE_TEACHER") {
-            alert("👩‍🏫 선생님만 접근할 수 있는 관리자 페이지입니다.");
+            alert(t("common.auth.teacherOnly"));
             return <Navigate to="/" replace />; // 학생 메인으로
         }
     } catch (error) {

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { DayPicker, type DateRange } from "@daypicker/react";
 import { ko } from "@daypicker/react/locale";
@@ -33,12 +34,16 @@ function toLocalMidnightString(date: Date): string {
     return `${year}-${month}-${day}T00:00:00`;
 }
 
-function formatDisplayDate(date?: Date): string {
+function formatDisplayDate(
+    date: Date | undefined,
+    emptyText: string,
+    locale: string,
+): string {
     if (!date) {
-        return "날짜를 선택해주세요";
+        return emptyText;
     }
 
-    return new Intl.DateTimeFormat("ko-KR", {
+    return new Intl.DateTimeFormat(locale, {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -49,8 +54,10 @@ function formatDisplayDate(date?: Date): string {
 export function TaskCreatePage() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
+    const { t, i18n } = useTranslation();
 
     const classRoomId = Number(id);
+    const currentLocale = i18n.resolvedLanguage || i18n.language || "zh-CN";
 
     /**
      * 오늘 날짜의 시·분·초를 0으로 설정합니다.
@@ -88,12 +95,12 @@ export function TaskCreatePage() {
         setErrorMessage("");
 
         if (!Number.isInteger(classRoomId) || classRoomId <= 0) {
-            setErrorMessage("잘못된 클래스룸 주소입니다.");
+            setErrorMessage(t("teacher.taskCreate.errors.invalidClassroom"));
             return;
         }
 
         if (!dateRange?.from || !dateRange.to) {
-            setErrorMessage("숙제 시작일과 종료일을 모두 선택해주세요.");
+            setErrorMessage(t("teacher.taskCreate.errors.needStartAndEnd"));
             return;
         }
 
@@ -101,14 +108,14 @@ export function TaskCreatePage() {
             !Number.isInteger(formData.rewardStamp) ||
             formData.rewardStamp < 1
         ) {
-            setErrorMessage("스탬프 개수는 1개 이상의 정수로 입력해주세요.");
+            setErrorMessage(t("teacher.taskCreate.errors.invalidStamp"));
             return;
         }
 
         const token = localStorage.getItem("jwt_token");
 
         if (!token) {
-            setErrorMessage("로그인 정보가 없습니다. 다시 로그인해주세요.");
+            setErrorMessage(t("teacher.taskCreate.errors.noLoginInfo"));
             return;
         }
 
@@ -143,14 +150,17 @@ export function TaskCreatePage() {
 
             if (!response.ok) {
                 throw new Error(
-                    `서버 에러 (${response.status}): ${responseText}`,
+                    t("teacher.taskCreate.errors.serverError", {
+                        status: response.status,
+                        message: responseText,
+                    }),
                 );
             }
 
             alert(
                 responseText
-                    ? `숙제가 생성되었습니다. 숙제 번호: ${responseText}`
-                    : "숙제가 생성되었습니다.",
+                    ? t("teacher.taskCreate.success.withNumber", { taskId: responseText })
+                    : t("teacher.taskCreate.success.default"),
             );
 
             navigate(`/teacher/classrooms/${id}/task`);
@@ -160,7 +170,7 @@ export function TaskCreatePage() {
             setErrorMessage(
                 error instanceof Error
                     ? error.message
-                    : "숙제를 생성하는 중 오류가 발생했습니다.",
+                    : t("teacher.taskCreate.errors.unknown"),
             );
         } finally {
             setIsSubmitting(false);
@@ -175,17 +185,17 @@ export function TaskCreatePage() {
                         type="button"
                         className="back-button"
                         onClick={() => navigate(-1)}
-                        aria-label="이전 페이지로 이동"
+                        aria-label={t("common.back")}
                     >
                         ←
                     </button>
 
                     <div>
                         <p className="page-eyebrow">HOMEWORK MANAGEMENT</p>
-                        <h1>새 숙제 만들기</h1>
+                        <h1>{t("teacher.taskCreate.title")}</h1>
                         <p className="page-description">
-                            숙제 내용과 학습 기간, 학생이 받을 보상을
-                            설정해주세요.
+                            {t("teacher.taskCreate.subtitleLine1")}
+                            {t("teacher.taskCreate.subtitleLine2")}
                         </p>
                     </div>
                 </header>
@@ -196,15 +206,15 @@ export function TaskCreatePage() {
                             <span className="section-number">1</span>
 
                             <div>
-                                <h2>숙제 기본 정보</h2>
-                                <p>학생에게 표시될 숙제 정보를 입력합니다.</p>
+                                <h2>{t("teacher.taskCreate.basicInfoTitle")}</h2>
+                                <p>{t("teacher.taskCreate.basicInfoDescription")}</p>
                             </div>
                         </div>
 
                         <div className="form-grid">
                             <div className="form-field form-field-full">
                                 <label htmlFor="taskName">
-                                    숙제 이름
+                                    {t("teacher.taskCreate.fields.taskName")}
                                     <span className="required-mark">*</span>
                                 </label>
 
@@ -218,7 +228,7 @@ export function TaskCreatePage() {
                                             event.target.value,
                                         )
                                     }
-                                    placeholder="예: 덧셈 문제 10개 풀기"
+                                    placeholder={t("teacher.taskCreate.fields.taskNamePlaceholder")}
                                     maxLength={100}
                                     required
                                 />
@@ -226,7 +236,7 @@ export function TaskCreatePage() {
 
                             <div className="form-field">
                                 <label htmlFor="category">
-                                    과목
+                                    {t("teacher.taskCreate.fields.subject")}
                                     <span className="required-mark">*</span>
                                 </label>
 
@@ -241,14 +251,14 @@ export function TaskCreatePage() {
                                         )
                                     }
                                 >
-                                    <option value="MATH">수학</option>
-                                    <option value="CHINESE">한자</option>
+                                    <option value="MATH">{t("teacher.taskCreate.subject.math")}</option>
+                                    <option value="CHINESE">{t("teacher.taskCreate.subject.chinese")}</option>
                                 </select>
                             </div>
 
                             <div className="form-field">
                                 <label htmlFor="stampCount">
-                                    스탬프 개수
+                                    {t("teacher.taskCreate.fields.stampCount")}
                                     <span className="required-mark">*</span>
                                 </label>
 
@@ -268,18 +278,18 @@ export function TaskCreatePage() {
                                         required
                                     />
 
-                                    <span className="input-suffix">개</span>
+                                    <span className="input-suffix">{t("teacher.taskCreate.fields.stampSuffix")}</span>
                                 </div>
 
                                 <p className="field-help">
-                                    숙제를 완료한 학생이 받게 될 스탬프
-                                    수입니다.
+                                    {t("teacher.taskCreate.fields.stampHelpLine1")}
+                                    {t("teacher.taskCreate.fields.stampHelpLine2")}
                                 </p>
                             </div>
 
                             <div className="form-field form-field-full">
                                 <label htmlFor="description">
-                                    숙제 설명
+                                    {t("teacher.taskCreate.fields.description")}
                                     <span className="required-mark">*</span>
                                 </label>
 
@@ -292,9 +302,7 @@ export function TaskCreatePage() {
                                             event.target.value,
                                         )
                                     }
-                                    placeholder={
-                                        "학생이 해야 할 내용을 자세히 입력해주세요.\n예: 교재 10쪽의 덧셈 문제를 풀고 제출해주세요."
-                                    }
+                                    placeholder={t("teacher.taskCreate.fields.descriptionPlaceholder")}
                                     maxLength={1000}
                                     required
                                 />
@@ -311,10 +319,10 @@ export function TaskCreatePage() {
                             <span className="section-number">2</span>
 
                             <div>
-                                <h2>숙제 기간</h2>
+                                <h2>{t("teacher.taskCreate.periodTitle")}</h2>
                                 <p>
-                                    시작일을 먼저 선택한 후 종료일을
-                                    선택해주세요.
+                                    {t("teacher.taskCreate.periodDescriptionLine1")}
+                                    {t("teacher.taskCreate.periodDescriptionLine2")}
                                 </p>
                             </div>
                         </div>
@@ -325,12 +333,12 @@ export function TaskCreatePage() {
                                     dateRange?.from ? "date-selected" : ""
                                 }`}
                             >
-                                <span className="date-label">시작일</span>
+                                <span className="date-label">{t("teacher.taskCreate.startDate")}</span>
                                 <strong>
-                                    {formatDisplayDate(dateRange?.from)}
+                                    {formatDisplayDate(dateRange?.from, t("teacher.taskCreate.errors.dateRequired"), currentLocale)}
                                 </strong>
                                 <span className="date-time">
-                                    00:00부터
+                                    {t("teacher.taskCreate.fromMidnight")}
                                 </span>
                             </div>
 
@@ -343,12 +351,12 @@ export function TaskCreatePage() {
                                     dateRange?.to ? "date-selected" : ""
                                 }`}
                             >
-                                <span className="date-label">종료일</span>
+                                <span className="date-label">{t("teacher.taskCreate.endDate")}</span>
                                 <strong>
-                                    {formatDisplayDate(dateRange?.to)}
+                                    {formatDisplayDate(dateRange?.to, t("teacher.taskCreate.errors.dateRequired"), currentLocale)}
                                 </strong>
                                 <span className="date-time">
-                                    23:59까지
+                                    {t("teacher.taskCreate.untilEndOfDay")}
                                 </span>
                             </div>
                         </div>
@@ -373,15 +381,15 @@ export function TaskCreatePage() {
                         </div>
 
                         <p className="calendar-help">
-                            회색으로 표시된 과거 날짜는 선택할 수 없습니다.
-                            같은 날짜를 두 번 선택하면 하루짜리 숙제로
-                            설정할 수 있습니다.
+                            {t("teacher.taskCreate.dateHelpLine1")}
+                            {t("teacher.taskCreate.dateHelpLine2")}
+                            {t("teacher.taskCreate.dateHelpLine3")}
                         </p>
                     </section>
 
                     {errorMessage && (
                         <div className="form-error" role="alert">
-                            <strong>숙제를 저장하지 못했습니다.</strong>
+                            <strong>{t("teacher.taskCreate.saveFailedTitle")}</strong>
                             <span>{errorMessage}</span>
                         </div>
                     )}
@@ -393,7 +401,7 @@ export function TaskCreatePage() {
                             onClick={() => navigate(-1)}
                             disabled={isSubmitting}
                         >
-                            취소
+                            {t("teacher.taskCreate.cancel")}
                         </button>
 
                         <button
@@ -405,7 +413,7 @@ export function TaskCreatePage() {
                                 !dateRange.to
                             }
                         >
-                            {isSubmitting ? "저장 중..." : "숙제 저장하기"}
+                            {isSubmitting ? t("teacher.taskCreate.submitting") : t("teacher.taskCreate.submit")}
                         </button>
                     </div>
                 </form>

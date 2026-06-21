@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ImagePlus, X, UploadCloud } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {supabase} from "../../../utils/supabaseClient"; // 아이콘 추가
 
 
@@ -11,6 +12,8 @@ interface QuizEditModalProps {
 }
 
 export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, onClose, onSuccess }) => {
+    const { t } = useTranslation();
+
     const [type, setType] = useState<"OX" | "CHOOSE">("CHOOSE");
     const [questionText, setQuestionText] = useState("");
 
@@ -50,7 +53,7 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
                         setOxAnswerIndex(data.correctAnswer);
                     }
                 } else {
-                    alert("퀴즈 정보를 불러오는데 실패했습니다.");
+                    alert(t("teacher.quizEdit.alerts.loadFailed"));
                     onClose();
                 }
             } catch (error) {
@@ -92,12 +95,12 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
         e.preventDefault();
 
         if (!questionText.trim() && !imageFile && !questImagePath) {
-            alert("문제 내용(텍스트)을 입력하거나 문제 이미지를 업로드해야 합니다.");
+            alert(t("teacher.quizEdit.alerts.questionRequired"));
             return;
         }
 
         if (type === "CHOOSE" && chooseOptions.some((opt) => opt.trim() === "")) {
-            alert("객관식 보기를 모두 입력해주세요.");
+            alert(t("teacher.quizEdit.alerts.choicesRequired"));
             return;
         }
 
@@ -140,15 +143,15 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
             });
 
             if (response.ok) {
-                alert("퀴즈가 성공적으로 수정되었습니다!");
+                alert(t("teacher.quizEdit.alerts.updateSuccess"));
                 onSuccess();
                 onClose();
             } else {
-                alert("퀴즈 수정에 실패했습니다.");
+                alert(t("teacher.quizEdit.alerts.updateFailed"));
             }
         } catch (error) {
             console.error("Error updating quiz:", error);
-            alert("서버와 통신 중 오류가 발생했습니다.");
+            alert(t("teacher.quizEdit.alerts.serverError"));
         } finally {
             setIsSubmitting(false);
         }
@@ -159,7 +162,7 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
             <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center backdrop-blur-sm">
                 <div className="bg-white p-6 rounded-2xl shadow-xl font-bold text-gray-700 flex items-center gap-3">
                     <div className="w-5 h-5 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    데이터를 불러오는 중...
+                    {t("teacher.quizEdit.loading")}
                 </div>
             </div>
         );
@@ -173,8 +176,8 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
             <div className="bg-white w-full max-w-2xl p-8 rounded-3xl shadow-2xl my-8 border border-gray-100">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className="text-2xl font-extrabold text-gray-900">퀴즈 수정</h2>
-                        <p className="text-sm text-gray-500 mt-1">기존에 작성한 내용을 확인하고 수정하세요.</p>
+                        <h2 className="text-2xl font-extrabold text-gray-900">{t("teacher.quizEdit.title")}</h2>
+                        <p className="text-sm text-gray-500 mt-1">{t("teacher.quizEdit.description")}</p>
                     </div>
                     <button onClick={onClose} className="p-2 bg-gray-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors">
                         <X size={20} />
@@ -186,12 +189,12 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
                     <div className="flex flex-col items-center p-6 bg-gray-50 border border-gray-200 rounded-2xl">
                         {displayImage ? (
                             <div className="relative group w-full max-w-md h-48 rounded-xl overflow-hidden border border-gray-300 shadow-sm">
-                                <img src={displayImage} alt="퀴즈 이미지" className="w-full h-full object-contain bg-white" />
+                                <img src={displayImage} alt={t("teacher.quizEdit.imageAlt")} className="w-full h-full object-contain bg-white" />
 
                                 {/* 이미지 호버 시 나타나는 오버레이 UI */}
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                                     <label className="cursor-pointer bg-white text-gray-800 px-4 py-2 rounded-lg font-bold text-sm shadow hover:bg-gray-100 flex items-center gap-2">
-                                        <ImagePlus size={16} /> 사진 변경
+                                        <ImagePlus size={16} /> {t("teacher.quizEdit.changePhoto")}
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -204,15 +207,15 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
                                         onClick={handleRemoveImage}
                                         className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow hover:bg-red-600"
                                     >
-                                        삭제
+                                        {t("teacher.quizEdit.delete")}
                                     </button>
                                 </div>
                             </div>
                         ) : (
                             <label className="w-full max-w-md h-48 border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors rounded-xl flex flex-col items-center justify-center cursor-pointer group">
                                 <UploadCloud size={40} className="text-gray-400 group-hover:text-blue-500 mb-3 transition-colors" />
-                                <span className="font-bold text-gray-600 group-hover:text-blue-600">클릭하여 이미지 업로드</span>
-                                <span className="text-xs text-gray-400 mt-1">또는 이미지를 드래그 앤 드롭 하세요</span>
+                                <span className="font-bold text-gray-600 group-hover:text-blue-600">{t("teacher.quizEdit.uploadClick")}</span>
+                                <span className="text-xs text-gray-400 mt-1">{t("teacher.quizEdit.dragDrop")}</span>
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -226,24 +229,24 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {/* 타입 선택 영역 */}
                         <div className="col-span-1">
-                            <label className="font-bold text-gray-700 block mb-2 text-sm">문제 유형</label>
+                            <label className="font-bold text-gray-700 block mb-2 text-sm">{t("teacher.quizEdit.type")}</label>
                             <select
                                 value={type}
                                 onChange={(e) => setType(e.target.value as "OX" | "CHOOSE")}
                                 className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium"
                             >
-                                <option value="CHOOSE">객관식</option>
-                                <option value="OX">OX 퀴즈</option>
+                                <option value="CHOOSE">{t("teacher.quizEdit.types.choose")}</option>
+                                <option value="OX">{t("teacher.quizEdit.types.ox")}</option>
                             </select>
                         </div>
 
                         {/* 문제 내용 입력 영역 */}
                         <div className="col-span-1 md:col-span-3">
-                            <label className="font-bold text-gray-700 block mb-2 text-sm">문제 내용</label>
+                            <label className="font-bold text-gray-700 block mb-2 text-sm">{t("teacher.quizEdit.question.label")}</label>
                             <textarea
                                 className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none leading-relaxed"
                                 rows={3}
-                                placeholder="문제의 질문 내용을 입력하세요..."
+                                placeholder={t("teacher.quizEdit.question.placeholder")}
                                 value={questionText}
                                 onChange={(e) => setQuestionText(e.target.value)}
                             />
@@ -252,7 +255,7 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
 
                     {/* 보기 및 정답 설정 영역 */}
                     <div className="pt-6 border-t border-gray-200">
-                        <label className="font-bold text-gray-800 block mb-4 text-lg">보기 및 정답 설정</label>
+                        <label className="font-bold text-gray-800 block mb-4 text-lg">{t("teacher.quizEdit.answer.title")}</label>
                         {type === "CHOOSE" ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {chooseOptions.map((opt, index) => (
@@ -272,11 +275,11 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
                                         <input
                                             type="text"
                                             value={opt}
-                                            placeholder={`${index + 1}번 보기`}
+                                            placeholder={t("teacher.quizEdit.answer.choicePlaceholder", { number: index + 1 })}
                                             onChange={(e) => handleOptionChange(index, e.target.value)}
                                             className="flex-1 bg-transparent outline-none font-medium text-gray-700 placeholder-gray-400"
                                         />
-                                        {chooseAnswerIndex === index && <span className="text-blue-600 font-extrabold text-xs bg-white px-2 py-1 rounded shadow-sm">정답</span>}
+                                        {chooseAnswerIndex === index && <span className="text-blue-600 font-extrabold text-xs bg-white px-2 py-1 rounded shadow-sm">{t("teacher.quizEdit.answer.correct")}</span>}
                                     </div>
                                 ))}
                             </div>
@@ -296,10 +299,10 @@ export const QuizEditModal: React.FC<QuizEditModalProps> = ({ taskId, quizId, on
 
                     <div className="flex gap-3 pt-4">
                         <button type="button" onClick={onClose} className="w-1/3 py-3.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors">
-                            취소
+                            {t("teacher.quizEdit.cancel")}
                         </button>
                         <button type="submit" disabled={isSubmitting} className={`w-2/3 font-bold py-3.5 rounded-xl text-white transition-all shadow-md ${isSubmitting ? "bg-gray-400" : "bg-gray-900 hover:bg-blue-600 hover:shadow-lg active:scale-[0.98]"}`}>
-                            {isSubmitting ? "저장 중..." : "수정 완료"}
+                            {isSubmitting ? t("teacher.quizEdit.submitting") : t("teacher.quizEdit.submit")}
                         </button>
                     </div>
                 </form>

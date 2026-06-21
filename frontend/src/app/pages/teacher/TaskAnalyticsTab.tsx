@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     AlertCircle,
     BarChart3,
@@ -43,6 +44,8 @@ export function TaskAnalyticsTab({
                                      completionRate,
                                      quizCount,
                                  }: TaskAnalyticsTabProps) {
+    const { t } = useTranslation();
+
     const [analysisData, setAnalysisData] =
         useState<TaskQuizWrongRateAnalysisResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -65,18 +68,18 @@ export function TaskAnalyticsTab({
             );
 
             if (!response.ok) {
-                throw new Error(`오답률 분석 조회 실패: ${response.status}`);
+                throw new Error(t("teacher.taskAnalytics.errors.apiFailed", { status: response.status }));
             }
 
             const data: TaskQuizWrongRateAnalysisResponse = await response.json();
             setAnalysisData(data);
         } catch (error) {
             console.error("오답률 분석 로딩 오류:", error);
-            setErrorMessage("오답률 분석 데이터를 불러오지 못했습니다.");
+            setErrorMessage(t("teacher.taskAnalytics.errors.loadFailed"));
         } finally {
             setIsLoading(false);
         }
-    }, [taskId, token]);
+    }, [taskId, token, t]);
 
     useEffect(() => {
         fetchAnalytics();
@@ -85,7 +88,7 @@ export function TaskAnalyticsTab({
     const chartData = useMemo(() => {
         return (
             analysisData?.quizzes.map((quiz) => ({
-                quizLabel: `${quiz.quizNum}번`,
+                quizLabel: t("teacher.taskAnalytics.chart.quizLabel", { quizNum: quiz.quizNum }),
                 quizNum: quiz.quizNum,
                 wrongRate: quiz.wrongRate,
                 wrongCount: quiz.wrongCount,
@@ -93,7 +96,7 @@ export function TaskAnalyticsTab({
                 questionText: quiz.questionText,
             })) ?? []
         );
-    }, [analysisData]);
+    }, [analysisData, t]);
 
     const hardestQuiz = analysisData?.hardestQuiz ?? null;
 
@@ -107,10 +110,10 @@ export function TaskAnalyticsTab({
 
                     <div>
                         <h2 className="text-xl font-black text-slate-950">
-                            숙제 분석
+                            {t("teacher.taskAnalytics.title")}
                         </h2>
                         <p className="text-sm font-semibold text-slate-400">
-                            문제별 오답률을 기준으로 학생들이 가장 어려워한 문항을 확인합니다.
+                            {t("teacher.taskAnalytics.description")}
                         </p>
                     </div>
                 </div>
@@ -125,36 +128,40 @@ export function TaskAnalyticsTab({
                         size={14}
                         className={isLoading ? "animate-spin" : ""}
                     />
-                    새로고침
+                    {t("teacher.taskAnalytics.refresh")}
                 </button>
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                 <AnalyticsPreviewCard
-                    label="현재 제출률"
+                    label={t("teacher.taskAnalytics.currentSubmissionRate.label")}
                     value={`${completionRate}%`}
-                    description="현재 task detail API의 completionRate 기반"
+                    description={t("teacher.taskAnalytics.currentSubmissionRate.description")}
                 />
 
                 <AnalyticsPreviewCard
-                    label="퀴즈 수"
-                    value={`${quizCount}개`}
-                    description="현재 task에 연결된 quiz list 기반"
+                    label={t("teacher.taskAnalytics.quizCount.label")}
+                    value={t("teacher.taskAnalytics.quizCount.value", { count: quizCount })}
+                    description={t("teacher.taskAnalytics.quizCount.description")}
                 />
 
                 <AnalyticsPreviewCard
-                    label="최고 오답률"
+                    label={t("teacher.taskAnalytics.highestWrongRate.label")}
                     value={
                         hardestQuiz
                             ? `${hardestQuiz.wrongRate}%`
                             : isLoading
-                                ? "계산 중"
+                                ? t("teacher.taskAnalytics.highestWrongRate.calculating")
                                 : "-"
                     }
                     description={
                         hardestQuiz
-                            ? `${hardestQuiz.quizNum}번 문제 · ${hardestQuiz.wrongCount}/${hardestQuiz.totalAttempts}명 오답`
-                            : "제출된 풀이 기록이 있으면 표시됩니다."
+                            ? t("teacher.taskAnalytics.highestWrongRate.summary", {
+                                  quizNum: hardestQuiz.quizNum,
+                                  wrongCount: hardestQuiz.wrongCount,
+                                  totalAttempts: hardestQuiz.totalAttempts,
+                              })
+                            : t("teacher.taskAnalytics.highestWrongRate.empty")
                     }
                 />
             </div>
@@ -168,17 +175,21 @@ export function TaskAnalyticsTab({
 
                         <div>
                             <p className="text-sm font-black text-red-600">
-                                가장 오답률이 높은 문제
+                                {t("teacher.taskAnalytics.hardestQuiz.title")}
                             </p>
 
                             <p className="mt-1 text-lg font-black text-slate-950">
-                                {hardestQuiz.quizNum}번 문제 · 오답률{" "}
-                                {hardestQuiz.wrongRate}%
+                                {t("teacher.taskAnalytics.hardestQuiz.summary", {
+                                    quizNum: hardestQuiz.quizNum,
+                                    wrongRate: hardestQuiz.wrongRate,
+                                })}
                             </p>
 
                             <p className="mt-1 text-sm font-semibold text-slate-500">
-                                총 {hardestQuiz.totalAttempts}명 중{" "}
-                                {hardestQuiz.wrongCount}명이 틀렸습니다.
+                                {t("teacher.taskAnalytics.hardestQuiz.detail", {
+                                    totalAttempts: hardestQuiz.totalAttempts,
+                                    wrongCount: hardestQuiz.wrongCount,
+                                })}
                             </p>
 
                             {hardestQuiz.questionText && (
@@ -195,15 +206,15 @@ export function TaskAnalyticsTab({
                 <div className="mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
                     <div>
                         <h3 className="text-base font-black text-slate-800">
-                            문제별 오답률
+                            {t("teacher.taskAnalytics.chart.title")}
                         </h3>
                         <p className="text-sm font-semibold text-slate-400">
-                            x축은 문제 번호, y축은 오답률입니다.
+                            {t("teacher.taskAnalytics.chart.description")}
                         </p>
                     </div>
 
                     <span className="text-xs font-bold text-slate-400">
-                        단위: %
+                        {t("teacher.taskAnalytics.chart.unit")}
                     </span>
                 </div>
 
@@ -212,7 +223,7 @@ export function TaskAnalyticsTab({
                         <div className="flex flex-col items-center gap-3">
                             <div className="h-9 w-9 rounded-full border-4 border-slate-200 border-t-purple-600 animate-spin" />
                             <p className="text-sm font-semibold text-slate-500">
-                                오답률 데이터를 불러오고 있습니다.
+                                {t("teacher.taskAnalytics.chart.loading")}
                             </p>
                         </div>
                     </div>
@@ -233,7 +244,7 @@ export function TaskAnalyticsTab({
                                 onClick={fetchAnalytics}
                                 className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-extrabold text-white hover:bg-purple-600"
                             >
-                                다시 시도
+                                {t("teacher.taskAnalytics.retry")}
                             </button>
                         </div>
                     </div>
@@ -247,10 +258,10 @@ export function TaskAnalyticsTab({
                                 size={36}
                             />
                             <p className="mt-3 text-sm font-bold text-slate-600">
-                                아직 분석할 풀이 기록이 없습니다.
+                                {t("teacher.taskAnalytics.chart.emptyTitle")}
                             </p>
                             <p className="mt-1 text-xs font-semibold text-slate-400">
-                                학생들이 문제를 풀고 제출하면 오답률이 표시됩니다.
+                                {t("teacher.taskAnalytics.chart.emptyDescription")}
                             </p>
                         </div>
                     </div>
@@ -281,12 +292,12 @@ export function TaskAnalyticsTab({
                                 <Tooltip
                                     formatter={(value, name, props) => {
                                         if (name === "wrongRate") {
-                                            return [`${value}%`, "오답률"];
+                                            return [`${value}%`, t("teacher.taskAnalytics.chart.wrongRate")];
                                         }
 
                                         return [value, name];
                                     }}
-                                    labelFormatter={(label) => `문제 ${label}`}
+                                    labelFormatter={(label) => t("teacher.taskAnalytics.chart.tooltipLabel", { label })}
                                     contentStyle={{
                                         borderRadius: "16px",
                                         border: "1px solid #e2e8f0",

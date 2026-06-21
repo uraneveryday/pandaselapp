@@ -1,0 +1,26 @@
+{
+  "login": {
+    "title": "登录",
+    "subtitleLine1": "使用老师或学生账号登录",
+    "subtitleLine2": "开始你的学习吧。",
+    "loginId": "账号",
+    "loginIdPlaceholder": "请输入账号",
+    "password": "密码",
+    "passwordPlaceholder": "请输入密码",
+    "submit": "登录",
+    "loading": "登录中...",
+    "teacherAccountQuestion": "还没有教师账号吗？",
+    "teacherRegister": "教师注册",
+    "studentAccountGuideLine1": "学生账号由负责老师",
+    "studentAccountGuideLine2": "在班级管理页面中创建。",
+    "languageKo": "한국어",
+    "languageZh": "中文",
+    "errors": {
+      "required": "请输入账号和密码。",
+      "invalidCredential": "账号或密码不正确。",
+      "missingToken": "服务器没有返回登录令牌。",
+      "invalidRole": "无法确认用户权限信息。",
+      "unknown": "登录过程中发生错误。"
+    }
+  }
+}

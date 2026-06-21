@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
     ArrowLeft,
     Award,
@@ -53,14 +54,14 @@ const getFileNameFromUrl = (url: string) => {
     return fileName ? decodeURIComponent(fileName) : null;
 };
 
-const formatDate = (dateString?: string) => {
+const formatDate = (dateString?: string, locale = "ko-KR") => {
     if (!dateString) return "-";
 
     const date = new Date(dateString);
 
     if (Number.isNaN(date.getTime())) return "-";
 
-    return new Intl.DateTimeFormat("ko-KR", {
+    return new Intl.DateTimeFormat(locale, {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -70,20 +71,23 @@ const formatDate = (dateString?: string) => {
     }).format(date);
 };
 
-const getDaysLeftText = (expiredDate?: string) => {
-    if (!expiredDate) return "마감일 없음";
+const getDaysLeftText = (
+    expiredDate: string | undefined,
+    t: any,
+) => {
+    if (!expiredDate) return t("teacher.taskDetail.deadline.none");
 
     const now = new Date();
     const end = new Date(expiredDate);
 
-    if (Number.isNaN(end.getTime())) return "마감일 오류";
+    if (Number.isNaN(end.getTime())) return t("teacher.taskDetail.deadline.invalid");
 
     const diffMs = end.getTime() - now.getTime();
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return "마감 지남";
-    if (diffDays === 0) return "오늘 마감";
-    return `${diffDays}일 남음`;
+    if (diffDays < 0) return t("teacher.taskDetail.deadline.expired");
+    if (diffDays === 0) return t("teacher.taskDetail.deadline.today");
+    return t("teacher.taskDetail.deadline.daysLeft", { count: diffDays });
 };
 
 const clampRate = (rate?: number) => {
@@ -94,6 +98,8 @@ export function TaskDetailPage() {
     const { id: classroomId, taskId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const { t, i18n } = useTranslation();
+    const currentLocale = i18n.resolvedLanguage || i18n.language || "zh-CN";
 
     const [taskInfo, setTaskInfo] = useState<TaskDto | null>(
         location.state as TaskDto | null
@@ -105,7 +111,7 @@ export function TaskDetailPage() {
 
     const isTaskDone = taskInfo?.isDone ?? taskInfo?.done ?? false;
     const completionRate = clampRate(taskInfo?.completionRate);
-    const daysLeftText = getDaysLeftText(taskInfo?.expiredDate);
+    const daysLeftText = getDaysLeftText(taskInfo?.expiredDate, t);
 
     const token = useMemo(() => localStorage.getItem("jwt_token"), []);
 
@@ -127,7 +133,7 @@ export function TaskDetailPage() {
             );
 
             if (!quizRes.ok) {
-                throw new Error(`퀴즈 목록 조회 실패: ${quizRes.status}`);
+                throw new Error(t("teacher.taskDetail.errors.quizListLoadFailed", { status: quizRes.status }));
             }
 
             const data: QuizResponse[] = await quizRes.json();
@@ -153,7 +159,7 @@ export function TaskDetailPage() {
             );
 
             if (!taskRes.ok) {
-                throw new Error(`숙제 상세 조회 실패: ${taskRes.status}`);
+                throw new Error(t("teacher.taskDetail.errors.taskDetailLoadFailed", { status: taskRes.status }));
             }
 
             const taskData: TaskDto = await taskRes.json();
@@ -175,7 +181,7 @@ export function TaskDetailPage() {
         if (!classroomId || !taskId) return;
 
         const confirmDelete = window.confirm(
-            "정말 이 숙제를 삭제하시겠습니까? 연결된 퀴즈도 함께 관리 대상에서 제외될 수 있습니다."
+            t("teacher.taskDetail.alerts.deleteTaskConfirm")
         );
 
         if (!confirmDelete) return;
@@ -192,19 +198,19 @@ export function TaskDetailPage() {
             );
 
             if (!response.ok) {
-                throw new Error(`숙제 삭제 실패: ${response.status}`);
+                throw new Error(t("teacher.taskDetail.errors.taskDeleteFailed", { status: response.status }));
             }
 
-            alert("숙제가 삭제되었습니다.");
+            alert(t("teacher.taskDetail.alerts.deleteTaskSuccess"));
             backToTaskList();
         } catch (error) {
-            console.error("숙제 삭제 오류:", error);
-            alert("숙제 삭제 중 오류가 발생했습니다.");
+            console.error("Task delete error:", error);
+            alert(t("teacher.taskDetail.alerts.deleteTaskFailed"));
         }
     };
 
     const handleDeleteQuiz = async (quizId: number, imageUrl?: string) => {
-        const confirmDelete = window.confirm("이 퀴즈를 정말 삭제하시겠습니까?");
+        const confirmDelete = window.confirm(t("teacher.taskDetail.alerts.deleteQuizConfirm"));
 
         if (!confirmDelete) return;
 
@@ -215,7 +221,7 @@ export function TaskDetailPage() {
                 try {
                     await supabase.storage.from("quiz_imeages").remove([fileName]);
                 } catch (storageError) {
-                    console.error("스토리지 이미지 삭제 오류:", storageError);
+                    console.error("Storage image delete error:", storageError);
                 }
             }
         }
@@ -232,14 +238,14 @@ export function TaskDetailPage() {
             );
 
             if (!response.ok) {
-                throw new Error(`퀴즈 삭제 실패: ${response.status}`);
+                throw new Error(t("teacher.taskDetail.errors.quizDeleteFailed", { status: response.status }));
             }
 
-            alert("퀴즈가 삭제되었습니다.");
+            alert(t("teacher.taskDetail.alerts.deleteQuizSuccess"));
             await fetchQuizList();
         } catch (error) {
-            console.error("퀴즈 삭제 오류:", error);
-            alert("퀴즈 삭제 중 오류가 발생했습니다.");
+            console.error("Quiz delete error:", error);
+            alert(t("teacher.taskDetail.alerts.deleteQuizFailed"));
         }
     };
 
@@ -249,7 +255,7 @@ export function TaskDetailPage() {
                 <div className="flex flex-col items-center gap-3">
                     <div className="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" />
                     <p className="text-sm font-semibold text-slate-500">
-                        숙제 정보를 불러오고 있습니다.
+                        {t("teacher.taskDetail.loading")}
                     </p>
                 </div>
             </div>
@@ -265,18 +271,18 @@ export function TaskDetailPage() {
                     </div>
 
                     <h2 className="text-xl font-extrabold text-slate-900">
-                        숙제 정보를 찾을 수 없습니다.
+                        {t("teacher.taskDetail.notFoundTitle")}
                     </h2>
 
                     <p className="mt-2 text-sm leading-6 text-slate-500">
-                        삭제되었거나 접근 권한이 없는 숙제일 수 있습니다.
+                        {t("teacher.taskDetail.notFoundDescription")}
                     </p>
 
                     <button
                         onClick={backToTaskList}
                         className="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-blue-600 transition-colors"
                     >
-                        숙제 목록으로 돌아가기
+                        {t("teacher.taskDetail.backToList")}
                     </button>
                 </div>
             </div>
@@ -291,7 +297,7 @@ export function TaskDetailPage() {
                     className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors"
                 >
                     <ArrowLeft size={18} />
-                    숙제 목록으로 돌아가기
+                    {t("teacher.taskDetail.backToList")}
                 </button>
 
                 <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
@@ -314,7 +320,7 @@ export function TaskDetailPage() {
                                         }`}
                                     >
                                         <CheckCircle2 size={14} />
-                                        {isTaskDone ? "마감됨" : "진행 중"}
+                                        {isTaskDone ? t("teacher.taskDetail.status.closed") : t("teacher.taskDetail.status.open")}
                                     </span>
 
                                     <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-extrabold text-slate-600">
@@ -329,7 +335,7 @@ export function TaskDetailPage() {
                                     </h1>
 
                                     <p className="mt-3 max-w-3xl text-sm md:text-base leading-7 text-slate-500 whitespace-pre-wrap">
-                                        {taskInfo.description || "등록된 숙제 설명이 없습니다."}
+                                        {taskInfo.description || t("teacher.taskDetail.noDescription")}
                                     </p>
                                 </div>
                             </div>
@@ -344,7 +350,7 @@ export function TaskDetailPage() {
                                     className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-extrabold text-white shadow-sm hover:bg-blue-600 active:scale-95 transition-all"
                                 >
                                     <Plus size={18} />
-                                    퀴즈 추가
+                                    {t("teacher.taskDetail.quizAdd")}
                                 </button>
 
                                 <button
@@ -352,7 +358,7 @@ export function TaskDetailPage() {
                                     className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-extrabold text-red-600 hover:bg-red-100 active:scale-95 transition-all"
                                 >
                                     <Trash2 size={18} />
-                                    숙제 삭제
+                                    {t("teacher.taskDetail.taskDelete")}
                                 </button>
                             </div>
                         </div>
@@ -361,28 +367,28 @@ export function TaskDetailPage() {
                     <div className="grid grid-cols-1 border-t border-slate-100 md:grid-cols-4">
                         <SummaryCard
                             icon={<Users size={20} />}
-                            label="학생 제출률"
+                            label={t("teacher.taskDetail.cards.submissionRate.label")}
                             value={`${completionRate}%`}
-                            subText="현재 숙제 완료 비율"
+                            subText={t("teacher.taskDetail.cards.submissionRate.subText")}
                         />
 
                         <SummaryCard
                             icon={<ListChecks size={20} />}
-                            label="등록된 퀴즈"
-                            value={`${quizList.length}개`}
-                            subText="이 숙제에 포함된 문제"
+                            label={t("teacher.taskDetail.cards.quizCount.label")}
+                            value={t("teacher.taskDetail.cards.quizCount.value", { count: quizList.length })}
+                            subText={t("teacher.taskDetail.cards.quizCount.subText")}
                         />
 
                         <SummaryCard
                             icon={<Award size={20} />}
-                            label="보상 도장"
-                            value={`${taskInfo.rewardStamp}개`}
-                            subText="완료 시 지급"
+                            label={t("teacher.taskDetail.cards.rewardStamp.label")}
+                            value={t("teacher.taskDetail.cards.rewardStamp.value", { count: taskInfo.rewardStamp })}
+                            subText={t("teacher.taskDetail.cards.rewardStamp.subText")}
                         />
 
                         <SummaryCard
                             icon={<Calendar size={20} />}
-                            label="마감일"
+                            label={t("teacher.taskDetail.cards.deadline.label")}
                             value={formatDate(taskInfo.expiredDate)}
                             subText={daysLeftText}
                         />
@@ -394,21 +400,21 @@ export function TaskDetailPage() {
                         <TabButton
                             active={activeTab === "overview"}
                             icon={<LayoutDashboard size={18} />}
-                            label="개요"
+                            label={t("teacher.taskDetail.tabs.overview")}
                             onClick={() => setActiveTab("overview")}
                         />
 
                         <TabButton
                             active={activeTab === "quizzes"}
                             icon={<ListChecks size={18} />}
-                            label="퀴즈 구성"
+                            label={t("teacher.taskDetail.tabs.quizzes")}
                             onClick={() => setActiveTab("quizzes")}
                         />
 
                         <TabButton
                             active={activeTab === "analytics"}
                             icon={<BarChart3 size={18} />}
-                            label="분석"
+                            label={t("teacher.taskDetail.tabs.analytics")}
                             onClick={() => setActiveTab("analytics")}
                         />
                     </div>
@@ -537,29 +543,29 @@ function OverviewTab({
 
                     <div>
                         <h2 className="text-xl font-black text-slate-950">
-                            숙제 개요
+                            {t("teacher.taskDetail.overview.title")}
                         </h2>
                         <p className="text-sm font-semibold text-slate-400">
-                            선생님이 설정한 숙제 기본 정보입니다.
+                            {t("teacher.taskDetail.overview.description")}
                         </p>
                     </div>
                 </div>
 
                 <div className="mt-6 space-y-5">
-                    <InfoRow label="숙제 이름" value={taskInfo.taskName} />
-                    <InfoRow label="반 이름" value={taskInfo.className} />
-                    <InfoRow label="시작 일시" value={formatDate(taskInfo.startDate)} />
-                    <InfoRow label="마감 일시" value={formatDate(taskInfo.expiredDate)} />
-                    <InfoRow label="보상 도장" value={`${taskInfo.rewardStamp}개`} />
-                    <InfoRow label="상태" value={isTaskDone ? "마감됨" : "진행 중"} />
+                    <InfoRow label={t("teacher.taskDetail.overview.info.taskName")} value={taskInfo.taskName} />
+                    <InfoRow label={t("teacher.taskDetail.overview.info.className")} value={taskInfo.className} />
+                    <InfoRow label={t("teacher.taskDetail.overview.info.startDate")} value={formatDate(taskInfo.startDate, currentLocale)} />
+                    <InfoRow label={t("teacher.taskDetail.overview.info.expiredDate")} value={formatDate(taskInfo.expiredDate, currentLocale)} />
+                    <InfoRow label={t("teacher.taskDetail.cards.rewardStamp.label")} value={t("teacher.taskDetail.cards.rewardStamp.value", { count: taskInfo.rewardStamp })} />
+                    <InfoRow label={t("teacher.taskDetail.overview.info.status")} value={isTaskDone ? t("teacher.taskDetail.status.closed") : t("teacher.taskDetail.status.open")} />
 
                     <div>
                         <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">
-                            과제 설명
+                            {t("teacher.taskDetail.overview.taskDescriptionTitle")}
                         </p>
 
                         <div className="mt-2 rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-600 whitespace-pre-wrap">
-                            {taskInfo.description || "등록된 설명이 없습니다."}
+                            {taskInfo.description || t("teacher.taskDetail.overview.noTaskDescription")}
                         </div>
                     </div>
                 </div>
@@ -573,10 +579,10 @@ function OverviewTab({
 
                     <div>
                         <h2 className="text-xl font-black text-slate-950">
-                            진행 요약
+                            {t("teacher.taskDetail.overview.progressSummaryTitle")}
                         </h2>
                         <p className="text-sm font-semibold text-slate-400">
-                            현재 숙제 진행 상태
+                            {t("teacher.taskDetail.overview.progressSummaryDescription")}
                         </p>
                     </div>
                 </div>
@@ -585,7 +591,7 @@ function OverviewTab({
                     <div className="flex items-end justify-between">
                         <div>
                             <p className="text-sm font-bold text-slate-400">
-                                제출률
+                                {t("teacher.taskDetail.overview.submissionRate")}
                             </p>
                             <p className="text-5xl font-black text-slate-950">
                                 {completionRate}
@@ -594,7 +600,7 @@ function OverviewTab({
                         </div>
 
                         <p className="rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-blue-600">
-                            퀴즈 {quizCount}개
+                            {t("teacher.taskDetail.overview.quizCount", { count: quizCount })}
                         </p>
                     </div>
 
@@ -606,7 +612,7 @@ function OverviewTab({
                     </div>
 
                     <p className="mt-4 text-sm leading-6 text-slate-500">
-                        나중에 학생별 제출 상태, 미제출 학생 목록, 평균 풀이 시간까지 이 카드 아래로 확장할 수 있습니다.
+                        {t("teacher.taskDetail.overview.futureAnalyticsGuide")}
                     </p>
                 </div>
             </section>
@@ -654,10 +660,10 @@ function QuizListTab({
 
                         <div>
                             <h2 className="text-xl font-black text-slate-950">
-                                등록된 퀴즈 구성
+                                {t("teacher.taskDetail.quizzes.title")}
                             </h2>
                             <p className="text-sm font-semibold text-slate-400">
-                                이 숙제에는 총 {quizList.length}개의 퀴즈가 포함되어 있습니다.
+                                {t("teacher.taskDetail.quizzes.description", { count: quizList.length })}
                             </p>
                         </div>
                     </div>
@@ -672,7 +678,7 @@ function QuizListTab({
                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-blue-600 active:scale-95 transition-all"
                 >
                     <Plus size={18} />
-                    퀴즈 추가
+                    {t("teacher.taskDetail.quizAdd")}
                 </button>
             </div>
 
@@ -695,11 +701,11 @@ function QuizListTab({
                         </div>
 
                         <h3 className="text-lg font-black text-slate-700">
-                            아직 등록된 퀴즈가 없습니다.
+                            {t("teacher.taskDetail.quizzes.emptyTitle")}
                         </h3>
 
                         <p className="mt-2 text-sm font-semibold text-slate-400">
-                            퀴즈를 추가하면 학생들이 풀 문제 구성이 이곳에 표시됩니다.
+                            {t("teacher.taskDetail.quizzes.emptyDescription")}
                         </p>
                     </div>
                 )}
@@ -724,7 +730,7 @@ function QuizCard({
                     {quiz.quizImage ? (
                         <img
                             src={quiz.quizImage}
-                            alt={`${quiz.quizName} 이미지`}
+                            alt={t("teacher.taskDetail.quizzes.imageAlt", { quizName: quiz.quizName })}
                             className="h-20 w-20 rounded-2xl border border-slate-200 object-cover"
                         />
                     ) : (
@@ -739,11 +745,11 @@ function QuizCard({
                         </div>
 
                         <h3 className="text-lg font-black text-slate-900">
-                            {quiz.quizName || "제목 없는 퀴즈"}
+                            {quiz.quizName || t("teacher.taskDetail.quizzes.untitled")}
                         </h3>
 
                         <p className="mt-1 text-sm font-semibold text-slate-400">
-                            문제 ID: {quiz.quizId}
+                            {t("teacher.taskDetail.quizzes.questionId", { quizId: quiz.quizId })}
                         </p>
                     </div>
                 </div>
@@ -754,7 +760,7 @@ function QuizCard({
                         className="inline-flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-extrabold text-blue-600 hover:bg-blue-100 transition-colors"
                     >
                         <Edit size={16} />
-                        수정
+                        {t("teacher.taskDetail.quizzes.edit")}
                     </button>
 
                     <button
@@ -762,7 +768,7 @@ function QuizCard({
                         className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-extrabold text-red-600 hover:bg-red-100 transition-colors"
                     >
                         <Trash2 size={16} />
-                        삭제
+                        {t("teacher.taskDetail.quizzes.delete")}
                     </button>
                 </div>
             </div>

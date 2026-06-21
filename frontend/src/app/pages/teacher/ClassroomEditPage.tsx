@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 import {
     ArrowLeft,
@@ -51,6 +52,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export function ClassroomEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [classroom, setClassroom] = useState<Classroom | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -102,7 +104,7 @@ export function ClassroomEditPage() {
             );
 
             if (!res.ok) {
-                throw new Error("클래스룸 정보를 불러오지 못했습니다.");
+                throw new Error(t("teacher.classroomEdit.alerts.loadFailed"));
             }
 
             const result = await res.json();
@@ -114,7 +116,7 @@ export function ClassroomEditPage() {
             });
         } catch (error) {
             console.error(error);
-            alert("클래스룸 정보를 불러오는 중 오류가 발생했습니다.");
+            alert(t("teacher.classroomEdit.alerts.loadError"));
         } finally {
             setIsLoading(false);
         }
@@ -144,15 +146,15 @@ export function ClassroomEditPage() {
         e.preventDefault();
 
         if (!createForm.username.trim()) {
-            return alert("학생 이름을 입력해주세요.");
+            return alert(t("teacher.classroomEdit.alerts.studentNameRequired"));
         }
 
         if (!createForm.loginId.trim()) {
-            return alert("로그인 ID를 입력해주세요.");
+            return alert(t("teacher.classroomEdit.alerts.loginIdRequired"));
         }
 
         if (!createForm.password.trim()) {
-            return alert("초기 비밀번호를 입력해주세요.");
+            return alert(t("teacher.classroomEdit.alerts.initialPasswordRequired"));
         }
 
         try {
@@ -182,7 +184,7 @@ export function ClassroomEditPage() {
             );
 
             if (!res.ok) {
-                throw new Error("학생 계정 생성에 실패했습니다.");
+                throw new Error(t("teacher.classroomEdit.alerts.createFailed"));
             }
 
             const result = await res.json();
@@ -207,10 +209,10 @@ export function ClassroomEditPage() {
             });
 
             setIsCreatingStudent(false);
-            alert("학생 계정이 생성되었습니다.");
+            alert(t("teacher.classroomEdit.alerts.createSuccess"));
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "학생 계정 생성 중 오류가 발생했습니다.");
+            alert(error.message || t("teacher.classroomEdit.alerts.createUnknown"));
         } finally {
             setIsCreating(false);
         }
@@ -238,7 +240,7 @@ export function ClassroomEditPage() {
 
     const handleUpdateStudent = async (studentId: number) => {
         if (!editForm.name.trim()) {
-            return alert("학생 이름을 입력해주세요.");
+            return alert(t("teacher.classroomEdit.alerts.studentNameRequired"));
         }
 
         try {
@@ -275,7 +277,7 @@ export function ClassroomEditPage() {
             );
 
             if (!res.ok) {
-                throw new Error("학생 정보 수정에 실패했습니다.");
+                throw new Error(t("teacher.classroomEdit.alerts.updateFailed"));
             }
 
             let updatedStudent: Partial<Student> | null = null;
@@ -310,18 +312,18 @@ export function ClassroomEditPage() {
             handleCancelEdit();
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "학생 정보 수정 중 오류가 발생했습니다.");
+            alert(error.message || t("teacher.classroomEdit.alerts.updateUnknown"));
         } finally {
             setUpdatingStudentId(null);
         }
     };
 
     const handleRemoveStudent = async (student: Student) => {
-        const studentName = student.name || student.username || "해당 학생";
+        const studentName = student.name || student.username || t("teacher.classroomEdit.alerts.fallbackStudentName");
 
         if (
             !window.confirm(
-                `${studentName} 학생을 이 클래스룸에서 제외하시겠습니까?`,
+                t("teacher.classroomEdit.alerts.removeConfirm", { studentName }),
             )
         ) {
             return;
@@ -340,7 +342,7 @@ export function ClassroomEditPage() {
             );
 
             if (!res.ok) {
-                throw new Error("학생 제외 처리에 실패했습니다.");
+                throw new Error(t("teacher.classroomEdit.alerts.removeFailed"));
             }
 
             setClassroom((prev) => {
@@ -358,14 +360,14 @@ export function ClassroomEditPage() {
             });
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "학생 제외 중 오류가 발생했습니다.");
+            alert(error.message || t("teacher.classroomEdit.alerts.removeUnknown"));
         }
     };
 
     if (isLoading) {
         return (
             <div style={centerStyle}>
-                <p style={loadingTextStyle}>클래스룸 정보를 불러오는 중입니다...</p>
+                <p style={loadingTextStyle}>{t("teacher.classroomEdit.loading")}</p>
             </div>
         );
     }
@@ -373,7 +375,7 @@ export function ClassroomEditPage() {
     if (!classroom) {
         return (
             <div style={centerStyle}>
-                <p style={emptyTextStyle}>클래스룸 정보를 찾을 수 없습니다.</p>
+                <p style={emptyTextStyle}>{t("teacher.classroomEdit.empty")}</p>
             </div>
         );
     }
@@ -387,28 +389,28 @@ export function ClassroomEditPage() {
                     style={backButtonStyle}
                 >
                     <ArrowLeft size={18} />
-                    목록으로
+                    {t("teacher.classroomEdit.backToList")}
                 </button>
 
                 <div>
                     <p style={eyebrowStyle}>Classroom Edit</p>
                     <h1 style={titleStyle}>{classroom.className}</h1>
                     <p style={subtitleStyle}>
-                        학생 계정 생성, 정보 수정, 클래스룸 제외를 관리합니다.
+                        {t("teacher.classroomEdit.subtitle")}
                     </p>
                 </div>
             </div>
 
             <section style={summaryGridStyle}>
                 <div style={summaryCardStyle}>
-                    <span style={summaryLabelStyle}>클래스룸</span>
+                    <span style={summaryLabelStyle}>{t("teacher.classroomEdit.summary.classroom")}</span>
                     <strong style={summaryValueStyle}>{classroom.className}</strong>
                 </div>
 
                 <div style={summaryCardStyle}>
-                    <span style={summaryLabelStyle}>등록 학생</span>
+                    <span style={summaryLabelStyle}>{t("teacher.classroomEdit.summary.registeredStudents")}</span>
                     <strong style={summaryValueStyle}>
-                        {classroom.students.length}명
+                        {t("teacher.classroomEdit.summary.studentCount", { count: classroom.students.length })}
                     </strong>
                 </div>
             </section>
@@ -416,9 +418,9 @@ export function ClassroomEditPage() {
             <section style={sectionStyle}>
                 <div style={sectionHeaderStyle}>
                     <div>
-                        <h2 style={sectionTitleStyle}>학생 관리</h2>
+                        <h2 style={sectionTitleStyle}>{t("teacher.classroomEdit.studentManagement")}</h2>
                         <p style={sectionDescriptionStyle}>
-                            DB PK는 화면에 표시하지 않고, 내부 요청에만 사용합니다.
+                            {t("teacher.classroomEdit.studentManagementDescription")}
                         </p>
                     </div>
 
@@ -428,7 +430,7 @@ export function ClassroomEditPage() {
                         style={primaryButtonStyle}
                     >
                         {isCreatingStudent ? <X size={17} /> : <UserPlus size={17} />}
-                        {isCreatingStudent ? "닫기" : "새 학생 만들기"}
+                        {isCreatingStudent ? t("teacher.classroomEdit.close") : t("teacher.classroomEdit.newStudent")}
                     </button>
                 </div>
 
@@ -445,7 +447,7 @@ export function ClassroomEditPage() {
                             <div style={createBoxStyle}>
                                 <div style={formGridStyle}>
                                     <label style={fieldStyle}>
-                                        <span style={fieldLabelStyle}>학생 이름 *</span>
+                                        <span style={fieldLabelStyle}>{t("teacher.classroomEdit.form.studentName")}</span>
                                         <input
                                             value={createForm.username}
                                             onChange={(e) =>
@@ -454,13 +456,13 @@ export function ClassroomEditPage() {
                                                     username: e.target.value,
                                                 })
                                             }
-                                            placeholder="예: 김민지"
+                                            placeholder={t("teacher.classroomEdit.form.studentNamePlaceholder")}
                                             style={inputStyle}
                                         />
                                     </label>
 
                                     <label style={fieldStyle}>
-                                        <span style={fieldLabelStyle}>성별</span>
+                                        <span style={fieldLabelStyle}>{t("teacher.classroomEdit.form.gender")}</span>
                                         <select
                                             value={createForm.gender}
                                             onChange={(e) =>
@@ -471,13 +473,13 @@ export function ClassroomEditPage() {
                                             }
                                             style={inputStyle}
                                         >
-                                            <option value="MALE">남학생</option>
-                                            <option value="FEMALE">여학생</option>
+                                            <option value="MALE">{t("common.gender.maleStudent")}</option>
+                                            <option value="FEMALE">{t("common.gender.femaleStudent")}</option>
                                         </select>
                                     </label>
 
                                     <label style={fieldStyle}>
-                                        <span style={fieldLabelStyle}>로그인 ID *</span>
+                                        <span style={fieldLabelStyle}>{t("teacher.classroomEdit.form.loginId")}</span>
                                         <input
                                             value={createForm.loginId}
                                             onChange={(e) =>
@@ -486,13 +488,13 @@ export function ClassroomEditPage() {
                                                     loginId: e.target.value,
                                                 })
                                             }
-                                            placeholder="학생 로그인 ID"
+                                            placeholder={t("teacher.classroomEdit.form.loginIdPlaceholder")}
                                             style={inputStyle}
                                         />
                                     </label>
 
                                     <label style={fieldStyle}>
-                                        <span style={fieldLabelStyle}>초기 비밀번호 *</span>
+                                        <span style={fieldLabelStyle}>{t("teacher.classroomEdit.form.initialPassword")}</span>
                                         <input
                                             type="password"
                                             value={createForm.password}
@@ -502,14 +504,14 @@ export function ClassroomEditPage() {
                                                     password: e.target.value,
                                                 })
                                             }
-                                            placeholder="초기 비밀번호"
+                                            placeholder={t("teacher.classroomEdit.form.initialPasswordPlaceholder")}
                                             style={inputStyle}
                                         />
                                     </label>
 
                                     <label style={{ ...fieldStyle, gridColumn: "1 / -1" }}>
                                         <span style={fieldLabelStyle}>
-                                            학부모 전화번호
+                                            {t("teacher.classroomEdit.form.parentPhoneNumber")}
                                         </span>
                                         <input
                                             value={createForm.parentPhoneNumber}
@@ -519,7 +521,7 @@ export function ClassroomEditPage() {
                                                     parentPhoneNumber: e.target.value,
                                                 })
                                             }
-                                            placeholder="선택 입력"
+                                            placeholder={t("teacher.classroomEdit.form.optionalPlaceholder")}
                                             style={inputStyle}
                                         />
                                     </label>
@@ -531,7 +533,7 @@ export function ClassroomEditPage() {
                                         onClick={() => setIsCreatingStudent(false)}
                                         style={secondaryButtonStyle}
                                     >
-                                        취소
+                                        {t("teacher.classroomEdit.buttons.cancel")}
                                     </button>
                                     <button
                                         type="submit"
@@ -542,7 +544,7 @@ export function ClassroomEditPage() {
                                         }}
                                     >
                                         <UserPlus size={17} />
-                                        {isCreating ? "생성 중..." : "계정 생성"}
+                                        {isCreating ? t("teacher.classroomEdit.form.creating") : t("teacher.classroomEdit.form.createAccount")}
                                     </button>
                                 </div>
                             </div>
@@ -556,13 +558,13 @@ export function ClassroomEditPage() {
                         <input
                             value={searchKeyword}
                             onChange={(e) => setSearchKeyword(e.target.value)}
-                            placeholder="학생 이름, 로그인 ID, 학부모 번호 검색"
+                            placeholder={t("teacher.classroomEdit.searchPlaceholder")}
                             style={searchInputStyle}
                         />
                     </div>
 
                     <span style={countBadgeStyle}>
-                        {filteredStudents.length}명 표시 중
+                        {t("teacher.classroomEdit.filteredCount", { count: filteredStudents.length })}
                     </span>
                 </div>
 
@@ -570,13 +572,13 @@ export function ClassroomEditPage() {
                     <table style={tableStyle}>
                         <thead>
                         <tr>
-                            <th style={thStyle}>학생 이름</th>
-                            <th style={thStyle}>로그인 ID</th>
-                            <th style={thStyle}>성별</th>
-                            <th style={thStyle}>학부모 번호</th>
-                            <th style={thStyle}>스탬프</th>
-                            <th style={thStyle}>쿠폰</th>
-                            <th style={{ ...thStyle, textAlign: "right" }}>관리</th>
+                            <th style={thStyle}>{t("teacher.classroomEdit.table.studentName")}</th>
+                            <th style={thStyle}>{t("teacher.classroomEdit.table.loginId")}</th>
+                            <th style={thStyle}>{t("teacher.classroomEdit.table.gender")}</th>
+                            <th style={thStyle}>{t("teacher.classroomEdit.table.parentPhoneNumber")}</th>
+                            <th style={thStyle}>{t("teacher.classroomEdit.table.stamp")}</th>
+                            <th style={thStyle}>{t("teacher.classroomEdit.table.coupon")}</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>{t("teacher.classroomEdit.table.manage")}</th>
                         </tr>
                         </thead>
 
@@ -608,7 +610,7 @@ export function ClassroomEditPage() {
                                                         )}
                                                     </span>
                                                 <strong style={studentNameStyle}>
-                                                    {student.name || student.username || "이름 없음"}
+                                                    {student.name || student.username || t("teacher.classroomEdit.defaultStudentName")}
                                                 </strong>
                                             </div>
                                         )}
@@ -623,7 +625,7 @@ export function ClassroomEditPage() {
                                                         loginId: e.target.value,
                                                     })
                                                 }
-                                                placeholder="로그인 ID"
+                                                placeholder={t("teacher.classroomEdit.table.loginId")}
                                                 style={smallInputStyle}
                                             />
                                         ) : (
@@ -644,12 +646,12 @@ export function ClassroomEditPage() {
                                                 }
                                                 style={smallInputStyle}
                                             >
-                                                <option value="MALE">남학생</option>
-                                                <option value="FEMALE">여학생</option>
+                                                <option value="MALE">{t("common.gender.maleStudent")}</option>
+                                                <option value="FEMALE">{t("common.gender.femaleStudent")}</option>
                                             </select>
                                         ) : (
                                             <span style={genderBadgeStyle(student.gender)}>
-                                                    {student.gender === "MALE" ? "남학생" : "여학생"}
+                                                    {student.gender === "MALE" ? t("common.gender.maleStudent") : t("common.gender.femaleStudent")}
                                                 </span>
                                         )}
                                     </td>
@@ -664,7 +666,7 @@ export function ClassroomEditPage() {
                                                         parentPhoneNumber: e.target.value,
                                                     })
                                                 }
-                                                placeholder="선택 입력"
+                                                placeholder={t("teacher.classroomEdit.form.optionalPlaceholder")}
                                                 style={smallInputStyle}
                                             />
                                         ) : (
@@ -696,7 +698,7 @@ export function ClassroomEditPage() {
                                                     style={iconPrimaryButtonStyle}
                                                 >
                                                     <Save size={15} />
-                                                    {isUpdating ? "저장 중" : "저장"}
+                                                    {isUpdating ? t("teacher.classroomEdit.buttons.saving") : t("teacher.classroomEdit.buttons.save")}
                                                 </button>
 
                                                 <button
@@ -705,7 +707,7 @@ export function ClassroomEditPage() {
                                                     style={iconSecondaryButtonStyle}
                                                 >
                                                     <X size={15} />
-                                                    취소
+                                                    {t("teacher.classroomEdit.buttons.cancel")}
                                                 </button>
                                             </div>
                                         ) : (
@@ -716,7 +718,7 @@ export function ClassroomEditPage() {
                                                     style={iconSecondaryButtonStyle}
                                                 >
                                                     <Pencil size={15} />
-                                                    수정
+                                                    {t("teacher.classroomEdit.buttons.edit")}
                                                 </button>
 
                                                 <button
@@ -725,7 +727,7 @@ export function ClassroomEditPage() {
                                                     style={dangerButtonStyle}
                                                 >
                                                     <Trash2 size={15} />
-                                                    제외
+                                                    {t("teacher.classroomEdit.buttons.remove")}
                                                 </button>
                                             </div>
                                         )}
@@ -738,9 +740,9 @@ export function ClassroomEditPage() {
 
                     {filteredStudents.length === 0 && (
                         <div style={emptyBoxStyle}>
-                            <p style={emptyTitleStyle}>표시할 학생이 없습니다.</p>
+                            <p style={emptyTitleStyle}>{t("teacher.classroomEdit.emptyStudentsTitle")}</p>
                             <p style={emptyTextStyle}>
-                                검색어를 지우거나 새 학생을 추가해주세요.
+                                {t("teacher.classroomEdit.emptyStudentsDescription")}
                             </p>
                         </div>
                     )}

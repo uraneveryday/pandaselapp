@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
     ArrowLeft,
     CheckCircle2,
@@ -20,6 +21,7 @@ interface TaskListItemDTO {
 export function ClassroomTaskListPage() {
     const { id: classroomId } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [tasks, setTasks] = useState<TaskListItemDTO[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +33,7 @@ export function ClassroomTaskListPage() {
 
     const fetchTasks = useCallback(async () => {
         if (!classroomId) {
-            setErrorMessage("교실 정보를 확인할 수 없습니다.");
+            setErrorMessage(t("teacher.taskList.errors.invalidClassroom"));
             setIsLoading(false);
             return;
         }
@@ -62,7 +64,7 @@ export function ClassroomTaskListPage() {
             }
 
             if (!response.ok) {
-                throw new Error(`숙제 목록 조회 실패: ${response.status}`);
+                throw new Error(`Task list load failed: ${response.status}`);
             }
 
             const data: TaskListItemDTO[] = await response.json();
@@ -74,11 +76,11 @@ export function ClassroomTaskListPage() {
             );
         } catch (error) {
             console.error("숙제 목록 조회 오류:", error);
-            setErrorMessage("숙제 목록을 불러오지 못했습니다.");
+            setErrorMessage(t("teacher.taskList.errors.loadFailed"));
         } finally {
             setIsLoading(false);
         }
-    }, [classroomId, navigate]);
+    }, [classroomId, navigate, t]);
 
     useEffect(() => {
         fetchTasks();
@@ -95,7 +97,7 @@ export function ClassroomTaskListPage() {
         }
 
         const confirmed = window.confirm(
-            "이 숙제를 마감하시겠습니까?\n마감 후에는 학생들이 더 이상 제출할 수 없습니다."
+            t("teacher.taskList.confirm.closeTask")
         );
 
         if (!confirmed) {
@@ -123,7 +125,7 @@ export function ClassroomTaskListPage() {
             );
 
             if (!response.ok) {
-                throw new Error(`숙제 마감 실패: ${response.status}`);
+                throw new Error(`Task finish failed: ${response.status}`);
             }
 
             setTasks(previousTasks =>
@@ -135,7 +137,7 @@ export function ClassroomTaskListPage() {
             );
         } catch (error) {
             console.error("숙제 마감 오류:", error);
-            window.alert("숙제를 마감하지 못했습니다.");
+            window.alert(t("teacher.taskList.errors.closeFailed"));
         } finally {
             setFinishingTaskId(null);
         }
@@ -157,7 +159,7 @@ export function ClassroomTaskListPage() {
                     className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-900"
                 >
                     <ArrowLeft size={17} />
-                    교실 관리로 돌아가기
+                    {t("teacher.taskList.backToClassroom")}
                 </button>
 
                 {/* 페이지 헤더 */}
@@ -169,11 +171,11 @@ export function ClassroomTaskListPage() {
                         </div>
 
                         <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                            숙제 관리
+                            {t("teacher.taskList.title")}
                         </h1>
 
                         <p className="mt-2 text-sm text-slate-500">
-                            등록된 숙제 {tasks.length}개
+                            {t("teacher.taskList.registeredCount", { count: tasks.length })}
                         </p>
                     </div>
 
@@ -187,7 +189,7 @@ export function ClassroomTaskListPage() {
                         className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-600 active:scale-[0.98]"
                     >
                         <Plus size={18} />
-                        새 숙제 만들기
+                        {t("teacher.taskList.create")}
                     </button>
                 </header>
 
@@ -209,7 +211,7 @@ export function ClassroomTaskListPage() {
                             className="mt-5 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
                         >
                             <RefreshCw size={16} />
-                            다시 불러오기
+                            {t("teacher.taskList.retry")}
                         </button>
                     </div>
                 )}
@@ -224,11 +226,11 @@ export function ClassroomTaskListPage() {
                             </div>
 
                             <h2 className="text-lg font-bold text-slate-800">
-                                등록된 숙제가 없습니다
+                                {t("teacher.taskList.emptyTitle")}
                             </h2>
 
                             <p className="mt-2 text-sm text-slate-500">
-                                첫 번째 숙제를 만들어 학생들에게 배정해보세요.
+                                {t("teacher.taskList.emptyDescription")}
                             </p>
                         </div>
                     )}
@@ -278,6 +280,7 @@ function TaskListItem({
                           onOpen,
                           onFinish,
                       }: TaskListItemProps) {
+    const { t } = useTranslation();
     const handleKeyDown = (
         event: React.KeyboardEvent<HTMLElement>
     ) => {
@@ -315,12 +318,12 @@ function TaskListItem({
                     {task.isDone ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
                             <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                            마감됨
+                            {t("teacher.taskList.closed")}
                         </span>
                     ) : (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
                             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                            진행 중
+                            {t("teacher.taskList.open")}
                         </span>
                     )}
                 </div>
@@ -346,17 +349,17 @@ function TaskListItem({
                                     className="animate-spin"
                                 />
                                 <span className="hidden sm:inline">
-                                    처리 중
+                                    {t("teacher.taskList.processing")}
                                 </span>
                             </>
                         ) : (
-                            "마감하기"
+                            t("teacher.taskList.closeTask")
                         )}
                     </button>
                 ) : (
                     <div className="hidden items-center gap-1.5 px-2 text-xs font-semibold text-slate-400 sm:flex">
                         <CheckCircle2 size={16} />
-                        마감 완료
+                        {t("teacher.taskList.closedDone")}
                     </div>
                 )}
 

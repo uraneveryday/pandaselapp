@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 // 1. 타입스크립트 인터페이스 정의 (백엔드 DTO 구조와 일치해야 함)
 interface Classroom {
@@ -10,6 +11,7 @@ interface Classroom {
 
 export function ClassroomListPage() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // 2. any[] 대신 명확한 타입 사용
     const [classrooms, setClassrooms] = useState<Classroom[]>([]);
@@ -21,7 +23,7 @@ export function ClassroomListPage() {
 
             // 3. 사전 방어: 토큰이 없으면 서버에 요청조차 보내지 않음
             if (!token) {
-                alert("로그인이 필요합니다.");
+                alert(t("teacher.classroomList.alerts.loginRequired"));
                 navigate("/login");
                 return;
             }
@@ -39,7 +41,7 @@ export function ClassroomListPage() {
                 });
 
                 if (!response.ok) {
-                    throw new Error("클래스룸 데이터를 불러오는데 실패했습니다.");
+                    throw new Error(t("teacher.classroomList.alerts.loadFailed"));
                 }
 
                 const result = await response.json();
@@ -54,14 +56,14 @@ export function ClassroomListPage() {
 
             } catch (error) {
                 console.error("API 통신 에러:", error);
-                alert("데이터를 불러올 수 없습니다. 서버 연결을 확인해주세요.");
+                alert(t("teacher.classroomList.alerts.serverCheck"));
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchClassrooms();
-    }, [navigate]);
+    }, [navigate, t]);
 
     // 6. 프론트엔드 전용 라우팅 경로로 수정 (api/ 제거 및 절대 경로 사용)
     const handleCreateClick = () => {
@@ -80,19 +82,19 @@ export function ClassroomListPage() {
     return (
         <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                <h2 style={{ margin: 0 }}>🏫 내 클래스룸 목록</h2>
+                <h2 style={{ margin: 0 }}>{t("teacher.classroomList.title")}</h2>
                 <button onClick={handleCreateClick} style={createButtonStyle}>
-                    ➕ 클래스룸 생성
+                    {t("teacher.classroomList.create")}
                 </button>
             </div>
 
             {isLoading ? (
                 <div style={{ padding: "40px", textAlign: "center", color: "#666" }}>
-                    데이터를 불러오는 중입니다... ⏳
+                    {t("teacher.classroomList.loading")}
                 </div>
             ) : classrooms.length === 0 ? (
                 <div style={{ padding: "40px", textAlign: "center", backgroundColor: "#f9f9f9", borderRadius: "8px" }}>
-                    <p style={{ color: "#666" }}>아직 생성된 클래스룸이 없습니다.</p>
+                    <p style={{ color: "#666" }}>{t("teacher.classroomList.empty")}</p>
                 </div>
             ) : (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
@@ -102,11 +104,11 @@ export function ClassroomListPage() {
                                 <h3 style={{ margin: "0 0 5px 0", fontSize: "18px" }}>{cls.className}</h3>
                                 {/* DTO 최적화를 반영하여 studentCount 바로 렌더링 */}
                                 <span style={{ fontSize: "14px", color: "#666" }}>
-                                    학생 수: {cls.studentCount || 0}명
+                                    {t("teacher.classroomList.studentCount", { count: cls.studentCount || 0 })}
                                 </span>
                             </div>
                             <button onClick={(e) => handleEditClick(e, cls.id)} style={editButtonStyle}>
-                                ✏️ 수정
+                                {t("teacher.classroomList.edit")}
                             </button>
                         </li>
                     ))}

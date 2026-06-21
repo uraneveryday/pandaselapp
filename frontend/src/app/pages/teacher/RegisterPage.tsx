@@ -5,6 +5,7 @@ import {
     type FormEvent,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
     ArrowLeft,
     Lock,
@@ -52,6 +53,7 @@ async function readResponseBody(
 
 export function RegisterPage() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState<RegisterFormData>({
         userId: "",
@@ -79,42 +81,42 @@ export function RegisterPage() {
 
     const validateForm = () => {
         if (!USER_ID_PATTERN.test(formData.userId.trim())) {
-            return "아이디는 영문, 숫자, 밑줄을 사용하여 5~20자로 입력해주세요.";
+            return t("register.errors.loginIdFormat");
         }
 
         if (
             formData.password.length < 8 ||
             formData.password.length > 20
         ) {
-            return "비밀번호는 8~20자로 입력해주세요.";
+            return t("register.errors.passwordLength");
         }
 
         if (!/[A-Za-z]/.test(formData.password)) {
-            return "비밀번호에는 영문자가 한 글자 이상 포함되어야 합니다.";
+            return t("register.errors.passwordLetter");
         }
 
         if (!/\d/.test(formData.password)) {
-            return "비밀번호에는 숫자가 한 글자 이상 포함되어야 합니다.";
+            return t("register.errors.passwordNumber");
         }
 
         if (!/[^A-Za-z0-9]/.test(formData.password)) {
-            return "비밀번호에는 특수문자가 한 글자 이상 포함되어야 합니다.";
+            return t("register.errors.passwordSpecial");
         }
 
         if (/\s/.test(formData.password)) {
-            return "비밀번호에는 공백을 사용할 수 없습니다.";
+            return t("register.errors.passwordNoSpace");
         }
 
         if (formData.password !== formData.passwordConfirm) {
-            return "비밀번호와 비밀번호 확인이 일치하지 않습니다.";
+            return t("register.errors.passwordMismatch");
         }
 
         if (!formData.name.trim()) {
-            return "이름을 입력해주세요.";
+            return t("register.errors.nameRequired");
         }
 
         if (!formData.email.trim()) {
-            return "이메일을 입력해주세요.";
+            return t("register.errors.emailRequired");
         }
 
         return null;
@@ -169,22 +171,21 @@ export function RegisterPage() {
                 throw new Error(
                     data.message ||
                         data.error ||
-                        "회원가입에 실패했습니다."
+                        t("register.errors.signupFailed")
                 );
             }
 
             navigate("/login", {
                 replace: true,
                 state: {
-                    successMessage:
-                        "회원가입이 완료되었습니다. 선생님 계정으로 로그인해주세요.",
+                    successMessage: t("register.success"),
                 },
             });
         } catch (error) {
             const message =
                 error instanceof Error
                     ? error.message
-                    : "회원가입 중 오류가 발생했습니다.";
+                    : t("register.errors.unknown");
 
             setResponseMsg(message);
             console.error("회원가입 에러:", error);
@@ -202,7 +203,7 @@ export function RegisterPage() {
                     className="mb-8 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    로그인으로 돌아가기
+                    {t("register.backToLogin")}
                 </button>
 
                 <div className="flex flex-col items-center mb-8">
@@ -211,22 +212,22 @@ export function RegisterPage() {
                     </div>
 
                     <h1 className="text-2xl font-bold text-gray-800">
-                        선생님 회원가입
+                        {t("register.title")}
                     </h1>
 
                     <p className="mt-2 text-sm text-gray-500 text-center leading-6">
-                        학급과 학습 활동을 관리할
+                        {t("register.subtitleLine1")}
                         <br />
-                        선생님 계정을 만들어주세요.
+                        {t("register.subtitleLine2")}
                     </p>
 
                     <div className="w-full mt-5 px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl">
                         <p className="text-xs text-amber-700 text-center leading-5">
-                            이 페이지에서는 선생님 계정만 가입할 수
-                            있습니다.
+                            {t("register.teacherOnlyLine1")}
                             <br />
-                            학생 계정은 가입 후 학급 관리 화면에서
-                            생성해주세요.
+                            {t("register.studentAccountGuideLine1")}
+                            <br />
+                            {t("register.studentAccountGuideLine2")}
                         </p>
                     </div>
                 </div>
@@ -249,7 +250,7 @@ export function RegisterPage() {
                             htmlFor="userId"
                             className="text-xs font-semibold text-gray-600 ml-1"
                         >
-                            아이디
+                            {t("register.fields.loginId")}
                             <span className="text-red-400 ml-1">*</span>
                         </label>
 
@@ -262,7 +263,7 @@ export function RegisterPage() {
                                 name="userId"
                                 value={formData.userId}
                                 onChange={handleChange}
-                                placeholder="영문, 숫자, 밑줄 5~20자"
+                                placeholder={t("register.fields.loginIdPlaceholder")}
                                 autoComplete="username"
                                 minLength={5}
                                 maxLength={20}
@@ -278,7 +279,7 @@ export function RegisterPage() {
                             htmlFor="password"
                             className="text-xs font-semibold text-gray-600 ml-1"
                         >
-                            비밀번호
+                            {t("register.fields.password")}
                             <span className="text-red-400 ml-1">*</span>
                         </label>
 
@@ -291,7 +292,7 @@ export function RegisterPage() {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                placeholder="영문, 숫자, 특수문자 포함 8~20자"
+                                placeholder={t("register.fields.passwordPlaceholder")}
                                 autoComplete="new-password"
                                 minLength={8}
                                 maxLength={20}
@@ -307,7 +308,7 @@ export function RegisterPage() {
                             htmlFor="passwordConfirm"
                             className="text-xs font-semibold text-gray-600 ml-1"
                         >
-                            비밀번호 확인
+                            {t("register.fields.passwordConfirm")}
                             <span className="text-red-400 ml-1">*</span>
                         </label>
 
@@ -320,7 +321,7 @@ export function RegisterPage() {
                                 name="passwordConfirm"
                                 value={formData.passwordConfirm}
                                 onChange={handleChange}
-                                placeholder="비밀번호를 다시 입력하세요"
+                                placeholder={t("register.fields.passwordConfirmPlaceholder")}
                                 autoComplete="new-password"
                                 required
                                 disabled={isLoading}
@@ -334,7 +335,7 @@ export function RegisterPage() {
                             htmlFor="name"
                             className="text-xs font-semibold text-gray-600 ml-1"
                         >
-                            이름
+                            {t("register.fields.name")}
                             <span className="text-red-400 ml-1">*</span>
                         </label>
 
@@ -347,7 +348,7 @@ export function RegisterPage() {
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                placeholder="선생님 이름을 입력하세요"
+                                placeholder={t("register.fields.namePlaceholder")}
                                 autoComplete="name"
                                 required
                                 disabled={isLoading}
@@ -361,7 +362,7 @@ export function RegisterPage() {
                             htmlFor="email"
                             className="text-xs font-semibold text-gray-600 ml-1"
                         >
-                            이메일
+                            {t("register.fields.email")}
                             <span className="text-red-400 ml-1">*</span>
                         </label>
 
@@ -389,9 +390,9 @@ export function RegisterPage() {
                                 htmlFor="gender"
                                 className="text-xs font-semibold text-gray-600 ml-1"
                             >
-                                성별
+                                {t("register.fields.gender")}
                                 <span className="ml-1 font-normal text-gray-400">
-                                    선택
+                                    {t("common.optional")}
                                 </span>
                             </label>
 
@@ -403,9 +404,9 @@ export function RegisterPage() {
                                 disabled={isLoading}
                                 className="w-full px-4 py-3.5 border border-gray-200 rounded-2xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 focus:bg-white transition-all"
                             >
-                                <option value="NONE">선택하지 않음</option>
-                                <option value="MALE">남성</option>
-                                <option value="FEMALE">여성</option>
+                                <option value="NONE">{t("common.gender.none")}</option>
+                                <option value="MALE">{t("common.gender.male")}</option>
+                                <option value="FEMALE">{t("common.gender.female")}</option>
                             </select>
                         </div>
 
@@ -414,9 +415,9 @@ export function RegisterPage() {
                                 htmlFor="phoneNumber"
                                 className="text-xs font-semibold text-gray-600 ml-1"
                             >
-                                전화번호
+                                {t("register.fields.phoneNumber")}
                                 <span className="ml-1 font-normal text-gray-400">
-                                    선택
+                                    {t("common.optional")}
                                 </span>
                             </label>
 
@@ -448,8 +449,8 @@ export function RegisterPage() {
 }`}
                     >
                         {isLoading
-                            ? "가입 처리 중..."
-                            : "선생님 계정 만들기"}
+                            ? t("register.submitting")
+                            : t("register.submit")}
                     </button>
                 </form>
             </div>

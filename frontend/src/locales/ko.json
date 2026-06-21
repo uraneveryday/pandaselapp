@@ -1,0 +1,670 @@
+{
+  "common": {
+    "confirm": "확인",
+    "cancel": "취소",
+    "save": "저장",
+    "edit": "수정",
+    "delete": "삭제",
+    "close": "닫기",
+    "back": "뒤로 가기",
+    "backToList": "목록으로",
+    "loading": "불러오는 중...",
+    "retry": "다시 시도",
+    "error": "오류가 발생했습니다.",
+    "success": "완료되었습니다.",
+    "select": "선택",
+    "optional": "선택",
+    "none": "선택하지 않음",
+    "search": "검색",
+    "created": "생성 중...",
+    "saving": "저장 중...",
+    "submitting": "제출 중...",
+    "processing": "처리 중",
+    "status": {
+      "closed": "마감됨",
+      "open": "진행 중",
+      "done": "완료",
+      "expired": "기한 만료"
+    },
+    "auth": {
+      "loginExpired": "로그인이 만료되었습니다. 다시 로그인해 주세요.",
+      "loginRequired": "로그인이 필요한 서비스입니다.",
+      "normalLoginRequired": "정상적인 로그인 절차가 필요합니다.",
+      "teacherOnly": "👩‍🏫 선생님만 접근할 수 있는 관리자 페이지입니다.",
+      "noLoginInfo": "로그인 정보가 없습니다. 다시 로그인해주세요."
+    },
+    "gender": {
+      "label": "성별",
+      "male": "남성",
+      "female": "여성",
+      "maleStudent": "남학생",
+      "femaleStudent": "여학생",
+      "none": "선택하지 않음"
+    },
+    "unit": {
+      "count": "{{count}}개",
+      "coupon": "{{count}}장",
+      "person": "{{count}}명",
+      "day": "{{count}}일",
+      "point": "{{count}}점",
+      "percent": "{{count}}%",
+      "stamps": "{{count}}개",
+      "charsMax": "{{count}} / {{max}}자"
+    }
+  },
+  "login": {
+    "title": "로그인",
+    "subtitleLine1": "선생님 또는 학생 계정으로 로그인하여",
+    "subtitleLine2": "학습을 시작해보세요.",
+    "loginId": "아이디",
+    "loginIdPlaceholder": "아이디를 입력하세요",
+    "password": "비밀번호",
+    "passwordPlaceholder": "비밀번호를 입력하세요",
+    "submit": "로그인",
+    "loading": "로그인 중...",
+    "teacherAccountQuestion": "아직 선생님 계정이 없으신가요?",
+    "teacherRegister": "선생님 회원가입",
+    "studentAccountGuideLine1": "학생 계정은 담당 선생님이",
+    "studentAccountGuideLine2": "학급 관리 화면에서 생성할 수 있습니다.",
+    "languageKo": "한국어",
+    "languageZh": "中文",
+    "errors": {
+      "required": "아이디와 비밀번호를 모두 입력해주세요.",
+      "invalidCredential": "아이디 또는 비밀번호가 일치하지 않습니다.",
+      "missingToken": "서버로부터 로그인 토큰을 전달받지 못했습니다.",
+      "invalidRole": "사용자 권한 정보를 확인할 수 없습니다.",
+      "unknown": "로그인 중 오류가 발생했습니다."
+    }
+  },
+  "register": {
+    "backToLogin": "로그인으로 돌아가기",
+    "title": "선생님 회원가입",
+    "subtitleLine1": "학급과 학습 활동을 관리할",
+    "subtitleLine2": "선생님 계정을 만들어주세요.",
+    "teacherOnlyLine1": "이 페이지에서는 선생님 계정만 가입할 수 있습니다.",
+    "studentAccountGuideLine1": "학생 계정은 가입 후 학급 관리 화면에서",
+    "studentAccountGuideLine2": "생성해주세요.",
+    "fields": {
+      "loginId": "아이디",
+      "loginIdPlaceholder": "영문, 숫자, 밑줄 5~20자",
+      "password": "비밀번호",
+      "passwordPlaceholder": "영문, 숫자, 특수문자 포함 8~20자",
+      "passwordConfirm": "비밀번호 확인",
+      "passwordConfirmPlaceholder": "비밀번호를 다시 입력하세요",
+      "name": "이름",
+      "namePlaceholder": "선생님 이름을 입력하세요",
+      "email": "이메일",
+      "gender": "성별",
+      "phoneNumber": "전화번호"
+    },
+    "submit": "선생님 계정 만들기",
+    "submitting": "가입 처리 중...",
+    "success": "회원가입이 완료되었습니다. 선생님 계정으로 로그인해주세요.",
+    "errors": {
+      "loginIdFormat": "아이디는 영문, 숫자, 밑줄을 사용하여 5~20자로 입력해주세요.",
+      "passwordLength": "비밀번호는 8~20자로 입력해주세요.",
+      "passwordLetter": "비밀번호에는 영문자가 한 글자 이상 포함되어야 합니다.",
+      "passwordNumber": "비밀번호에는 숫자가 한 글자 이상 포함되어야 합니다.",
+      "passwordSpecial": "비밀번호에는 특수문자가 한 글자 이상 포함되어야 합니다.",
+      "passwordNoSpace": "비밀번호에는 공백을 사용할 수 없습니다.",
+      "passwordMismatch": "비밀번호와 비밀번호 확인이 일치하지 않습니다.",
+      "nameRequired": "이름을 입력해주세요.",
+      "emailRequired": "이메일을 입력해주세요.",
+      "signupFailed": "회원가입에 실패했습니다.",
+      "unknown": "회원가입 중 오류가 발생했습니다."
+    }
+  },
+  "student": {
+    "welcome": {
+      "subtitle": "매일 조금씩, 재미있게 공부해요!",
+      "start": "시작하기",
+      "startLearning": "학습 시작하기",
+      "stats": {
+        "subjects": "학습 과목",
+        "students": "참여 학생",
+        "satisfaction": "만족도"
+      },
+      "learnTitle": "어떤 것을 배울 수 있나요?",
+      "subjects": {
+        "korean": {
+          "title": "한글 배우기",
+          "desc": "재미있는 글자 놀이"
+        },
+        "math": {
+          "title": "수학 놀이",
+          "desc": "숫자와 친구되기"
+        },
+        "art": {
+          "title": "미술 시간",
+          "desc": "색칠하고 그리기"
+        },
+        "music": {
+          "title": "음악 교실",
+          "desc": "노래하고 춤추기"
+        }
+      }
+    },
+    "myPage": {
+      "myLearning": "나의 학습",
+      "loading": "데이터를 불러오는 중입니다...",
+      "noClassroomTitle": "소속된 클래스룸이 없습니다.",
+      "goHome": "홈으로 돌아가기",
+      "todayHomework": "오늘의 학습 과제",
+      "noHomework": "야호! 지금은 할 숙제가 없어요!",
+      "task": {
+        "complete": "완료",
+        "expiredAlert": "😥 앗! ⚠️ 이미 숙제 기한이 지났어요!",
+        "expired": "⚠️ 기한 만료",
+        "start": "시작하기"
+      },
+      "errors": {
+        "normalLoginRequired": "정상적인 로그인 절차가 필요합니다."
+      }
+    },
+    "quiz": {
+      "loading": "문제를 불러오는 중...",
+      "emptyTitle": "등록된 문제가 없습니다.",
+      "backToMyPage": "마이페이지로 돌아가기",
+      "exit": "나가기",
+      "previous": "이전",
+      "next": "다음",
+      "finalSubmit": "최종 제출하기",
+      "submitting": "제출 중...",
+      "questionImageAlt": "문제 이미지",
+      "alerts": {
+        "loadFailed": "문제를 불러오는데 실패했습니다.",
+        "unansweredConfirm": "아직 풀지 않은 문제가 있습니다. 그래도 제출하시겠습니까?",
+        "submitSuccess": "숙제가 성공적으로 제출되었습니다!",
+        "submitError": "제출 중 오류가 발생했습니다. (이미 제출된 과제일 수 있습니다)",
+        "serverError": "서버와 통신할 수 없습니다."
+      }
+    },
+    "ranking": {
+      "title": "지역별 랭킹",
+      "hallOfFame": "명예의 전당",
+      "bestRegion": "최고의 학습 지역",
+      "overallRank": "전체 순위",
+      "updateNotice": "📊 순위는 매일 자정에 업데이트됩니다",
+      "rankLabel": "{{rank}}위",
+      "score": "{{score}}점",
+      "trend": {
+        "up": "상승",
+        "down": "하락",
+        "same": "유지"
+      },
+      "regions": {
+        "seoul": "서울특별시",
+        "gyeonggi": "경기도",
+        "busan": "부산광역시",
+        "incheon": "인천광역시",
+        "daegu": "대구광역시",
+        "gwangju": "광주광역시",
+        "daejeon": "대전광역시",
+        "ulsan": "울산광역시",
+        "sejong": "세종특별자치시",
+        "gangwon": "강원도"
+      }
+    }
+  },
+  "teacher": {
+    "layout": {
+      "pageTitle": "👩‍🏫 {{userName}}님 페이지",
+      "logout": "로그아웃",
+      "logoutAlert": "로그아웃 되었습니다."
+    },
+    "classroomList": {
+      "title": "🏫 내 클래스룸 목록",
+      "create": "➕ 클래스룸 생성",
+      "loading": "데이터를 불러오는 중입니다... ⏳",
+      "empty": "아직 생성된 클래스룸이 없습니다.",
+      "studentCount": "학생 수: {{count}}명",
+      "edit": "✏️ 수정",
+      "alerts": {
+        "loginRequired": "로그인이 필요합니다.",
+        "loadFailed": "클래스룸 데이터를 불러오는데 실패했습니다.",
+        "serverCheck": "데이터를 불러올 수 없습니다. 서버 연결을 확인해주세요."
+      }
+    },
+    "classroomCreate": {
+      "title": "➕ 새 클래스룸 만들기",
+      "back": "돌아가기",
+      "className": "클래스룸 이름",
+      "classNamePlaceholder": "예: 1학년 1반 심화수학",
+      "charCount": "{{count}} / 50자",
+      "submit": "클래스룸 생성하기",
+      "creating": "생성 중...",
+      "alerts": {
+        "nameRequired": "클래스룸 이름을 입력해주세요.",
+        "nameTooLong": "클래스룸 이름은 50자를 초과할 수 없습니다.",
+        "createFailed": "클래스룸 생성 실패",
+        "createSuccess": "'{{className}}' 클래스룸이 성공적으로 생성되었습니다!",
+        "unknown": "클래스룸 생성 중 오류가 발생했습니다."
+      }
+    },
+    "classroomDetail": {
+      "errors": {
+        "invalidClassroomId": "클래스룸 ID가 올바르지 않습니다.",
+        "loginExpired": "로그인이 만료되었습니다.",
+        "noPermission": "이 클래스룸을 조회할 권한이 없습니다.",
+        "notFound": "해당 클래스룸을 찾을 수 없습니다.",
+        "loadFailed": "클래스룸 정보를 불러오지 못했습니다.",
+        "unknown": "알 수 없는 오류가 발생했습니다.",
+        "couponUseFailed": "쿠폰 사용 중 오류가 발생했습니다.",
+        "couponUseNotCompleted": "쿠폰을 사용하지 못했습니다."
+      },
+      "loadingTitle": "우리 반 친구들을 불러오는 중이에요",
+      "loadingDescription": "조금만 기다려 주세요 ✨",
+      "errorTitle": "앗, 문제가 생겼어요",
+      "back": "뒤로 가기",
+      "couponUseCompleteTitle": "쿠폰 사용 완료",
+      "couponUseConfirm": "{{studentName}} 학생의 쿠폰 1개를 사용하시겠어요?",
+      "couponUseSuccess": "{{studentName}} 학생의 쿠폰 1개가 사용되었습니다!",
+      "taskManagement": "과제 관리",
+      "classroomSetting": "클래스룸 설정",
+      "friendsTitle": "함께 공부하는 친구들",
+      "studentsTitle": "우리 반 학생",
+      "studentCount": "{{count}}명",
+      "emptyStudentTitle": "아직 등록된 학생이 없어요",
+      "emptyStudentDescriptionLine1": "학생을 초대하면 이곳에 귀여운",
+      "emptyStudentDescriptionLine2": "카드로 표시됩니다.",
+      "guardianPhoneNotRegistered": "보호자 연락처 미등록",
+      "todayStamp": "오늘의 스탬프",
+      "stampGuide": "10개를 모으면 쿠폰 1개!",
+      "stampAriaLabel": "스탬프 {{count}}개",
+      "couponCount": "{{count}}개",
+      "ownedCoupon": "보유 쿠폰",
+      "useCoupon": "쿠폰 사용",
+      "usingCoupon": "사용 중",
+      "needMoreStamp": "스탬프를 조금 더 모아봐요"
+    },
+    "classroomEdit": {
+      "loading": "클래스룸 정보를 불러오는 중입니다...",
+      "empty": "클래스룸 정보를 찾을 수 없습니다.",
+      "backToList": "목록으로",
+      "subtitle": "학생 계정 생성, 정보 수정, 클래스룸 제외를 관리합니다.",
+      "summary": {
+        "classroom": "클래스룸",
+        "registeredStudents": "등록 학생",
+        "studentCount": "{{count}}명"
+      },
+      "studentManagement": "학생 관리",
+      "studentManagementDescription": "DB PK는 화면에 표시하지 않고, 내부 요청에만 사용합니다.",
+      "newStudent": "새 학생 만들기",
+      "close": "닫기",
+      "form": {
+        "studentName": "학생 이름 *",
+        "studentNamePlaceholder": "예: 김민지",
+        "gender": "성별",
+        "loginId": "로그인 ID *",
+        "loginIdPlaceholder": "학생 로그인 ID",
+        "initialPassword": "초기 비밀번호 *",
+        "initialPasswordPlaceholder": "초기 비밀번호",
+        "parentPhoneNumber": "학부모 전화번호",
+        "optionalPlaceholder": "선택 입력",
+        "createAccount": "계정 생성",
+        "creating": "생성 중..."
+      },
+      "searchPlaceholder": "학생 이름, 로그인 ID, 학부모 번호 검색",
+      "filteredCount": "{{count}}명 표시 중",
+      "table": {
+        "studentName": "학생 이름",
+        "loginId": "로그인 ID",
+        "gender": "성별",
+        "parentPhoneNumber": "학부모 번호",
+        "stamp": "스탬프",
+        "coupon": "쿠폰",
+        "manage": "관리"
+      },
+      "defaultStudentName": "이름 없음",
+      "buttons": {
+        "save": "저장",
+        "saving": "저장 중",
+        "cancel": "취소",
+        "edit": "수정",
+        "remove": "제외"
+      },
+      "emptyStudentsTitle": "표시할 학생이 없습니다.",
+      "emptyStudentsDescription": "검색어를 지우거나 새 학생을 추가해주세요.",
+      "alerts": {
+        "loadFailed": "클래스룸 정보를 불러오지 못했습니다.",
+        "loadError": "클래스룸 정보를 불러오는 중 오류가 발생했습니다.",
+        "studentNameRequired": "학생 이름을 입력해주세요.",
+        "loginIdRequired": "로그인 ID를 입력해주세요.",
+        "initialPasswordRequired": "초기 비밀번호를 입력해주세요.",
+        "createFailed": "학생 계정 생성에 실패했습니다.",
+        "createSuccess": "학생 계정이 생성되었습니다.",
+        "createUnknown": "학생 계정 생성 중 오류가 발생했습니다.",
+        "updateFailed": "학생 정보 수정에 실패했습니다.",
+        "updateUnknown": "학생 정보 수정 중 오류가 발생했습니다.",
+        "removeConfirm": "{{studentName}} 학생을 이 클래스룸에서 제외하시겠습니까?",
+        "removeFailed": "학생 제외 처리에 실패했습니다.",
+        "removeUnknown": "학생 제외 중 오류가 발생했습니다.",
+        "fallbackStudentName": "해당 학생"
+      }
+    },
+    "taskList": {
+      "backToClassroom": "교실 관리로 돌아가기",
+      "title": "숙제 관리",
+      "registeredCount": "등록된 숙제 {{count}}개",
+      "create": "새 숙제 만들기",
+      "retry": "다시 불러오기",
+      "emptyTitle": "등록된 숙제가 없습니다",
+      "emptyDescription": "첫 번째 숙제를 만들어 학생들에게 배정해보세요.",
+      "closed": "마감됨",
+      "open": "진행 중",
+      "processing": "처리 중",
+      "closeTask": "마감하기",
+      "closedDone": "마감 완료",
+      "errors": {
+        "invalidClassroom": "교실 정보를 확인할 수 없습니다.",
+        "loadFailed": "숙제 목록을 불러오지 못했습니다.",
+        "closeFailed": "숙제를 마감하지 못했습니다."
+      },
+      "confirm": {
+        "closeTask": "이 숙제를 마감하시겠습니까?\n마감 후에는 학생들이 더 이상 제출할 수 없습니다."
+      }
+    },
+    "taskCreate": {
+      "title": "새 숙제 만들기",
+      "subtitleLine1": "숙제 내용과 학습 기간, 학생이 받을 보상을",
+      "subtitleLine2": "설정해주세요.",
+      "basicInfoTitle": "숙제 기본 정보",
+      "basicInfoDescription": "학생에게 표시될 숙제 정보를 입력합니다.",
+      "fields": {
+        "taskName": "숙제 이름",
+        "taskNamePlaceholder": "예: 덧셈 문제 10개 풀기",
+        "subject": "과목",
+        "stampCount": "스탬프 개수",
+        "stampSuffix": "개",
+        "stampHelpLine1": "숙제를 완료한 학생이 받게 될 스탬프",
+        "stampHelpLine2": "수입니다.",
+        "description": "숙제 설명",
+        "descriptionPlaceholder": "학생이 해야 할 내용을 자세히 입력해주세요.\n예: 교재 10쪽의 덧셈 문제를 풀고 제출해주세요."
+      },
+      "subject": {
+        "math": "수학",
+        "chinese": "한자"
+      },
+      "periodTitle": "숙제 기간",
+      "periodDescriptionLine1": "시작일을 먼저 선택한 후 종료일을",
+      "periodDescriptionLine2": "선택해주세요.",
+      "startDate": "시작일",
+      "fromMidnight": "00:00부터",
+      "endDate": "종료일",
+      "untilEndOfDay": "23:59까지",
+      "dateHelpLine1": "회색으로 표시된 과거 날짜는 선택할 수 없습니다.",
+      "dateHelpLine2": "같은 날짜를 두 번 선택하면 하루짜리 숙제로",
+      "dateHelpLine3": "설정할 수 있습니다.",
+      "saveFailedTitle": "숙제를 저장하지 못했습니다.",
+      "cancel": "취소",
+      "submit": "숙제 저장하기",
+      "submitting": "저장 중...",
+      "errors": {
+        "dateRequired": "날짜를 선택해주세요",
+        "invalidClassroom": "잘못된 클래스룸 주소입니다.",
+        "needStartAndEnd": "숙제 시작일과 종료일을 모두 선택해주세요.",
+        "invalidStamp": "스탬프 개수는 1개 이상의 정수로 입력해주세요.",
+        "noLoginInfo": "로그인 정보가 없습니다. 다시 로그인해주세요.",
+        "serverError": "서버 에러 ({{status}}): {{message}}",
+        "unknown": "숙제를 생성하는 중 오류가 발생했습니다."
+      },
+      "success": {
+        "withNumber": "숙제가 생성되었습니다. 숙제 번호: {{taskId}}",
+        "default": "숙제가 생성되었습니다."
+      }
+    },
+    "taskDetail": {
+      "deadline": {
+        "none": "마감일 없음",
+        "invalid": "마감일 오류",
+        "expired": "마감 지남",
+        "today": "오늘 마감",
+        "daysLeft": "{{count}}일 남음"
+      },
+      "loading": "숙제 정보를 불러오고 있습니다.",
+      "notFoundTitle": "숙제 정보를 찾을 수 없습니다.",
+      "notFoundDescription": "삭제되었거나 접근 권한이 없는 숙제일 수 있습니다.",
+      "backToList": "숙제 목록으로 돌아가기",
+      "status": {
+        "closed": "마감됨",
+        "open": "진행 중"
+      },
+      "noDescription": "등록된 숙제 설명이 없습니다.",
+      "quizAdd": "퀴즈 추가",
+      "taskDelete": "숙제 삭제",
+      "cards": {
+        "submissionRate": {
+          "label": "학생 제출률",
+          "subText": "현재 숙제 완료 비율"
+        },
+        "quizCount": {
+          "label": "등록된 퀴즈",
+          "value": "{{count}}개",
+          "subText": "이 숙제에 포함된 문제"
+        },
+        "rewardStamp": {
+          "label": "보상 도장",
+          "value": "{{count}}개",
+          "subText": "완료 시 지급"
+        },
+        "deadline": {
+          "label": "마감일"
+        }
+      },
+      "tabs": {
+        "overview": "개요",
+        "quizzes": "퀴즈 구성",
+        "analytics": "분석"
+      },
+      "overview": {
+        "title": "숙제 개요",
+        "description": "선생님이 설정한 숙제 기본 정보입니다.",
+        "info": {
+          "taskName": "숙제 이름",
+          "className": "반 이름",
+          "startDate": "시작 일시",
+          "expiredDate": "마감 일시",
+          "rewardStamp": "보상 도장",
+          "status": "상태"
+        },
+        "taskDescriptionTitle": "과제 설명",
+        "noTaskDescription": "등록된 설명이 없습니다.",
+        "progressSummaryTitle": "진행 요약",
+        "progressSummaryDescription": "현재 숙제 진행 상태",
+        "submissionRate": "제출률",
+        "quizCount": "퀴즈 {{count}}개",
+        "futureAnalyticsGuide": "나중에 학생별 제출 상태, 미제출 학생 목록, 평균 풀이 시간까지 이 카드 아래로 확장할 수 있습니다."
+      },
+      "quizzes": {
+        "title": "등록된 퀴즈 구성",
+        "description": "이 숙제에는 총 {{count}}개의 퀴즈가 포함되어 있습니다.",
+        "add": "퀴즈 추가",
+        "emptyTitle": "아직 등록된 퀴즈가 없습니다.",
+        "emptyDescription": "퀴즈를 추가하면 학생들이 풀 문제 구성이 이곳에 표시됩니다.",
+        "imageAlt": "{{quizName}} 이미지",
+        "untitled": "제목 없는 퀴즈",
+        "questionId": "문제 ID: {{quizId}}",
+        "edit": "수정",
+        "delete": "삭제"
+      },
+      "alerts": {
+        "deleteTaskConfirm": "정말 이 숙제를 삭제하시겠습니까? 연결된 퀴즈도 함께 관리 대상에서 제외될 수 있습니다.",
+        "deleteTaskSuccess": "숙제가 삭제되었습니다.",
+        "deleteTaskFailed": "숙제 삭제 중 오류가 발생했습니다.",
+        "deleteQuizConfirm": "이 퀴즈를 정말 삭제하시겠습니까?",
+        "deleteQuizSuccess": "퀴즈가 삭제되었습니다.",
+        "deleteQuizFailed": "퀴즈 삭제 중 오류가 발생했습니다."
+      },
+      "errors": {
+        "quizListLoadFailed": "퀴즈 목록 조회 실패: {{status}}",
+        "taskDetailLoadFailed": "숙제 상세 조회 실패: {{status}}",
+        "taskDeleteFailed": "숙제 삭제 실패: {{status}}",
+        "quizDeleteFailed": "퀴즈 삭제 실패: {{status}}"
+      }
+    },
+    "taskAnalytics": {
+      "title": "숙제 분석",
+      "description": "문제별 오답률을 기준으로 학생들이 가장 어려워한 문항을 확인합니다.",
+      "refresh": "새로고침",
+      "currentSubmissionRate": {
+        "label": "현재 제출률",
+        "description": "현재 task detail API의 completionRate 기반"
+      },
+      "quizCount": {
+        "label": "퀴즈 수",
+        "value": "{{count}}개",
+        "description": "현재 task에 연결된 quiz list 기반"
+      },
+      "highestWrongRate": {
+        "label": "최고 오답률",
+        "calculating": "계산 중",
+        "empty": "제출된 풀이 기록이 있으면 표시됩니다.",
+        "summary": "{{quizNum}}번 문제 · {{wrongCount}}/{{totalAttempts}}명 오답"
+      },
+      "hardestQuiz": {
+        "title": "가장 오답률이 높은 문제",
+        "summary": "{{quizNum}}번 문제 · 오답률 {{wrongRate}}%",
+        "detail": "총 {{totalAttempts}}명 중 {{wrongCount}}명이 틀렸습니다."
+      },
+      "chart": {
+        "title": "문제별 오답률",
+        "description": "x축은 문제 번호, y축은 오답률입니다.",
+        "unit": "단위: %",
+        "loading": "오답률 데이터를 불러오고 있습니다.",
+        "emptyTitle": "아직 분석할 풀이 기록이 없습니다.",
+        "emptyDescription": "학생들이 문제를 풀고 제출하면 오답률이 표시됩니다.",
+        "wrongRate": "오답률",
+        "quizLabel": "{{quizNum}}번",
+        "tooltipLabel": "문제 {{label}}"
+      },
+      "retry": "다시 시도",
+      "errors": {
+        "loadFailed": "오답률 분석 데이터를 불러오지 못했습니다.",
+        "apiFailed": "오답률 분석 조회 실패: {{status}}"
+      }
+    },
+    "quizCreate": {
+      "title": "새 퀴즈 추가 (Task ID: {{taskId}})",
+      "type": "문제 유형",
+      "types": {
+        "choose": "객관식 (4지선다)",
+        "ox": "OX 퀴즈"
+      },
+      "question": {
+        "label": "문제 내용",
+        "hint": "(텍스트 또는 이미지를 필수로 입력하세요)",
+        "placeholder": "문제를 입력하세요...",
+        "imageOptional": "문제 이미지 (선택)"
+      },
+      "answer": {
+        "title": "보기 및 정답 설정",
+        "choicePlaceholder": "{{number}}번 보기 입력",
+        "correct": "정답"
+      },
+      "submit": "퀴즈 저장하기",
+      "submitting": "저장 중...",
+      "alerts": {
+        "questionRequired": "문제 내용(텍스트)을 입력하거나 문제 이미지를 업로드해야 합니다.",
+        "choicesRequired": "객관식 보기를 모두 입력해주세요.",
+        "imageUploadFailed": "이미지 업로드에 실패했습니다.",
+        "createSuccess": "퀴즈가 성공적으로 생성되었습니다!",
+        "createFailed": "퀴즈 생성에 실패했습니다.",
+        "serverError": "서버와 통신 중 오류가 발생했습니다."
+      }
+    },
+    "quizEdit": {
+      "loading": "데이터를 불러오는 중...",
+      "title": "퀴즈 수정",
+      "description": "기존에 작성한 내용을 확인하고 수정하세요.",
+      "imageAlt": "퀴즈 이미지",
+      "changePhoto": "사진 변경",
+      "delete": "삭제",
+      "uploadClick": "클릭하여 이미지 업로드",
+      "dragDrop": "또는 이미지를 드래그 앤 드롭 하세요",
+      "type": "문제 유형",
+      "types": {
+        "choose": "객관식",
+        "ox": "OX 퀴즈"
+      },
+      "question": {
+        "label": "문제 내용",
+        "placeholder": "문제의 질문 내용을 입력하세요..."
+      },
+      "answer": {
+        "title": "보기 및 정답 설정",
+        "choicePlaceholder": "{{number}}번 보기",
+        "correct": "정답"
+      },
+      "cancel": "취소",
+      "submit": "수정 완료",
+      "submitting": "저장 중...",
+      "alerts": {
+        "loadFailed": "퀴즈 정보를 불러오는데 실패했습니다.",
+        "questionRequired": "문제 내용(텍스트)을 입력하거나 문제 이미지를 업로드해야 합니다.",
+        "choicesRequired": "객관식 보기를 모두 입력해주세요.",
+        "updateSuccess": "퀴즈가 성공적으로 수정되었습니다!",
+        "updateFailed": "퀴즈 수정에 실패했습니다.",
+        "serverError": "서버와 통신 중 오류가 발생했습니다."
+      }
+    }
+  },
+  "components": {
+    "progressHeader": {
+      "greeting": "안녕, {{userName}}!",
+      "todayText": "오늘도 함께 공부해요",
+      "stars": "별점",
+      "streak": "연속학습",
+      "streakDays": "{{count}}일"
+    },
+    "learningCard": {
+      "progress": "{{progress}}% 완료"
+    },
+    "rewardBadges": {
+      "title": "획득한 배지"
+    },
+    "stampTracker": {
+      "loading": "스탬프 정보를 불러오는 중...",
+      "title": "스탬프 모으기",
+      "stampProgress": "{{current}} / {{max}} 개",
+      "ownedStamps": "보유 {{count}}개",
+      "ownedCoupons": "보유 쿠폰: {{count}}장",
+      "giftPrompt": "🎉 선물상자를 눌러 쿠폰 받기!",
+      "giftMessage": "유치원에 가면 선생님이 선물을 줄 거예요!",
+      "couponCardTitle": "선물 쿠폰",
+      "couponEarned": "쿠폰 1개 획득!",
+      "alerts": {
+        "cannotExchange": "아직 쿠폰으로 바꿀 수 없어요."
+      }
+    },
+    "homeworkList": {
+      "title": "📚 오늘의 숙제",
+      "remaining": "{{count}}개 남음",
+      "due": "기한: {{dDayText}} 남음",
+      "start": "시작하기",
+      "completedDesc": "완료했어요! 참 잘했어요 👏",
+      "allDone": "오늘의 숙제를 모두 끝냈어요! 🎉"
+    },
+    "rankingPreview": {
+      "title": "지역별 랭킹",
+      "currentTopRegion": "현재 1위 지역",
+      "score": "{{score}}점",
+      "prompt": "우리 지역도 1등을 해봐요! 자세히 보기 →"
+    },
+    "completionModal": {
+      "title": "잘했어요!",
+      "description": "학습을 완료했어요",
+      "score": "점수",
+      "point": "점",
+      "goHome": "홈으로 돌아가기"
+    },
+    "learningSession": {
+      "questionCounter": "문제 {{current}} / {{total}}",
+      "nextQuestion": "다음 문제",
+      "complete": "완료"
+    },
+    "layout": {
+      "homeworkBannerTitle": "선생님이 내준 숙제가 있어요!",
+      "homeworkBannerDescription": "마이페이지에서 숙제를 확인하고 완료해보세요."
+    }
+  }
+}

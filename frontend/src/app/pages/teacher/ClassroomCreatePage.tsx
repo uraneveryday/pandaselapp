@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export function ClassroomCreatePage() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // 입력받을 클래스룸 이름 상태
     const [className, setClassName] = useState("");
@@ -13,11 +15,11 @@ export function ClassroomCreatePage() {
 
         // 1. 유효성 검사 (엔티티 제약조건: nullable = false, length = 50)
         if (!className.trim()) {
-            alert("클래스룸 이름을 입력해주세요.");
+            alert(t("teacher.classroomCreate.alerts.nameRequired"));
             return;
         }
         if (className.length > 50) {
-            alert("클래스룸 이름은 50자를 초과할 수 없습니다.");
+            alert(t("teacher.classroomCreate.alerts.nameTooLong"));
             return;
         }
 
@@ -42,20 +44,20 @@ export function ClassroomCreatePage() {
                 body: JSON.stringify({ className })
             });
 
-            if (!response.ok) throw new Error("클래스룸 생성 실패");
+            if (!response.ok) throw new Error(t("teacher.classroomCreate.alerts.createFailed"));
 
 
             // API 호출을 시뮬레이션하기 위한 임시 딜레이
             await new Promise((resolve) => setTimeout(resolve, 500));
 
-            alert(`'${className}' 클래스룸이 성공적으로 생성되었습니다!`);
+            alert(t("teacher.classroomCreate.alerts.createSuccess", { className }));
 
             // 생성이 완료되면 내 클래스룸 목록 페이지(/teacher)로 돌아갑니다.
             navigate("/teacher");
 
         } catch (error) {
             console.error("생성 에러:", error);
-            alert("클래스룸 생성 중 오류가 발생했습니다.");
+            alert(t("teacher.classroomCreate.alerts.unknown"));
         } finally {
             setIsLoading(false);
         }
@@ -64,13 +66,13 @@ export function ClassroomCreatePage() {
     return (
         <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                <h2 style={{ margin: 0 }}>➕ 새 클래스룸 만들기</h2>
+                <h2 style={{ margin: 0 }}>{t("teacher.classroomCreate.title")}</h2>
                 <button
                     onClick={() => navigate("/teacher")}
                     style={cancelButtonStyle}
                     disabled={isLoading}
                 >
-                    돌아가기
+                    {t("teacher.classroomCreate.back")}
                 </button>
             </div>
 
@@ -79,20 +81,20 @@ export function ClassroomCreatePage() {
 
                     <div>
                         <label htmlFor="className" style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "#333" }}>
-                            클래스룸 이름 <span style={{ color: "red" }}>*</span>
+                            {t("teacher.classroomCreate.className")} <span style={{ color: "red" }}>*</span>
                         </label>
                         <input
                             id="className"
                             type="text"
                             value={className}
                             onChange={(e) => setClassName(e.target.value)}
-                            placeholder="예: 1학년 1반 심화수학"
+                            placeholder={t("teacher.classroomCreate.classNamePlaceholder")}
                             maxLength={50} // DB 엔티티 길이 제한 반영
                             disabled={isLoading}
                             style={inputStyle}
                         />
                         <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: className.length >= 50 ? "red" : "#666", textAlign: "right" }}>
-                            {className.length} / 50자
+                            {t("teacher.classroomCreate.charCount", { count: className.length })}
                         </p>
                     </div>
 
@@ -101,7 +103,7 @@ export function ClassroomCreatePage() {
                         disabled={isLoading}
                         style={{ ...submitButtonStyle, opacity: isLoading ? 0.7 : 1 }}
                     >
-                        {isLoading ? "생성 중..." : "클래스룸 생성하기"}
+                        {isLoading ? t("teacher.classroomCreate.creating") : t("teacher.classroomCreate.submit")}
                     </button>
                 </form>
             </div>

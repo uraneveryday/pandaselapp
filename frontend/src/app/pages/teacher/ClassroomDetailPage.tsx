@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
@@ -61,6 +62,7 @@ function unwrapResponse<T>(response: ApiResponse<T> | T): T {
 export function ClassroomDetailPage() {
     const { id: classroomId } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [classroom, setClassroom] =
         useState<ClassroomDetail | null>(null);
@@ -84,7 +86,7 @@ export function ClassroomDetailPage() {
             }
 
             if (!classroomId) {
-                setError("클래스룸 ID가 올바르지 않습니다.");
+                setError(t("teacher.classroomDetail.errors.invalidClassroomId"));
                 setIsLoading(false);
                 return;
             }
@@ -109,23 +111,23 @@ export function ClassroomDetailPage() {
 
                 if (!response.ok) {
                     if (response.status === 401) {
-                        throw new Error("로그인이 만료되었습니다.");
+                        throw new Error(t("teacher.classroomDetail.errors.loginExpired"));
                     }
 
                     if (response.status === 403) {
                         throw new Error(
-                            "이 클래스룸을 조회할 권한이 없습니다."
+                            t("teacher.classroomDetail.errors.noPermission")
                         );
                     }
 
                     if (response.status === 404) {
                         throw new Error(
-                            "해당 클래스룸을 찾을 수 없습니다."
+                            t("teacher.classroomDetail.errors.notFound")
                         );
                     }
 
                     throw new Error(
-                        "클래스룸 정보를 불러오지 못했습니다."
+                        t("teacher.classroomDetail.errors.loadFailed")
                     );
                 }
 
@@ -140,14 +142,14 @@ export function ClassroomDetailPage() {
                 });
             } catch (caughtError) {
                 console.error(
-                    "클래스룸 상세 조회 실패:",
+                    "Classroom detail load failed:",
                     caughtError
                 );
 
                 setError(
                     caughtError instanceof Error
                         ? caughtError.message
-                        : "알 수 없는 오류가 발생했습니다."
+                        : t("teacher.classroomDetail.errors.unknown")
                 );
             } finally {
                 setIsLoading(false);
@@ -155,7 +157,7 @@ export function ClassroomDetailPage() {
         };
 
         void fetchClassroomDetail();
-    }, [classroomId, navigate]);
+    }, [classroomId, navigate, t]);
 
     const handleUseCoupon = async (student: Student) => {
         if (!classroomId || student.couponCount <= 0) {
@@ -163,7 +165,7 @@ export function ClassroomDetailPage() {
         }
 
         const shouldUseCoupon = window.confirm(
-            `${student.name} 학생의 쿠폰 1개를 사용하시겠어요?`
+            t("teacher.classroomDetail.couponUseConfirm", { studentName: student.name })
         );
 
         if (!shouldUseCoupon) {
@@ -201,7 +203,7 @@ export function ClassroomDetailPage() {
 
                 throw new Error(
                     errorBody?.message ??
-                    "쿠폰을 사용하지 못했습니다."
+                    t("teacher.classroomDetail.errors.couponUseNotCompleted")
                 );
             }
 
@@ -235,7 +237,7 @@ export function ClassroomDetailPage() {
                 };
             });
             setCouponSuccessMessage(
-                `${student.name} 학생의 쿠폰 1개가 사용되었습니다!`
+                t("teacher.classroomDetail.couponUseSuccess", { studentName: student.name })
             );
 
             setTimeout(() => {
@@ -243,12 +245,12 @@ export function ClassroomDetailPage() {
             }, 2200);
 
         } catch (caughtError) {
-            console.error("쿠폰 사용 실패:", caughtError);
+            console.error("Coupon use failed:", caughtError);
 
             alert(
                 caughtError instanceof Error
                     ? caughtError.message
-                    : "쿠폰 사용 중 오류가 발생했습니다."
+                    : t("teacher.classroomDetail.errors.couponUseFailed")
             );
         } finally {
             setUsingCouponStudentId(null);
@@ -268,8 +270,8 @@ export function ClassroomDetailPage() {
                         size={34}
                     />
 
-                    <strong>우리 반 친구들을 불러오는 중이에요</strong>
-                    <span>조금만 기다려 주세요 ✨</span>
+                    <strong>{t("teacher.classroomDetail.loadingTitle")}</strong>
+                    <span>{t("teacher.classroomDetail.loadingDescription")}</span>
                 </motion.div>
             </main>
         );
@@ -284,7 +286,7 @@ export function ClassroomDetailPage() {
                     animate={{ opacity: 1, y: 0 }}
                 >
                     <span className="error-emoji">🥲</span>
-                    <h2>앗, 문제가 생겼어요</h2>
+                    <h2>{t("teacher.classroomDetail.errorTitle")}</h2>
                     <p>{error}</p>
 
                     <button
@@ -293,7 +295,7 @@ export function ClassroomDetailPage() {
                         onClick={() => navigate(-1)}
                     >
                         <ArrowLeft size={17} />
-                        뒤로 가기
+                        {t("teacher.classroomDetail.back")}
                     </button>
                 </motion.div>
             </main>
@@ -322,7 +324,7 @@ export function ClassroomDetailPage() {
                         </div>
 
                         <div>
-                            <strong>쿠폰 사용 완료</strong>
+                            <strong>{t("teacher.classroomDetail.couponUseCompleteTitle")}</strong>
                             <p>{couponSuccessMessage}</p>
                         </div>
                     </motion.div>
@@ -338,7 +340,7 @@ export function ClassroomDetailPage() {
                     <button
                         type="button"
                         className="round-icon-button"
-                        aria-label="클래스룸 목록으로 이동"
+                        aria-label={t("teacher.classroomDetail.back")}
                         onClick={() =>
                             navigate("/teacher/classrooms")
                         }
@@ -367,13 +369,13 @@ export function ClassroomDetailPage() {
                         }
                     >
                         <BookOpen size={18} />
-                        과제 관리
+                        {t("teacher.classroomDetail.taskManagement")}
                     </button>
 
                     <button
                         type="button"
                         className="round-icon-button"
-                        aria-label="클래스룸 설정"
+                        aria-label={t("teacher.classroomDetail.classroomSetting")}
                     >
                         <Settings size={20} />
                     </button>
@@ -392,10 +394,10 @@ export function ClassroomDetailPage() {
 
                 <div>
                     <span className="summary-label">
-                        함께 공부하는 친구들
+                        {t("teacher.classroomDetail.friendsTitle")}
                     </span>
 
-                    <strong>{studentCount}명</strong>
+                    <strong>{t("teacher.classroomDetail.studentCount", { count: studentCount })}</strong>
                 </div>
 
                 <div className="summary-decoration">
@@ -409,11 +411,11 @@ export function ClassroomDetailPage() {
                         <span className="section-eyebrow">
                             STUDENTS
                         </span>
-                        <h2>우리 반 학생</h2>
+                        <h2>{t("teacher.classroomDetail.studentsTitle")}</h2>
                     </div>
 
                     <span className="student-count-badge">
-                        {studentCount}명
+                        {t("teacher.classroomDetail.studentCount", { count: studentCount })}
                     </span>
                 </div>
 
@@ -443,10 +445,10 @@ export function ClassroomDetailPage() {
                         animate={{ opacity: 1 }}
                     >
                         <span>🌱</span>
-                        <h3>아직 등록된 학생이 없어요</h3>
+                        <h3>{t("teacher.classroomDetail.emptyStudentTitle")}</h3>
                         <p>
-                            학생을 초대하면 이곳에 귀여운
-                            카드로 표시됩니다.
+                            {t("teacher.classroomDetail.emptyStudentDescriptionLine1")}
+                            {t("teacher.classroomDetail.emptyStudentDescriptionLine2")}
                         </p>
                     </motion.div>
                 )}
@@ -474,7 +476,7 @@ function StudentRewardCard({
     );
 
     const genderLabel =
-        student.gender === "MALE" ? "남학생" : "여학생";
+        student.gender === "MALE" ? t("common.gender.maleStudent") : t("common.gender.femaleStudent");
 
     return (
         <motion.article
@@ -526,7 +528,7 @@ function StudentRewardCard({
                     <div className="phone-info">
                         <Phone size={13} />
                         {student.parentPhoneNumber ??
-                            "보호자 연락처 미등록"}
+                            t("teacher.classroomDetail.guardianPhoneNotRegistered")}
                     </div>
                 </div>
             </div>
@@ -535,10 +537,10 @@ function StudentRewardCard({
                 <div className="reward-heading">
                     <div>
                         <span className="reward-title">
-                            오늘의 스탬프
+                            {t("teacher.classroomDetail.todayStamp")}
                         </span>
                         <span className="reward-description">
-                            10개를 모으면 쿠폰 1개!
+                            {t("teacher.classroomDetail.stampGuide")}
                         </span>
                     </div>
 
@@ -550,7 +552,7 @@ function StudentRewardCard({
 
                 <div
                     className="stamp-board"
-                    aria-label={`스탬프 ${safeStampCount}개`}
+                    aria-label={t("teacher.classroomDetail.stampAriaLabel", { count: safeStampCount })}
                 >
                     {Array.from({ length: 10 }).map(
                         (_, stampIndex) => {
@@ -601,9 +603,9 @@ function StudentRewardCard({
                     </div>
 
                     <div>
-                        <span>보유 쿠폰</span>
+                        <span>{t("teacher.classroomDetail.ownedCoupon")}</span>
                         <strong>
-                            {student.couponCount}개
+                            {t("teacher.classroomDetail.couponCount", { count: student.couponCount })}
                         </strong>
                     </div>
                 </div>
@@ -633,18 +635,18 @@ function StudentRewardCard({
                                     className="button-spinner"
                                     size={16}
                                 />
-                                사용 중
+                                {t("teacher.classroomDetail.usingCoupon")}
                             </>
                         ) : (
                             <>
                                 <Sparkles size={16} />
-                                쿠폰 사용
+                                {t("teacher.classroomDetail.useCoupon")}
                             </>
                         )}
                     </motion.button>
                 ) : (
                     <span className="no-coupon-message">
-                        스탬프를 조금 더 모아봐요
+                        {t("teacher.classroomDetail.needMoreStamp")}
                     </span>
                 )}
             </div>
