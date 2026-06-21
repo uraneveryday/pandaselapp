@@ -470,6 +470,8 @@ function StudentRewardCard({
                                isUsingCoupon,
                                onUseCoupon
                            }: StudentRewardCardProps) {
+    const { t } = useTranslation();
+
     const safeStampCount = Math.max(
         0,
         Math.min(student.stampCount, 10)
