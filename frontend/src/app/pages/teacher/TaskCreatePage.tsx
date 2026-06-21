@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { DayPicker, type DateRange } from "@daypicker/react";
-import { ko } from "@daypicker/react/locale";
+import { ko, zhCN } from "@daypicker/react/locale";
 
 import "@daypicker/react/style.css";
 import "./TaskCreatePage.css";
@@ -57,7 +57,9 @@ export function TaskCreatePage() {
     const { t, i18n } = useTranslation();
 
     const classRoomId = Number(id);
-    const currentLocale = i18n.resolvedLanguage || i18n.language || "zh-CN";
+    const currentLanguage = i18n.resolvedLanguage || i18n.language || "zh-CN";
+    const currentLocale = currentLanguage.startsWith("ko") ? "ko-KR" : "zh-CN";
+    const dayPickerLocale = currentLanguage.startsWith("ko") ? ko : zhCN;
 
     /**
      * 오늘 날짜의 시·분·초를 0으로 설정합니다.
@@ -364,7 +366,7 @@ export function TaskCreatePage() {
                         <div className="date-picker-panel">
                             <DayPicker
                                 mode="range"
-                                locale={ko}
+                                locale={dayPickerLocale}
                                 selected={dateRange}
                                 onSelect={setDateRange}
                                 defaultMonth={today}
