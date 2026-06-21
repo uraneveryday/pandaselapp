@@ -1,8 +1,11 @@
 import { CheckCircle, Clock } from "lucide-react";
 import { useHomework } from "../context/HomeworkContext";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 export function HomeworkList() {
+    const { t } = useTranslation();
+
     // 1. homeworks -> tasks로 변경
     // 🚨 completeHomework는 아직 Context에 없으므로 일단 제거하거나 아래처럼 별도로 임시 구성해야 합니다.
     const { tasks } = useHomework();
@@ -13,7 +16,7 @@ export function HomeworkList() {
 
     // 숙제 시작 버튼 클릭 시 동작할 임시 함수 (추후 API 연동 필요)
     const handleStartHomework = (taskId: number) => {
-        console.log("숙제 상세 페이지로 이동하거나 시작 처리:", taskId);
+        console.log("Start homework:", taskId);
     };
 
     if (tasks.length === 0) return null;
@@ -23,10 +26,10 @@ export function HomeworkList() {
             <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFD54F] rounded-full opacity-20 -mr-6 -mt-6" />
 
             <div className="flex items-center gap-2 mb-3">
-                <h3 className="font-bold text-gray-800 text-lg m-0">📚 오늘의 숙제</h3>
+                <h3 className="font-bold text-gray-800 text-lg m-0">{t("components.homeworkList.title")}</h3>
                 {incomplete.length > 0 && (
                     <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
-            {incomplete.length}개 남음
+            {t("components.homeworkList.remaining", { count: incomplete.length })}
           </span>
                 )}
             </div>
@@ -49,7 +52,7 @@ export function HomeworkList() {
                                     <div className="flex items-center gap-1 text-xs text-orange-400 font-medium">
                                         <Clock className="w-3.5 h-3.5" />
                                         {/* 4. dueDate -> dDayText 적용 (방금 만든 디데이 기능) */}
-                                        <span>기한: {hw.dDayText} 남음</span>
+                                        <span>{t("components.homeworkList.due", { dDayText: hw.dDayText })}</span>
                                     </div>
                                 </div>
                                 <motion.button
@@ -58,7 +61,7 @@ export function HomeworkList() {
                                     onClick={() => handleStartHomework(hw.id)} // id를 넘겨주도록 수정
                                     className="bg-[#FFAB91] hover:bg-[#FF8A65] text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-colors"
                                 >
-                                    시작하기
+                                    {t("components.homeworkList.start")}
                                 </motion.button>
                             </div>
                         </motion.div>
@@ -71,14 +74,14 @@ export function HomeworkList() {
                         <div>
                             {/* 여기도 title -> taskName으로 변경 */}
                             <h4 className="font-bold text-gray-500 text-sm m-0 line-through">{hw.taskName}</h4>
-                            <p className="text-gray-400 text-xs mt-0.5">완료했어요! 참 잘했어요 👏</p>
+                            <p className="text-gray-400 text-xs mt-0.5">{t("components.homeworkList.completedDesc")}</p>
                         </div>
                     </div>
                 ))}
 
                 {incomplete.length === 0 && (
                     <div className="bg-white rounded-xl p-4 text-center border border-green-100">
-                        <p className="text-green-600 font-bold">오늘의 숙제를 모두 끝냈어요! 🎉</p>
+                        <p className="text-green-600 font-bold">{t("components.homeworkList.allDone")}</p>
                     </div>
                 )}
             </div>

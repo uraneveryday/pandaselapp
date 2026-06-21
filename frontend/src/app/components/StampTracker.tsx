@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Ticket } from "lucide-react";
 import { apiClient } from "../../api/client";
+import { useTranslation } from "react-i18next";
 
 interface StampTrackerProps {
     onRewardClick?: () => void;
@@ -18,6 +19,8 @@ const MAX_STAMPS = 10;
 const PARTICLE_COUNT = 18;
 
 export function StampTracker({ onRewardClick }: StampTrackerProps) {
+    const { t } = useTranslation();
+
     const [currentStamps, setCurrentStamps] = useState<number>(0);
     const [currentCoupons, setCurrentCoupons] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -38,7 +41,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                 setCurrentStamps(data.currentStamps);
                 setCurrentCoupons(data.currentCoupons);
             } catch (error) {
-                console.error("스탬프 데이터 조회 실패:", error);
+                console.error("Stamp data fetch failed:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -63,7 +66,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
             setCurrentCoupons(data.currentCoupons);
 
             setShowCouponEffect(true);
-            setMessage("유치원에 가면 선생님이 선물을 줄 거예요!");
+            setMessage(t("components.stampTracker.giftMessage"));
 
             onRewardClick?.();
 
@@ -72,8 +75,8 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                 setMessage(null);
             }, 2600);
         } catch (error) {
-            console.error("쿠폰 교환 실패:", error);
-            alert("아직 쿠폰으로 바꿀 수 없어요.");
+            console.error("Coupon exchange failed:", error);
+            alert(t("components.stampTracker.alerts.cannotExchange"));
         } finally {
             setIsExchanging(false);
         }
@@ -82,7 +85,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
     if (isLoading) {
         return (
             <div className="bg-white rounded-3xl p-6 shadow-sm flex items-center justify-center min-h-[220px]">
-                <p className="text-muted-foreground text-sm">스탬프 정보를 불러오는 중...</p>
+                <p className="text-muted-foreground text-sm">{t("components.stampTracker.loading")}</p>
             </div>
         );
     }
@@ -94,19 +97,19 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
         <div className="relative bg-white rounded-3xl p-6 shadow-sm overflow-hidden min-h-[300px]">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h3 className="mb-1 font-bold">스탬프 모으기</h3>
+                    <h3 className="mb-1 font-bold">{t("components.stampTracker.title")}</h3>
 
                     <p className="text-sm text-muted-foreground">
-                        {displayStamps} / {MAX_STAMPS} 개
+                        {t("components.stampTracker.stampProgress", { current: displayStamps, max: MAX_STAMPS })}
                         {currentStamps > MAX_STAMPS && (
                             <span className="ml-1 text-xs text-purple-500">
-                                보유 {currentStamps}개
+                                {t("components.stampTracker.ownedStamps", { count: currentStamps })}
                             </span>
                         )}
                     </p>
 
                     <p className="text-xs text-purple-500 mt-1">
-                        보유 쿠폰: {currentCoupons}장
+                        {t("components.stampTracker.ownedCoupons", { count: currentCoupons })}
                     </p>
                 </div>
             </div>
@@ -200,7 +203,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
                             >
-                                🎉 선물상자를 눌러 쿠폰 받기!
+                                {t("components.stampTracker.giftPrompt")}
                             </motion.div>
                         </motion.button>
                     </motion.div>
@@ -269,7 +272,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                         >
                             <Ticket className="w-10 h-10 text-pink-500 mb-1" />
                             <span className="text-xs font-bold text-pink-600">
-                                선물 쿠폰
+                                {t("components.stampTracker.couponCardTitle")}
                             </span>
                         </motion.div>
 
@@ -279,7 +282,7 @@ export function StampTracker({ onRewardClick }: StampTrackerProps) {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.25 }}
                         >
-                            쿠폰 1개 획득!
+                            {t("components.stampTracker.couponEarned")}
                         </motion.h3>
 
                         {message && (

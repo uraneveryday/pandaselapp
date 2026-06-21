@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Trophy, Star, Home } from "lucide-react";
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
+import { useTranslation } from "react-i18next";
 
 interface CompletionModalProps {
   score: number;
@@ -9,6 +10,8 @@ interface CompletionModalProps {
 }
 
 export function CompletionModal({ score, onClose }: CompletionModalProps) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     confetti({
       particleCount: 100,
@@ -38,11 +41,11 @@ export function CompletionModal({ score, onClose }: CompletionModalProps) {
           <Trophy className="w-12 h-12 text-[#FF9ECD]" />
         </motion.div>
 
-        <h2 className="mb-2">잘했어요!</h2>
-        <p className="text-muted-foreground mb-6">학습을 완료했어요</p>
+        <h2 className="mb-2">{t("components.completionModal.title")}</h2>
+        <p className="text-muted-foreground mb-6">{t("components.completionModal.description")}</p>
 
         <div className="bg-gradient-to-br from-[#FF9ECD] to-[#D4A5FF] rounded-2xl p-6 mb-6">
-          <p className="text-white text-sm mb-2">점수</p>
+          <p className="text-white text-sm mb-2">{t("components.completionModal.score")}</p>
           <div className="flex items-center justify-center gap-2">
             <motion.p
               className="text-5xl text-white"
@@ -52,7 +55,7 @@ export function CompletionModal({ score, onClose }: CompletionModalProps) {
             >
               {score}
             </motion.p>
-            <span className="text-2xl text-white">점</span>
+            <span className="text-2xl text-white">{t("components.completionModal.point")}</span>
           </div>
         </div>
 
@@ -82,7 +85,7 @@ export function CompletionModal({ score, onClose }: CompletionModalProps) {
           whileTap={{ scale: 0.98 }}
         >
           <Home className="w-5 h-5" />
-          홈으로 돌아가기
+          {t("components.completionModal.goHome")}
         </motion.button>
       </motion.div>
     </motion.div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Check, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
+import { useTranslation } from "react-i18next";
 
 interface Question {
   id: string;
@@ -25,6 +26,8 @@ export function LearningSession({
   onClose,
   onComplete,
 }: LearningSessionProps) {
+  const { t } = useTranslation();
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -67,7 +70,7 @@ export function LearningSession({
       exit={{ opacity: 0 }}
     >
       <motion.div
-        className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto overflow-x-hidden>"
+        className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto overflow-x-hidden"
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
@@ -92,7 +95,7 @@ export function LearningSession({
             />
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            문제 {currentQuestion + 1} / {questions.length}
+            {t("components.learningSession.questionCounter", { current: currentQuestion + 1, total: questions.length })}
           </p>
         </div>
 
@@ -151,7 +154,7 @@ export function LearningSession({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {currentQuestion < questions.length - 1 ? "다음 문제" : "완료"}
+                  {currentQuestion < questions.length - 1 ? t("components.learningSession.nextQuestion") : t("components.learningSession.complete")}
                   <ChevronRight className="w-5 h-5" />
                 </motion.button>
               )}

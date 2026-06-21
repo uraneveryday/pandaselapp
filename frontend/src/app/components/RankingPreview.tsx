@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Trophy, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface RankingPreviewProps {
   topRegion: string;
@@ -9,6 +10,10 @@ interface RankingPreviewProps {
 
 export function RankingPreview({ topRegion, topScore }: RankingPreviewProps) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+
+  const currentLanguage = i18n.resolvedLanguage || i18n.language || "zh-CN";
+  const numberLocale = currentLanguage.startsWith("ko") ? "ko-KR" : "zh-CN";
 
   return (
     <motion.button
@@ -24,11 +29,11 @@ export function RankingPreview({ topRegion, topScore }: RankingPreviewProps) {
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-3">
           <Trophy className="w-6 h-6 text-[#FFE4B5]" />
-          <h3 className="text-white">지역별 랭킹</h3>
+          <h3 className="text-white">{t("components.rankingPreview.title")}</h3>
         </div>
         
         <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 mb-3">
-          <p className="text-sm mb-2 text-white/80">현재 1위 지역</p>
+          <p className="text-sm mb-2 text-white/80">{t("components.rankingPreview.currentTopRegion")}</p>
           <motion.div
             className="flex items-center justify-between"
             initial={{ x: -20, opacity: 0 }}
@@ -37,7 +42,7 @@ export function RankingPreview({ topRegion, topScore }: RankingPreviewProps) {
           >
             <div>
               <h2 className="text-white mb-1">🏆 {topRegion}</h2>
-              <p className="text-sm text-white/80">{topScore.toLocaleString()}점</p>
+              <p className="text-sm text-white/80">{t("components.rankingPreview.score", { score: topScore.toLocaleString(numberLocale) })}</p>
             </div>
             <motion.div
               animate={{ x: [0, 5, 0] }}
@@ -49,7 +54,7 @@ export function RankingPreview({ topRegion, topScore }: RankingPreviewProps) {
         </div>
         
         <p className="text-sm text-white/90 text-center">
-          우리 지역도 1등을 해봐요! 자세히 보기 →
+          {t("components.rankingPreview.prompt")}
         </p>
       </div>
     </motion.button>

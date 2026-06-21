@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 interface LearningCardProps {
   title: string;
@@ -18,6 +19,8 @@ export function LearningCard({
   progress,
   onClick,
 }: LearningCardProps) {
+  const { t } = useTranslation();
+
   return (
     <motion.button
       onClick={onClick}
@@ -45,7 +48,7 @@ export function LearningCard({
               transition={{ duration: 1, delay: 0.2 }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-1">{progress}% 완료</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("components.learningCard.progress", { progress })}</p>
         </div>
       </div>
     </motion.button>

@@ -1,5 +1,6 @@
 import { Star, Award } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 interface ProgressHeaderProps {
   userName: string;
@@ -8,12 +9,14 @@ interface ProgressHeaderProps {
 }
 
 export function ProgressHeader({ userName, totalStars, streak }: ProgressHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="mb-1">안녕, {userName}!</h2>
-          <p className="text-sm text-muted-foreground">오늘도 함께 공부해요</p>
+          <h2 className="mb-1">{t("components.progressHeader.greeting", { userName })}</h2>
+          <p className="text-sm text-muted-foreground">{t("components.progressHeader.todayText")}</p>
         </div>
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FF9ECD] to-[#D4A5FF] flex items-center justify-center">
           <span className="text-2xl">🎓</span>
@@ -28,7 +31,7 @@ export function ProgressHeader({ userName, totalStars, streak }: ProgressHeaderP
         >
           <div className="flex items-center gap-2 mb-2">
             <Star className="w-5 h-5 text-[#FF9ECD] fill-[#FF9ECD]" />
-            <span className="text-sm text-muted-foreground">별점</span>
+            <span className="text-sm text-muted-foreground">{t("components.progressHeader.stars")}</span>
           </div>
           <p className="text-2xl">{totalStars}</p>
         </motion.div>
@@ -40,9 +43,9 @@ export function ProgressHeader({ userName, totalStars, streak }: ProgressHeaderP
         >
           <div className="flex items-center gap-2 mb-2">
             <Award className="w-5 h-5 text-[#FF9ECD]" />
-            <span className="text-sm text-white">연속학습</span>
+            <span className="text-sm text-white">{t("components.progressHeader.streak")}</span>
           </div>
-          <p className="text-2xl text-white">{streak}일</p>
+          <p className="text-2xl text-white">{t("components.progressHeader.streakDays", { count: streak })}</p>
         </motion.div>
       </div>
     </div>

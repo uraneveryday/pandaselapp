@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 interface Badge {
   id: string;
@@ -12,9 +13,11 @@ interface RewardBadgesProps {
 }
 
 export function RewardBadges({ badges }: RewardBadgesProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm">
-      <h3 className="mb-4">획득한 배지</h3>
+      <h3 className="mb-4">{t("components.rewardBadges.title")}</h3>
       <div className="grid grid-cols-4 gap-3">
         {badges.map((badge, index) => (
           <motion.div

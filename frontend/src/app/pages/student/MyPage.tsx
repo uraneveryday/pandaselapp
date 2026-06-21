@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, PlayCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiClient } from "../../../api/client";
 import { ProgressHeader } from "../../components/ProgressHeader";
 import { StampTracker } from "../../components/StampTracker";
@@ -17,6 +18,8 @@ interface UserMeResponse {
 // 2. 개별 과제(Task) 렌더링용 하위 컴포넌트 분리
 // (Task의 타입은 HomeworkContext에서 정의한 것을 가져와 쓰는 것이 좋습니다)
 const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void }) => {
+    const { t } = useTranslation();
+
     const isDateExpired = task.dDay !== undefined && task.dDay < 0;
     const isCompleted = task.completed;
 
@@ -33,8 +36,8 @@ const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void 
                     {!isCompleted && task.dDayText && (
                         <span className={`text-xs font-bold px-2 py-1 rounded-full ${
                             isDateExpired || task.dDay === 0
-                                ? 'bg-red-100 text-red-600'
-                                : 'bg-orange-100 text-orange-600'
+                                ? "bg-red-100 text-red-600"
+                                : "bg-orange-100 text-orange-600"
                         }`}>
                             {task.dDayText}
                         </span>
@@ -42,10 +45,11 @@ const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void 
 
                     {isCompleted && (
                         <span className="text-xs font-bold px-2 py-1 bg-green-200 text-green-700 rounded-full">
-                            완료
+                            {t("student.myPage.task.complete")}
                         </span>
                     )}
                 </div>
+
                 <h4 className="font-bold text-gray-800">{task.taskName}</h4>
                 <p className="text-sm text-gray-500">{task.description}</p>
             </div>
@@ -56,7 +60,7 @@ const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void 
                     whileTap={!isDateExpired ? { scale: 0.95 } : {}}
                     onClick={() => {
                         if (isDateExpired) {
-                            alert("😥 앗! ⚠️ 이미 숙제 기한이 지났어요!");
+                            alert(t("student.myPage.task.expiredAlert"));
                         } else {
                             onStart(task.id);
                         }
@@ -68,9 +72,12 @@ const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void 
                     }`}
                 >
                     {isDateExpired ? (
-                        <><span>⚠️</span>기한 만료</>
+                        <>{t("student.myPage.task.expired")}</>
                     ) : (
-                        <><PlayCircle className="w-4 h-4" />시작하기</>
+                        <>
+                            <PlayCircle className="w-4 h-4" />
+                            {t("student.myPage.task.start")}
+                        </>
                     )}
                 </motion.button>
             )}
@@ -80,6 +87,8 @@ const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void 
 
 export function MyPage() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
+
     // userInfo 객체 하나로 상태를 묶어 관리 (추후 확장성 고려)
     const [userInfo, setUserInfo] = useState<UserMeResponse | null>(null);
 
@@ -92,8 +101,9 @@ export function MyPage() {
     useEffect(() => {
         const fetchUserData = async () => {
             const token = localStorage.getItem("jwt_token");
+
             if (!token) {
-                alert("정상적인 로그인 절차가 필요합니다.");
+                alert(t("student.myPage.errors.normalLoginRequired"));
                 navigate("/login", { replace: true });
                 return;
             }
@@ -103,21 +113,23 @@ export function MyPage() {
                 const res = await apiClient.get<UserMeResponse>("/users/me");
                 setUserInfo(res.data);
             } catch (err) {
-                console.error("me API 통신 실패 원인:", err);
+                console.error("me API request failed:", err);
             }
         };
 
         fetchUserData();
-    }, [navigate]);
+    }, [navigate, t]);
 
     const handleRewardClick = () => {
-        console.log("선물 버튼 클릭됨!");
+        console.log("reward button clicked");
     };
 
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <p className="text-gray-500 font-bold">데이터를 불러오는 중입니다...</p>
+                <p className="text-gray-500 font-bold">
+                    {t("student.myPage.loading")}
+                </p>
             </div>
         );
     }
@@ -127,14 +139,18 @@ export function MyPage() {
             <div className="min-h-screen flex flex-col items-center justify-center p-4">
                 <div className="bg-white p-8 rounded-2xl shadow-sm text-center space-y-4">
                     <div className="text-4xl">🏫</div>
-                    <h2 className="text-xl font-bold text-gray-800">소속된 클래스룸이 없습니다.</h2>
+
+                    <h2 className="text-xl font-bold text-gray-800">
+                        {t("student.myPage.noClassroomTitle")}
+                    </h2>
+
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => navigate("/")}
                         className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-full font-medium"
                     >
-                        홈으로 돌아가기
+                        {t("student.myPage.goHome")}
                     </motion.button>
                 </div>
             </div>
@@ -153,7 +169,10 @@ export function MyPage() {
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </motion.button>
-                    <h2 className="text-xl font-bold">나의 학습</h2>
+
+                    <h2 className="text-xl font-bold">
+                        {t("student.myPage.myLearning")}
+                    </h2>
                 </div>
 
                 {/* API가 로드된 후에만 헤더를 렌더링. 하드코딩 제거를 대비한 설계 */}
@@ -168,12 +187,17 @@ export function MyPage() {
                 <StampTracker onRewardClick={handleRewardClick} />
 
                 <div>
-                    <h3 className="mb-4 px-2 font-bold text-lg">오늘의 학습 과제</h3>
+                    <h3 className="mb-4 px-2 font-bold text-lg">
+                        {t("student.myPage.todayHomework")}
+                    </h3>
 
                     {tasks.length === 0 ? (
                         <div className="bg-white p-6 rounded-2xl shadow-sm text-center border-2 border-dashed border-gray-200">
                             <span className="text-3xl mb-2 block">🎉</span>
-                            <p className="text-gray-600 font-medium">야호! 지금은 할 숙제가 없어요!</p>
+
+                            <p className="text-gray-600 font-medium">
+                                {t("student.myPage.noHomework")}
+                            </p>
                         </div>
                     ) : (
                         <div className="space-y-3">
