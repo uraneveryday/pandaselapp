@@ -5,6 +5,7 @@ import App from "./App";
 import "./styles/tailwind.css";
 import "./styles/theme.css";
 import "./styles/fonts.css";
+import "./i18n";
 
 const rootElement = document.getElementById('root');
 

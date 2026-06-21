@@ -1,8 +1,8 @@
-
 import { useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Lock, User, UserPlus } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 
 interface LoginResponse {
     accessToken?: string;
@@ -39,6 +39,7 @@ async function readResponseBody(response: Response): Promise<LoginResponse> {
 export function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { t, i18n } = useTranslation();
 
     const locationState = location.state as LoginLocationState | null;
     const successMessage = locationState?.successMessage;
@@ -48,11 +49,18 @@ export function LoginPage() {
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    const currentLanguage = i18n.resolvedLanguage || i18n.language;
+
+    const changeLanguage = (language: "ko" | "zh-CN") => {
+        i18n.changeLanguage(language);
+        setErrorMessage("");
+    };
+
     const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!loginId.trim() || !password) {
-            setErrorMessage("아이디와 비밀번호를 모두 입력해주세요.");
+            setErrorMessage(t("login.errors.required"));
             return;
         }
 
@@ -79,19 +87,12 @@ export function LoginPage() {
             if (!response.ok) {
                 throw new Error(
                     data.message ||
-                        data.error ||
-                        "아이디 또는 비밀번호가 일치하지 않습니다."
+                    data.error ||
+                    t("login.errors.invalidCredential")
                 );
             }
 
-            /*
-             * 현재 코드는 두 가지 응답 형태를 모두 지원합니다.
-             *
-             * 1. 응답 JSON의 accessToken
-             * 2. Authorization 응답 헤더의 Bearer 토큰
-             */
-            const authorizationHeader =
-                response.headers.get("Authorization");
+            const authorizationHeader = response.headers.get("Authorization");
 
             const headerToken = authorizationHeader?.replace(
                 /^Bearer\s+/i,
@@ -101,50 +102,40 @@ export function LoginPage() {
             const token = data.accessToken || headerToken;
 
             if (!token) {
-                throw new Error(
-                    "서버로부터 로그인 토큰을 전달받지 못했습니다."
-                );
+                throw new Error(t("login.errors.missingToken"));
             }
 
+            const decodedPayload = jwtDecode<JwtPayload>(token);
 
-const decodedPayload = jwtDecode<JwtPayload>(token);
+            const rawRole =
+                decodedPayload.auth ?? decodedPayload.role ?? data.role;
 
-const rawRole =
-    decodedPayload.auth ??
-    decodedPayload.role ??
-    data.role;
+            const normalizedRole = rawRole?.startsWith("ROLE_")
+                ? rawRole
+                : rawRole
+                    ? `ROLE_${rawRole}`
+                    : "";
 
-const normalizedRole = rawRole?.startsWith("ROLE_")
-    ? rawRole
-    : rawRole
-      ? `ROLE_${rawRole}`
-      : "";
+            if (
+                normalizedRole !== "ROLE_TEACHER" &&
+                normalizedRole !== "ROLE_STUDENT"
+            ) {
+                throw new Error(t("login.errors.invalidRole"));
+            }
 
-if (
-    normalizedRole !== "ROLE_TEACHER" &&
-    normalizedRole !== "ROLE_STUDENT"
-) {
-    throw new Error("사용자 권한 정보를 확인할 수 없습니다.");
-}
+            localStorage.setItem("jwt_token", token);
+            localStorage.setItem("user_role", normalizedRole);
 
-localStorage.setItem("jwt_token", token);
-localStorage.setItem("user_role", normalizedRole);
+            if (normalizedRole === "ROLE_TEACHER") {
+                navigate("/teacher/classrooms", {
+                    replace: true,
+                });
+                return;
+            }
 
-if (normalizedRole === "ROLE_TEACHER") {
-    navigate("/teacher/classrooms", {
-        replace: true,
-    });
-    return;
-}
-
-navigate("/student", {
-    replace: true,
-});
-
-
-
-
-
+            navigate("/student", {
+                replace: true,
+            });
         } catch (error) {
             localStorage.removeItem("jwt_token");
             localStorage.removeItem("user_role");
@@ -152,7 +143,7 @@ navigate("/student", {
             const message =
                 error instanceof Error
                     ? error.message
-                    : "로그인 중 오류가 발생했습니다.";
+                    : t("login.errors.unknown");
 
             setErrorMessage(message);
             console.error("로그인 에러:", error);
@@ -164,19 +155,45 @@ navigate("/student", {
     return (
         <div className="min-h-screen bg-[#FDFBF7] font-sans text-gray-800 flex flex-col items-center">
             <div className="w-full max-w-md flex-1 bg-white shadow-sm relative flex flex-col justify-center px-6 py-12">
+                <div className="absolute top-5 right-5 flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => changeLanguage("zh-CN")}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                            currentLanguage.startsWith("zh")
+                                ? "bg-blue-400 text-white border-blue-400"
+                                : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                        }`}
+                    >
+                        {t("login.languageZh")}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => changeLanguage("ko")}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                            currentLanguage.startsWith("ko")
+                                ? "bg-blue-400 text-white border-blue-400"
+                                : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                        }`}
+                    >
+                        {t("login.languageKo")}
+                    </button>
+                </div>
+
                 <div className="flex flex-col items-center">
                     <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-blue-100">
                         <span className="text-4xl">🐻</span>
                     </div>
 
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                        로그인
+                        {t("login.title")}
                     </h1>
 
                     <p className="text-sm text-gray-500 mb-8 text-center leading-6">
-                        선생님 또는 학생 계정으로 로그인하여
+                        {t("login.subtitleLine1")}
                         <br />
-                        학습을 시작해보세요.
+                        {t("login.subtitleLine2")}
                     </p>
 
                     {successMessage && (
@@ -194,16 +211,13 @@ navigate("/student", {
                         </div>
                     )}
 
-                    <form
-                        onSubmit={handleLogin}
-                        className="w-full space-y-5"
-                    >
+                    <form onSubmit={handleLogin} className="w-full space-y-5">
                         <div className="space-y-1">
                             <label
                                 htmlFor="loginId"
                                 className="text-xs font-semibold text-gray-600 ml-1"
                             >
-                                아이디
+                                {t("login.loginId")}
                             </label>
 
                             <div className="relative">
@@ -219,7 +233,9 @@ navigate("/student", {
                                         setLoginId(e.target.value)
                                     }
                                     className="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all bg-gray-50 focus:bg-white"
-                                    placeholder="아이디를 입력하세요"
+                                    placeholder={t(
+                                        "login.loginIdPlaceholder"
+                                    )}
                                     autoComplete="username"
                                     required
                                     disabled={isLoading}
@@ -232,7 +248,7 @@ navigate("/student", {
                                 htmlFor="password"
                                 className="text-xs font-semibold text-gray-600 ml-1"
                             >
-                                비밀번호
+                                {t("login.password")}
                             </label>
 
                             <div className="relative">
@@ -248,7 +264,9 @@ navigate("/student", {
                                         setPassword(e.target.value)
                                     }
                                     className="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all bg-gray-50 focus:bg-white"
-                                    placeholder="비밀번호를 입력하세요"
+                                    placeholder={t(
+                                        "login.passwordPlaceholder"
+                                    )}
                                     autoComplete="current-password"
                                     required
                                     disabled={isLoading}
@@ -260,18 +278,20 @@ navigate("/student", {
                             type="submit"
                             disabled={isLoading}
                             className={`w-full mt-4 py-4 rounded-2xl font-bold text-lg shadow-sm transition-all active:scale-[0.98] ${
-    isLoading
-        ? "bg-blue-300 cursor-not-allowed text-white"
-        : "bg-blue-400 hover:bg-blue-500 text-white hover:shadow-md"
-}`}
+                                isLoading
+                                    ? "bg-blue-300 cursor-not-allowed text-white"
+                                    : "bg-blue-400 hover:bg-blue-500 text-white hover:shadow-md"
+                            }`}
                         >
-                            {isLoading ? "로그인 중..." : "로그인"}
+                            {isLoading
+                                ? t("login.loading")
+                                : t("login.submit")}
                         </button>
                     </form>
 
                     <div className="w-full mt-8 pt-7 border-t border-gray-100">
                         <p className="mb-3 text-xs text-center text-gray-500">
-                            아직 선생님 계정이 없으신가요?
+                            {t("login.teacherAccountQuestion")}
                         </p>
 
                         <button
@@ -281,13 +301,13 @@ navigate("/student", {
                             className="w-full py-3.5 rounded-2xl border border-blue-300 text-blue-500 font-semibold text-sm hover:bg-blue-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             <UserPlus className="w-4 h-4" />
-                            선생님 회원가입
+                            {t("login.teacherRegister")}
                         </button>
 
                         <p className="mt-4 text-xs text-gray-400 text-center leading-5">
-                            학생 계정은 담당 선생님이
+                            {t("login.studentAccountGuideLine1")}
                             <br />
-                            학급 관리 화면에서 생성할 수 있습니다.
+                            {t("login.studentAccountGuideLine2")}
                         </p>
                     </div>
                 </div>
