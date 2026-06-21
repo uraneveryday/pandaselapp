@@ -1,26 +1,670 @@
 {
+  "common": {
+    "confirm": "确认",
+    "cancel": "取消",
+    "save": "保存",
+    "edit": "修改",
+    "delete": "删除",
+    "close": "关闭",
+    "back": "返回",
+    "backToList": "返回列表",
+    "loading": "加载中...",
+    "retry": "重试",
+    "error": "发生错误了。",
+    "success": "已完成。",
+    "select": "选择",
+    "optional": "选填",
+    "none": "未选择",
+    "search": "搜索",
+    "created": "创建中...",
+    "saving": "保存中...",
+    "submitting": "提交中...",
+    "processing": "处理中",
+    "status": {
+      "closed": "已截止",
+      "open": "进行中",
+      "done": "完成",
+      "expired": "已过期"
+    },
+    "auth": {
+      "loginExpired": "登录已过期，请重新登录。",
+      "loginRequired": "此功能需要登录后使用。",
+      "normalLoginRequired": "需要正常登录。",
+      "teacherOnly": "👩‍🏫 此页面仅限教师访问。",
+      "noLoginInfo": "未获取到登录信息，请重新登录。"
+    },
+    "gender": {
+      "label": "性别",
+      "male": "男",
+      "female": "女",
+      "maleStudent": "男学生",
+      "femaleStudent": "女学生",
+      "none": "未选择"
+    },
+    "unit": {
+      "count": "{{count}}个",
+      "coupon": "{{count}}张",
+      "person": "{{count}}名",
+      "day": "{{count}}天",
+      "point": "{{count}}分",
+      "percent": "{{count}}%",
+      "stamps": "{{count}}个",
+      "charsMax": "{{count}} / {{max}}字"
+    }
+  },
   "login": {
     "title": "登录",
-    "subtitleLine1": "使用老师或学生账号登录",
-    "subtitleLine2": "开始你的学习吧。",
+    "subtitleLine1": "请使用教师或学生账号登录",
+    "subtitleLine2": "开始学习吧。",
     "loginId": "账号",
     "loginIdPlaceholder": "请输入账号",
     "password": "密码",
     "passwordPlaceholder": "请输入密码",
     "submit": "登录",
     "loading": "登录中...",
-    "teacherAccountQuestion": "还没有教师账号吗？",
+    "teacherAccountQuestion": "还没有教师账号？",
     "teacherRegister": "教师注册",
-    "studentAccountGuideLine1": "学生账号由负责老师",
+    "studentAccountGuideLine1": "学生账号由教师",
     "studentAccountGuideLine2": "在班级管理页面中创建。",
-    "languageKo": "한국어",
+    "languageKo": "韩语",
     "languageZh": "中文",
     "errors": {
       "required": "请输入账号和密码。",
-      "invalidCredential": "账号或密码不正确。",
-      "missingToken": "服务器没有返回登录令牌。",
+      "invalidCredential": "账号或密码不匹配。",
+      "missingToken": "未能从服务器获取登录令牌。",
       "invalidRole": "无法确认用户权限信息。",
       "unknown": "登录过程中发生错误。"
+    }
+  },
+  "register": {
+    "backToLogin": "返回登录",
+    "title": "教师注册",
+    "subtitleLine1": "请创建用于管理班级和学习活动的",
+    "subtitleLine2": "教师账号。",
+    "teacherOnlyLine1": "此页面仅限教师账号注册。",
+    "studentAccountGuideLine1": "学生账号请注册后",
+    "studentAccountGuideLine2": "在班级管理页面创建。",
+    "fields": {
+      "loginId": "账号",
+      "loginIdPlaceholder": "英文、数字、下划线，5~20字",
+      "password": "密码",
+      "passwordPlaceholder": "英文、数字、特殊字符，8~20字",
+      "passwordConfirm": "确认密码",
+      "passwordConfirmPlaceholder": "请再次输入密码",
+      "name": "姓名",
+      "namePlaceholder": "请输入教师姓名",
+      "email": "邮箱",
+      "gender": "性别",
+      "phoneNumber": "电话号码"
+    },
+    "submit": "创建教师账号",
+    "submitting": "注册处理中...",
+    "success": "注册已完成，请使用教师账号登录。",
+    "errors": {
+      "loginIdFormat": "账号请使用英文、数字、下划线，长度为5~20字。",
+      "passwordLength": "请输入8~20字的密码。",
+      "passwordLetter": "密码必须包含至少一个英文字母。",
+      "passwordNumber": "密码必须包含至少一个数字。",
+      "passwordSpecial": "密码必须包含至少一个特殊字符。",
+      "passwordNoSpace": "密码不能包含空格。",
+      "passwordMismatch": "密码与确认密码不一致。",
+      "nameRequired": "请输入姓名。",
+      "emailRequired": "请输入邮箱。",
+      "signupFailed": "注册失败。",
+      "unknown": "注册过程中发生错误。"
+    }
+  },
+  "student": {
+    "welcome": {
+      "subtitle": "每天进步一点点，快乐学习每一天！",
+      "start": "开始",
+      "startLearning": "开始学习",
+      "stats": {
+        "subjects": "学习科目",
+        "students": "参与学生",
+        "satisfaction": "满意度"
+      },
+      "learnTitle": "可以学些什么呢？",
+      "subjects": {
+        "korean": {
+          "title": "学习韩文",
+          "desc": "有趣的文字游戏"
+        },
+        "math": {
+          "title": "数学游戏",
+          "desc": "和数字做朋友"
+        },
+        "art": {
+          "title": "美术时间",
+          "desc": "涂色和绘画"
+        },
+        "music": {
+          "title": "音乐教室",
+          "desc": "唱歌跳舞"
+        }
+      }
+    },
+    "myPage": {
+      "myLearning": "我的学习",
+      "loading": "正在加载数据...",
+      "noClassroomTitle": "没有所属的班级。",
+      "goHome": "返回首页",
+      "todayHomework": "今天的学习任务",
+      "noHomework": "哦耶！现在没有作业要做！",
+      "task": {
+        "complete": "完成",
+        "expiredAlert": "啊！作业已经过期了！",
+        "expired": "⚠️ 已过期",
+        "start": "开始"
+      },
+      "errors": {
+        "normalLoginRequired": "需要正常登录。"
+      }
+    },
+    "quiz": {
+      "loading": "正在加载题目...",
+      "emptyTitle": "没有已创建的题目。",
+      "backToMyPage": "返回我的页面",
+      "exit": "退出",
+      "previous": "上一题",
+      "next": "下一题",
+      "finalSubmit": "最终提交",
+      "submitting": "提交中...",
+      "questionImageAlt": "题目图片",
+      "alerts": {
+        "loadFailed": "加载题目失败。",
+        "unansweredConfirm": "还有未解答的题目，确定要提交吗？",
+        "submitSuccess": "作业提交成功！",
+        "submitError": "提交过程中发生错误（作业可能已提交过）。",
+        "serverError": "服务器连接失败，请稍后重试。"
+      }
+    },
+    "ranking": {
+      "title": "地区排名",
+      "hallOfFame": "荣誉殿堂",
+      "bestRegion": "最佳学习地区",
+      "overallRank": "总排名",
+      "updateNotice": "📊 排名每日午夜更新",
+      "rankLabel": "第{{rank}}名",
+      "score": "{{score}}分",
+      "trend": {
+        "up": "上升",
+        "down": "下降",
+        "same": "保持不变"
+      },
+      "regions": {
+        "seoul": "首尔特别市",
+        "gyeonggi": "京畿道",
+        "busan": "釜山广域市",
+        "incheon": "仁川广域市",
+        "daegu": "大邱广域市",
+        "gwangju": "光州广域市",
+        "daejeon": "大田广域市",
+        "ulsan": "蔚山广域市",
+        "sejong": "世宗特别自治市",
+        "gangwon": "江原道"
+      }
+    }
+  },
+  "teacher": {
+    "layout": {
+      "pageTitle": "👩‍🏫 {{userName}}教师的页面",
+      "logout": "退出登录",
+      "logoutAlert": "已退出登录。"
+    },
+    "classroomList": {
+      "title": "🏫 我的班级列表",
+      "create": "➕ 创建班级",
+      "loading": "正在加载数据... ⏳",
+      "empty": "尚未创建班级。",
+      "studentCount": "学生数：{{count}}名",
+      "edit": "✏️ 修改",
+      "alerts": {
+        "loginRequired": "需要登录。",
+        "loadFailed": "加载班级数据失败。",
+        "serverCheck": "无法加载数据，请检查服务器连接。"
+      }
+    },
+    "classroomCreate": {
+      "title": "➕ 创建新班级",
+      "back": "返回",
+      "className": "班级名称",
+      "classNamePlaceholder": "例如：一年级一班 高级数学",
+      "charCount": "{{count}} / 50字",
+      "submit": "创建班级",
+      "creating": "创建中...",
+      "alerts": {
+        "nameRequired": "请输入班级名称。",
+        "nameTooLong": "班级名称不能超过50字。",
+        "createFailed": "创建班级失败",
+        "createSuccess": "'{{className}}'班级创建成功！",
+        "unknown": "创建班级过程中发生错误。"
+      }
+    },
+    "classroomDetail": {
+      "errors": {
+        "invalidClassroomId": "班级ID无效。",
+        "loginExpired": "登录已过期。",
+        "noPermission": "没有权限查看此班级。",
+        "notFound": "找不到该班级。",
+        "loadFailed": "无法加载班级信息。",
+        "unknown": "发生未知错误。",
+        "couponUseFailed": "使用兑换券时发生错误。",
+        "couponUseNotCompleted": "无法使用兑换券。"
+      },
+      "loadingTitle": "正在加载班级成员",
+      "loadingDescription": "请稍等 ✨",
+      "errorTitle": "啊，出现了点问题",
+      "back": "返回",
+      "couponUseCompleteTitle": "兑换券使用完成",
+      "couponUseConfirm": "是否核销{{studentName}}的1张兑换券？",
+      "couponUseSuccess": "{{studentName}}的1张兑换券已核销！",
+      "taskManagement": "作业管理",
+      "classroomSetting": "班级设置",
+      "friendsTitle": "一起学习的朋友们",
+      "studentsTitle": "我的班级学生",
+      "studentCount": "{{count}}名",
+      "emptyStudentTitle": "还没有注册的学生",
+      "emptyStudentDescriptionLine1": "邀请学生后，这里会显示",
+      "emptyStudentDescriptionLine2": "可爱的名片卡。",
+      "guardianPhoneNotRegistered": "未登记监护人联系方式",
+      "todayStamp": "今天的印章",
+      "stampGuide": "集齐10个可获得1张兑换券！",
+      "stampAriaLabel": "印章 {{count}}个",
+      "couponCount": "{{count}}张",
+      "ownedCoupon": "持有兑换券",
+      "useCoupon": "使用兑换券",
+      "usingCoupon": "使用中",
+      "needMoreStamp": "再攒一些印章吧"
+    },
+    "classroomEdit": {
+      "loading": "正在加载班级信息...",
+      "empty": "找不到班级信息。",
+      "backToList": "返回列表",
+      "subtitle": "学生账号管理（创建、修改、删除）",
+      "summary": {
+        "classroom": "班级",
+        "registeredStudents": "已创建的学生",
+        "studentCount": "{{count}}名"
+      },
+      "studentManagement": "学生管理",
+      "studentManagementDescription": "数据库主键不在画面显示，仅用于内部请求。",
+      "newStudent": "创建新学生",
+      "close": "关闭",
+      "form": {
+        "studentName": "学生姓名 *",
+        "studentNamePlaceholder": "例如：金敏智",
+        "gender": "性别",
+        "loginId": "登录ID *",
+        "loginIdPlaceholder": "学生登录ID",
+        "initialPassword": "初始密码 *",
+        "initialPasswordPlaceholder": "初始密码",
+        "parentPhoneNumber": "家长电话号码",
+        "optionalPlaceholder": "选填",
+        "createAccount": "创建账号",
+        "creating": "创建中..."
+      },
+      "searchPlaceholder": "搜索学生姓名、登录ID、家长号码",
+      "filteredCount": "显示 {{count}}名",
+      "table": {
+        "studentName": "学生姓名",
+        "loginId": "登录ID",
+        "gender": "性别",
+        "parentPhoneNumber": "家长号码",
+        "stamp": "印章",
+        "coupon": "兑换券",
+        "manage": "管理"
+      },
+      "defaultStudentName": "未命名",
+      "buttons": {
+        "save": "保存",
+        "saving": "保存中",
+        "cancel": "取消",
+        "edit": "修改",
+        "remove": "删除"
+      },
+      "emptyStudentsTitle": "没有匹配的学生。",
+      "emptyStudentsDescription": "请清除搜索词或添加新学生。",
+      "alerts": {
+        "loadFailed": "无法加载班级信息。",
+        "loadError": "加载班级信息时发生错误。",
+        "studentNameRequired": "请输入学生姓名。",
+        "loginIdRequired": "请输入登录ID。",
+        "initialPasswordRequired": "请输入初始密码。",
+        "createFailed": "创建学生账号失败。",
+        "createSuccess": "学生账号已创建。",
+        "createUnknown": "创建学生账号时发生错误。",
+        "updateFailed": "修改学生信息失败。",
+        "updateUnknown": "修改学生信息时发生错误。",
+        "removeConfirm": "是否将{{studentName}}学生从此班级删除？",
+        "removeFailed": "删除学生失败。",
+        "removeUnknown": "删除学生时发生错误。",
+        "fallbackStudentName": "该学生"
+      }
+    },
+    "taskList": {
+      "backToClassroom": "返回教室管理",
+      "title": "作业管理",
+      "registeredCount": "已布置作业 {{count}}个",
+      "create": "布置新作业",
+      "retry": "重新加载",
+      "emptyTitle": "没有已布置的作业",
+      "emptyDescription": "请布置第一个作业并分配给学生。",
+      "closed": "已截止",
+      "open": "进行中",
+      "processing": "处理中",
+      "closeTask": "截止",
+      "closedDone": "已截止",
+      "errors": {
+        "invalidClassroom": "无法确认教室信息。",
+        "loadFailed": "无法加载作业列表。",
+        "closeFailed": "作业截止失败，请稍后重试。"
+      },
+      "confirm": {
+        "closeTask": "确认截止该作业吗？\n截止后学生将无法继续提交。"
+      }
+    },
+    "taskCreate": {
+      "title": "创建新作业",
+      "subtitleLine1": "请设置作业内容、学习期限",
+      "subtitleLine2": "以及学生将获得的奖励。",
+      "basicInfoTitle": "作业基本信息",
+      "basicInfoDescription": "填写作业信息，内容将展示给学生。",
+      "fields": {
+        "taskName": "作业名称",
+        "taskNamePlaceholder": "例如：解10道加法题",
+        "subject": "科目",
+        "stampCount": "印章数量",
+        "stampSuffix": "个",
+        "stampHelpLine1": "完成作业的学生将获得的",
+        "stampHelpLine2": "印章数量。",
+        "description": "作业说明",
+        "descriptionPlaceholder": "请详细输入学生需要完成的内容。\n例如：请解答教材第10页的加法题并提交。"
+      },
+      "subject": {
+        "math": "数学",
+        "chinese": "汉字"
+      },
+      "periodTitle": "作业期限",
+      "periodDescriptionLine1": "请先选择开始日期",
+      "periodDescriptionLine2": "再选择结束日期。",
+      "startDate": "开始日期",
+      "fromMidnight": "从00:00开始",
+      "endDate": "结束日期",
+      "untilEndOfDay": "到23:59结束",
+      "dateHelpLine1": "灰色显示的过去日期不可选。",
+      "dateHelpLine2": "选择两次相同日期",
+      "dateHelpLine3": "可设置为一天的作业。",
+      "saveFailedTitle": "无法保存作业。",
+      "cancel": "取消",
+      "submit": "保存作业",
+      "submitting": "保存中...",
+      "errors": {
+        "dateRequired": "请选择日期",
+        "invalidClassroom": "班级无效。",
+        "needStartAndEnd": "请同时选择作业的开始日期和结束日期。",
+        "invalidStamp": "印章数量请输入1以上的整数。",
+        "noLoginInfo": "没有登录信息，请重新登录。",
+        "serverError": "服务器错误 ({{status}})：{{message}}",
+        "unknown": "创建作业时发生错误。"
+      },
+      "success": {
+        "withNumber": "作业已创建。作业编号：{{taskId}}",
+        "default": "作业已创建。"
+      }
+    },
+    "taskDetail": {
+      "deadline": {
+        "none": "无截止日期",
+        "invalid": "截止日期错误",
+        "expired": "已过截止日期",
+        "today": "今日截止",
+        "daysLeft": "剩余{{count}}天"
+      },
+      "loading": "正在加载作业信息。",
+      "notFoundTitle": "找不到作业信息。",
+      "notFoundDescription": "可能是已被删除或无权限访问的作业。",
+      "backToList": "返回作业列表",
+      "status": {
+        "closed": "已截止",
+        "open": "进行中"
+      },
+      "noDescription": "暂无作业说明。",
+      "quizAdd": "添加题目",
+      "taskDelete": "删除作业",
+      "cards": {
+        "submissionRate": {
+          "label": "学生提交率",
+          "subText": "当前作业完成率"
+        },
+        "quizCount": {
+          "label": "已创建题目",
+          "value": "{{count}}个",
+          "subText": "此作业包含的题目"
+        },
+        "rewardStamp": {
+          "label": "奖励印章",
+          "value": "{{count}}个",
+          "subText": "完成时发放"
+        },
+        "deadline": {
+          "label": "截止日期"
+        }
+      },
+      "tabs": {
+        "overview": "概览",
+        "quizzes": "题目构成",
+        "analytics": "分析"
+      },
+      "overview": {
+        "title": "作业概览",
+        "description": "以下是您设置的作业基本信息。",
+        "info": {
+          "taskName": "作业名称",
+          "className": "班级名称",
+          "startDate": "开始时间",
+          "expiredDate": "截止时间",
+          "rewardStamp": "奖励印章",
+          "status": "状态"
+        },
+        "taskDescriptionTitle": "作业说明",
+        "noTaskDescription": "未填写作业说明。",
+        "progressSummaryTitle": "进度概况",
+        "progressSummaryDescription": "当前作业进展情况",
+        "submissionRate": "提交率",
+        "quizCount": "题目 {{count}}个",
+        "futureAnalyticsGuide": "后续可在此卡片下方扩展查看：学生提交状态、未提交名单、平均答题用时等数据。"
+      },
+      "quizzes": {
+        "title": "已创建的题目",
+        "description": "此作业共包含{{count}}个题目。",
+        "add": "添加题目",
+        "emptyTitle": "还没有创建题目。",
+        "emptyDescription": "添加后的题目将显示在这里。",
+        "imageAlt": "{{quizName}}图片",
+        "untitled": "无标题题目",
+        "questionId": "题目ID：{{quizId}}",
+        "edit": "修改",
+        "delete": "删除"
+      },
+      "alerts": {
+        "deleteTaskConfirm": "确定要删除此作业吗？相关题目也可能被移出管理范围。",
+        "deleteTaskSuccess": "作业已删除。",
+        "deleteTaskFailed": "删除作业时发生错误。",
+        "deleteQuizConfirm": "确定要删除此题目吗？",
+        "deleteQuizSuccess": "题目已删除。",
+        "deleteQuizFailed": "删除题目时发生错误。"
+      },
+      "errors": {
+        "quizListLoadFailed": "查询题目失败：{{status}}",
+        "taskDetailLoadFailed": "查询作业详情失败：{{status}}",
+        "taskDeleteFailed": "删除作业失败：{{status}}",
+        "quizDeleteFailed": "删除题目失败：{{status}}"
+      }
+    },
+    "taskAnalytics": {
+      "title": "作业分析",
+      "description": "基于各题错误率，定位学生掌握最薄弱的题目。",
+      "refresh": "刷新",
+      "currentSubmissionRate": {
+        "label": "当前提交率",
+        "description": "基于当前 task detail API 的 completionRate"
+      },
+      "quizCount": {
+        "label": "题目数量",
+        "value": "{{count}}个",
+        "description": "基于当前任务关联的题目列表"
+      },
+      "highestWrongRate": {
+        "label": "最高错误率",
+        "calculating": "计算中",
+        "empty": "学生提交解题记录后即可查看。",
+        "summary": "第{{quizNum}}题 · {{wrongCount}}/{{totalAttempts}}人答错"
+      },
+      "hardestQuiz": {
+        "title": "错误率最高的题目",
+        "summary": "第{{quizNum}}题 · 错误率 {{wrongRate}}%",
+        "detail": "共{{totalAttempts}}人中，有{{wrongCount}}人答错。"
+      },
+      "chart": {
+        "title": "各题错误率",
+        "description": "x轴为题目编号，y轴为错误率。",
+        "unit": "单位：%",
+        "loading": "正在加载错误率数据。",
+        "emptyTitle": "还没有可供分析的解题记录。",
+        "emptyDescription": "学生解题并提交后，将显示错误率。",
+        "wrongRate": "错误率",
+        "quizLabel": "第{{quizNum}}题",
+        "tooltipLabel": "题目 {{label}}"
+      },
+      "retry": "重试",
+      "errors": {
+        "loadFailed": "无法加载错误率分析数据。",
+        "apiFailed": "查询错误率分析失败：{{status}}"
+      }
+    },
+    "quizCreate": {
+      "title": "添加新题目 (任务ID：{{taskId}})",
+      "type": "题目类型",
+      "types": {
+        "choose": "单选题",
+        "ox": "判断题"
+      },
+      "question": {
+        "label": "题目内容",
+        "hint": "（必须输入文本或图片）",
+        "placeholder": "请输入题目...",
+        "imageOptional": "题目图片（选填）"
+      },
+      "answer": {
+        "title": "设置选项及正确答案",
+        "choicePlaceholder": "输入第{{number}}个选项",
+        "correct": "正确答案"
+      },
+      "submit": "保存题目",
+      "submitting": "保存中...",
+      "alerts": {
+        "questionRequired": "请输入题目内容（文本）或上传题目图片。",
+        "choicesRequired": "请全部输入选择题选项。",
+        "imageUploadFailed": "图片上传失败。",
+        "createSuccess": "题目创建成功！",
+        "createFailed": "创建失败。",
+        "serverError": "服务器连接失败，请稍后重试。"
+      }
+    },
+    "quizEdit": {
+      "loading": "正在加载数据...",
+      "title": "修改题目",
+      "description": "请确认并修改已填写的内容。",
+      "imageAlt": "题目图片",
+      "changePhoto": "更换照片",
+      "delete": "删除",
+      "uploadClick": "点击上传图片",
+      "dragDrop": "或将图片拖拽到此处",
+      "type": "题目类型",
+      "types": {
+        "choose": "单选题",
+        "ox": "判断题"
+      },
+      "question": {
+        "label": "题目内容",
+        "placeholder": "请输入题目内容..."
+      },
+      "answer": {
+        "title": "设置选项及正确答案",
+        "choicePlaceholder": "第{{number}}个选项",
+        "correct": "正确答案"
+      },
+      "cancel": "取消",
+      "submit": "修改完成",
+      "submitting": "保存中...",
+      "alerts": {
+        "loadFailed": "加载题目信息失败。",
+        "questionRequired": "请输入题目内容（文本）或上传题目图片。",
+        "choicesRequired": "请全部输入选择题选项。",
+        "updateSuccess": "修改成功！",
+        "updateFailed": "修改失败。",
+        "serverError": "服务器连接失败，请稍后重试。"
+      }
+    }
+  },
+  "components": {
+    "progressHeader": {
+      "greeting": "你好，{{userName}}！",
+      "todayText": "今天也一起学习吧",
+      "stars": "星级",
+      "streak": "连续学习",
+      "streakDays": "{{count}}天"
+    },
+    "learningCard": {
+      "progress": "已完成 {{progress}}%"
+    },
+    "rewardBadges": {
+      "title": "获得的徽章"
+    },
+    "stampTracker": {
+      "loading": "正在加载印章信息...",
+      "title": "收集印章",
+      "stampProgress": "{{current}} / {{max}} 个",
+      "ownedStamps": "持有 {{count}}个",
+      "ownedCoupons": "持有兑换券：{{count}}张",
+      "giftPrompt": "🎉 点击礼物盒领取兑换券！",
+      "giftMessage": "去幼儿园找老师兑换礼物吧！",
+      "couponCardTitle": "礼物兑换券",
+      "couponEarned": "获得1张兑换券！",
+      "alerts": {
+        "cannotExchange": "还不能领取兑换券。"
+      }
+    },
+    "homeworkList": {
+      "title": "📚 今天的作业",
+      "remaining": "剩余{{count}}个",
+      "due": "期限：剩余{{dDayText}}",
+      "start": "开始",
+      "completedDesc": "完成了！你真棒 👏",
+      "allDone": "今天的作业全部完成了！🎉"
+    },
+    "rankingPreview": {
+      "title": "地区排名",
+      "currentTopRegion": "当前第1名地区",
+      "score": "{{score}}分",
+      "prompt": "我们地区也来争第一吧！查看详情 →"
+    },
+    "completionModal": {
+      "title": "做得好！",
+      "description": "已完成学习",
+      "score": "分数",
+      "point": "分",
+      "goHome": "返回首页"
+    },
+    "learningSession": {
+      "questionCounter": "题目 {{current}} / {{total}}",
+      "nextQuestion": "下一题",
+      "complete": "完成"
+    },
+    "layout": {
+      "homeworkBannerTitle": "老师布置了作业哦！",
+      "homeworkBannerDescription": "请在“我的页面”中查看并完成作业。"
     }
   }
 }

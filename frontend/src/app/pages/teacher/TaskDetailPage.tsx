@@ -141,7 +141,7 @@ export function TaskDetailPage() {
         } catch (error) {
             console.error("퀴즈 목록 로딩 오류:", error);
         }
-    }, [classroomId, taskId, token]);
+    }, [classroomId, taskId, token, t]);
 
     const fetchTaskDetail = useCallback(async () => {
         if (!classroomId || !taskId) return;
@@ -171,7 +171,7 @@ export function TaskDetailPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [classroomId, taskId, token, fetchQuizList]);
+    }, [classroomId, taskId, token, fetchQuizList, t]);
 
     useEffect(() => {
         fetchTaskDetail();
@@ -389,7 +389,7 @@ export function TaskDetailPage() {
                         <SummaryCard
                             icon={<Calendar size={20} />}
                             label={t("teacher.taskDetail.cards.deadline.label")}
-                            value={formatDate(taskInfo.expiredDate)}
+                            value={formatDate(taskInfo.expiredDate, currentLocale)}
                             subText={daysLeftText}
                         />
                     </div>
@@ -533,6 +533,9 @@ function OverviewTab({
     quizCount: number;
     isTaskDone: boolean;
 }) {
+    const { t, i18n } = useTranslation();
+    const currentLocale = i18n.resolvedLanguage || i18n.language || "zh-CN";
+
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
@@ -648,6 +651,7 @@ function QuizListTab({
     onDelete: (quizId: number, imageUrl?: string) => void;
 }) {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     return (
         <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
@@ -723,6 +727,8 @@ function QuizCard({
     onEdit: () => void;
     onDelete: () => void;
 }) {
+    const { t } = useTranslation();
+
     return (
         <article className="group rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-blue-300 hover:shadow-md">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
