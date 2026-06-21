@@ -37,8 +37,8 @@
       "label": "性别",
       "male": "男",
       "female": "女",
-      "maleStudent": "男学生",
-      "femaleStudent": "女学生",
+      "maleStudent": "男",
+      "femaleStudent": "女",
       "none": "未选择"
     },
     "unit": {
