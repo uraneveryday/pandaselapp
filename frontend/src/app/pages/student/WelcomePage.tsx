@@ -24,7 +24,7 @@ export function WelcomePage() {
                         🎓
                     </motion.div>
 
-                    <h1 className="mb-2 text-foreground">Panda trip!!#@</h1>
+                    <h1 className="mb-2 text-foreground">LEARNING TRIP!</h1>
 
                     <p className="text-muted-foreground">
                         {t("student.welcome.subtitle")}

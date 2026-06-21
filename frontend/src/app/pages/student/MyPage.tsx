@@ -1,32 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ArrowLeft, PlayCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { apiClient } from "../../../api/client";
-import { ProgressHeader } from "../../components/ProgressHeader";
 import { StampTracker } from "../../components/StampTracker";
 import { useHomework } from "../../context/HomeworkContext";
 
-// 1. API 응답 타입 정의 (필수)
-interface UserMeResponse {
-    name: string;
-    totalStars: number; // 토탈 스코어? 추후 백엔드에서 제공해야 할 데이터
-    streak: number;     // 연속 학습? 추후 백엔드에서 제공해야 할 데이터
-}
-
-// 2. 개별 과제(Task) 렌더링용 하위 컴포넌트 분리
-// (Task의 타입은 HomeworkContext에서 정의한 것을 가져와 쓰는 것이 좋습니다)
-const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void }) => {
+// 개별 과제 카드
+const TaskCard = ({
+                      task,
+                      onStart,
+                  }: {
+    task: any;
+    onStart: (id: number) => void;
+}) => {
     const { t } = useTranslation();
 
     const isDateExpired = task.dDay !== undefined && task.dDay < 0;
     const isCompleted = task.completed;
 
     return (
-        <div className={`p-4 rounded-2xl border-2 flex items-center justify-between ${
-            isCompleted ? "border-green-200 bg-green-50" : "border-blue-100 bg-white"
-        }`}>
+        <div
+            className={`p-4 rounded-2xl border-2 flex items-center justify-between ${
+                isCompleted
+                    ? "border-green-200 bg-green-50"
+                    : "border-blue-100 bg-white"
+            }`}
+        >
             <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
@@ -34,11 +34,13 @@ const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void 
                     </span>
 
                     {!isCompleted && task.dDayText && (
-                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
-                            isDateExpired || task.dDay === 0
-                                ? "bg-red-100 text-red-600"
-                                : "bg-orange-100 text-orange-600"
-                        }`}>
+                        <span
+                            className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                isDateExpired || task.dDay === 0
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-orange-100 text-orange-600"
+                            }`}
+                        >
                             {task.dDayText}
                         </span>
                     )}
@@ -50,8 +52,13 @@ const TaskCard = ({ task, onStart }: { task: any, onStart: (id: number) => void 
                     )}
                 </div>
 
-                <h4 className="font-bold text-gray-800">{task.taskName}</h4>
-                <p className="text-sm text-gray-500">{task.description}</p>
+                <h4 className="font-bold text-gray-800">
+                    {task.taskName}
+                </h4>
+
+                <p className="text-sm text-gray-500">
+                    {task.description}
+                </p>
             </div>
 
             {!isCompleted && (
@@ -89,9 +96,6 @@ export function MyPage() {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    // userInfo 객체 하나로 상태를 묶어 관리 (추후 확장성 고려)
-    const [userInfo, setUserInfo] = useState<UserMeResponse | null>(null);
-
     const { tasks, isLoading, hasNoClassroom } = useHomework();
 
     const handleStartTask = (taskId: number) => {
@@ -99,30 +103,13 @@ export function MyPage() {
     };
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            const token = localStorage.getItem("jwt_token");
+        const token = localStorage.getItem("jwt_token");
 
-            if (!token) {
-                alert(t("student.myPage.errors.normalLoginRequired"));
-                navigate("/login", { replace: true });
-                return;
-            }
-
-            try {
-                // 3. 타입 안정성 확보 및 async/await 적용
-                const res = await apiClient.get<UserMeResponse>("/users/me");
-                setUserInfo(res.data);
-            } catch (err) {
-                console.error("me API request failed:", err);
-            }
-        };
-
-        fetchUserData();
+        if (!token) {
+            alert(t("student.myPage.errors.normalLoginRequired"));
+            navigate("/login", { replace: true });
+        }
     }, [navigate, t]);
-
-    const handleRewardClick = () => {
-        console.log("reward button clicked");
-    };
 
     if (isLoading) {
         return (
@@ -175,16 +162,7 @@ export function MyPage() {
                     </h2>
                 </div>
 
-                {/* API가 로드된 후에만 헤더를 렌더링. 하드코딩 제거를 대비한 설계 */}
-                {userInfo && (
-                    <ProgressHeader
-                        userName={userInfo.name}
-                        totalStars={userInfo.totalStars || 342} // 백엔드 연동 전까지 임시 기본값 부여
-                        streak={userInfo.streak || 7}           // 백엔드 연동 전까지 임시 기본값 부여
-                    />
-                )}
-
-                <StampTracker onRewardClick={handleRewardClick} />
+                <StampTracker />
 
                 <div>
                     <h3 className="mb-4 px-2 font-bold text-lg">
@@ -201,7 +179,6 @@ export function MyPage() {
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {/* 4. 분리된 TaskCard 컴포넌트를 활용하여 맵핑 로직을 대폭 단순화 */}
                             {tasks.map((task) => (
                                 <TaskCard
                                     key={task.id}
