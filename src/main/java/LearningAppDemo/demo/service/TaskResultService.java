@@ -31,7 +31,7 @@ public class TaskResultService {
     @Transactional
     public void submit(Long studentId, Long taskId, TaskSubmitRequestDto request) {
 
-        if (taskResultRepository.existsByTaskIdAndStudentId(studentId,taskId))
+        if (taskResultRepository.existsByTaskIdAndStudentId(taskId,studentId))
             throw new IllegalStateException("이미 제출완료한 과제입니다");
 
         Task task = taskRepository.findById(taskId).orElseThrow();
@@ -86,4 +86,7 @@ public class TaskResultService {
     }
 
 
+    public double getAverageTakesTime(Long taskId) {
+        return taskResultRepository.averageTakesTimeByTaskId(taskId);
+    }
 }

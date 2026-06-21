@@ -31,6 +31,7 @@ public class TaskService {
     private final StudentTaskRepository studentTaskRepository;
     private final TeacherRepository teacherRepository;
     private final TaskResultRepository taskResultRepository;
+    private final TaskResultService taskResultService;
 
 
     public Long createTask(CreateTaskRequest request,Long userId,Long classroomId) {
@@ -127,7 +128,10 @@ public class TaskService {
 
         int completed = taskResultRepository.studentsCompleted(task.getId());
 
-        return new TaskDto(task,classroom.studentCount(),completed);
+        double averageTakesTime = taskResultService.getAverageTakesTime(taskId);
+
+
+        return new TaskDto(task,classroom.studentCount(),completed,averageTakesTime);
 
     }
 

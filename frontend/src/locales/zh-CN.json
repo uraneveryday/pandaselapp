@@ -433,6 +433,11 @@
       "quizAdd": "添加题目",
       "taskDelete": "删除作业",
       "cards": {
+        "averageTakesTime": {
+          "label": "平均解题时间",
+          "subText": "参考已提交的数据",
+          "empty": "暂无提交记录"
+        },
         "submissionRate": {
           "label": "学生提交率",
           "subText": "当前作业完成率"
@@ -457,6 +462,11 @@
         "analytics": "分析"
       },
       "overview": {
+        "averageTakesTime": {
+          "label": "平均解题时间",
+          "description": "学生解题所需的平均时间",
+          "empty": "提交时显示平均解题时间"
+        },
         "title": "作业概览",
         "description": "以下是您设置的作业基本信息。",
         "info": {
@@ -465,7 +475,8 @@
           "startDate": "开始时间",
           "expiredDate": "截止时间",
           "rewardStamp": "奖励印章",
-          "status": "状态"
+          "status": "状态",
+          "averageTakesTime": "平均解题时间"
         },
         "taskDescriptionTitle": "作业说明",
         "noTaskDescription": "未填写作业说明。",
@@ -508,12 +519,12 @@
       "refresh": "刷新",
       "currentSubmissionRate": {
         "label": "当前提交率",
-        "description": "基于当前 task detail API 的 completionRate"
+        "description": "显示学生们的作业提交情况"
       },
       "quizCount": {
         "label": "题目数量",
         "value": "{{count}}个",
-        "description": "基于当前任务关联的题目列表"
+        "description": "本作业题目数"
       },
       "highestWrongRate": {
         "label": "最高错误率",

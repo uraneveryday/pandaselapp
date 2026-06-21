@@ -20,7 +20,9 @@ public class TaskDto {
     private String className;
     private double completionRate;
 
-    public TaskDto(Task task, int totalStudentCount, int completedStudentCount) {
+    private double averageTakesTime;
+
+    public TaskDto(Task task, int totalStudentCount, int completedStudentCount,double averageTakesTime) {
         this.id = task.getId();
         this.taskName = task.getTaskName();
         this.description = task.getDescription();
@@ -29,7 +31,7 @@ public class TaskDto {
         this.isDone = task.isDone();
         this.rewardStamp = task.getRewardStamp();
         this.className = task.getClassRoom().getClassName();
-
+        this.averageTakesTime = Math.round(averageTakesTime * 10.0) / 10.0;
         if (totalStudentCount > 0) {
             this.completionRate = Math.round(((double) completedStudentCount / totalStudentCount) * 100.0 * 10) / 10.0;
         } else {

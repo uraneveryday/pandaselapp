@@ -13,4 +13,12 @@ public interface TaskResultRepository extends JpaRepository<TaskResult, Long> {
     @Query(value = "select COUNT(task_result_id) from task_result where task_id = :taskId AND completed = true",
             nativeQuery = true)
     int studentsCompleted(@Param("taskId")Long taskId);
+
+    @Query(value = """
+        select coalesce(avg(takes_time), 0)
+        from task_result
+        where task_id = :taskId
+          and completed = true
+        """, nativeQuery = true)
+    double averageTakesTimeByTaskId(@Param("taskId") Long taskId);
 }

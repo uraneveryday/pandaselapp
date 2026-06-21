@@ -43,6 +43,7 @@ export interface TaskDto {
     done?: boolean;
     className: string;
     completionRate: number;
+    averageTakesTime?: number;
 }
 
 const getFileNameFromUrl = (url: string) => {
@@ -52,6 +53,26 @@ const getFileNameFromUrl = (url: string) => {
     const fileName = cleanUrl.split("/").pop();
 
     return fileName ? decodeURIComponent(fileName) : null;
+};
+
+const formatTakesTime = (seconds?: number | null) => {
+    if (seconds == null || !Number.isFinite(seconds) || seconds <= 0) {
+        return "-";
+    }
+
+    const rounded = Math.round(seconds);
+    const minutes = Math.floor(rounded / 60);
+    const remainSeconds = rounded % 60;
+
+    if (minutes === 0) return `${remainSeconds}sec`;
+
+    if (remainSeconds === 0) return `${minutes}min`;
+
+    return `${minutes}min ${remainSeconds}sec`;
+};
+
+const hasAverageTakesTime = (seconds?: number | null) => {
+    return seconds != null && Number.isFinite(seconds) && seconds > 0;
 };
 
 const formatDate = (dateString?: string, locale = "ko-KR") => {
@@ -364,12 +385,22 @@ export function TaskDetailPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 border-t border-slate-100 md:grid-cols-4">
+                    <div className="grid grid-cols-1 border-t border-slate-100 sm:grid-cols-2 xl:grid-cols-5">
                         <SummaryCard
                             icon={<Users size={20} />}
                             label={t("teacher.taskDetail.cards.submissionRate.label")}
                             value={`${completionRate}%`}
                             subText={t("teacher.taskDetail.cards.submissionRate.subText")}
+                        />
+                        <SummaryCard
+                            icon={<Clock size={20} />}
+                            label={t("teacher.taskDetail.cards.averageTakesTime.label")}
+                            value={formatTakesTime(taskInfo.averageTakesTime)}
+                            subText={
+                                hasAverageTakesTime(taskInfo.averageTakesTime)
+                                    ? t("teacher.taskDetail.cards.averageTakesTime.subText")
+                                    : t("teacher.taskDetail.cards.averageTakesTime.empty")
+                            }
                         />
 
                         <SummaryCard
@@ -536,6 +567,9 @@ function OverviewTab({
     const { t, i18n } = useTranslation();
     const currentLocale = i18n.resolvedLanguage || i18n.language || "zh-CN";
 
+    const averageTakesTimeText = formatTakesTime(taskInfo.averageTakesTime);
+    const hasAverageTime = hasAverageTakesTime(taskInfo.averageTakesTime);
+
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
@@ -560,6 +594,12 @@ function OverviewTab({
                     <InfoRow label={t("teacher.taskDetail.overview.info.startDate")} value={formatDate(taskInfo.startDate, currentLocale)} />
                     <InfoRow label={t("teacher.taskDetail.overview.info.expiredDate")} value={formatDate(taskInfo.expiredDate, currentLocale)} />
                     <InfoRow label={t("teacher.taskDetail.cards.rewardStamp.label")} value={t("teacher.taskDetail.cards.rewardStamp.value", { count: taskInfo.rewardStamp })} />
+
+                    <InfoRow
+                        label={t("teacher.taskDetail.overview.info.averageTakesTime")}
+                        value={formatTakesTime(taskInfo.averageTakesTime)}
+                    />
+
                     <InfoRow label={t("teacher.taskDetail.overview.info.status")} value={isTaskDone ? t("teacher.taskDetail.status.closed") : t("teacher.taskDetail.status.open")} />
 
                     <div>
@@ -612,6 +652,30 @@ function OverviewTab({
                             className="h-full rounded-full bg-blue-600 transition-all duration-700"
                             style={{ width: `${completionRate}%` }}
                         />
+                    </div>
+
+                    <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">
+                                    {t("teacher.taskDetail.overview.averageTakesTime.label")}
+                                </p>
+
+                                <p className="mt-1 text-3xl font-black text-slate-950">
+                                    {averageTakesTimeText}
+                                </p>
+                            </div>
+
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-600 shadow-sm">
+                                <Clock size={21} />
+                            </div>
+                        </div>
+
+                        <p className="mt-3 text-sm leading-6 text-slate-500">
+                            {hasAverageTime
+                                ? t("teacher.taskDetail.overview.averageTakesTime.description")
+                                : t("teacher.taskDetail.overview.averageTakesTime.empty")}
+                        </p>
                     </div>
 
                     <p className="mt-4 text-sm leading-6 text-slate-500">

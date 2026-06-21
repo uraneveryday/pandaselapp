@@ -433,6 +433,11 @@
       "quizAdd": "퀴즈 추가",
       "taskDelete": "숙제 삭제",
       "cards": {
+        "averageTakesTime": {
+          "label": "평균 풀이 시간",
+          "subText": "제출한 학생 기준",
+          "empty": "아직 제출 기록 없음"
+        },
         "submissionRate": {
           "label": "학생 제출률",
           "subText": "현재 숙제 완료 비율"
@@ -457,6 +462,11 @@
         "analytics": "분석"
       },
       "overview": {
+        "averageTakesTime": {
+        "label": "평균 풀이 시간",
+        "description": "학생들이 숙제를 완료하는 데 걸린 평균 시간입니다.",
+        "empty": "학생들이 숙제를 제출하면 평균 풀이 시간이 표시됩니다."
+      },
         "title": "숙제 개요",
         "description": "선생님이 설정한 숙제 기본 정보입니다.",
         "info": {
@@ -465,7 +475,8 @@
           "startDate": "시작 일시",
           "expiredDate": "마감 일시",
           "rewardStamp": "보상 도장",
-          "status": "상태"
+          "status": "상태",
+          "averageTakesTime": "평균 풀이 시간"
         },
         "taskDescriptionTitle": "과제 설명",
         "noTaskDescription": "등록된 설명이 없습니다.",
@@ -508,12 +519,12 @@
       "refresh": "새로고침",
       "currentSubmissionRate": {
         "label": "현재 제출률",
-        "description": "현재 task detail API의 completionRate 기반"
+        "description": "학생들이 숙제를 얼마나 제출했는지 보여줍니다."
       },
       "quizCount": {
         "label": "퀴즈 수",
         "value": "{{count}}개",
-        "description": "현재 task에 연결된 quiz list 기반"
+        "description": "이 숙제에 포함된 문제 수입니다."
       },
       "highestWrongRate": {
         "label": "최고 오답률",
