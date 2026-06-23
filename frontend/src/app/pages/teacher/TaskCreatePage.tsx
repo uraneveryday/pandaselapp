@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -8,12 +8,16 @@ import { ko, zhCN } from "@daypicker/react/locale";
 import "@daypicker/react/style.css";
 import "./TaskCreatePage.css";
 
-type TaskCategory = "MATH" | "CHINESE";
+interface Category {
+    id: number;
+    name: string;
+    systemDefault: boolean;
+}
 
 interface TaskFormData {
     taskName: string;
     description: string;
-    category: TaskCategory;
+    categoryId: number;
     rewardStamp: number;
 }
 
@@ -74,11 +78,15 @@ export function TaskCreatePage() {
     const [formData, setFormData] = useState<TaskFormData>({
         taskName: "",
         description: "",
-        category: "MATH",
+        categoryId: 0,
         rewardStamp: 1,
     });
 
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [newCategoryName, setNewCategoryName] = useState("");
+    const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
+    const [isCreatingCategory, setIsCreatingCategory] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -90,6 +98,89 @@ export function TaskCreatePage() {
             ...previous,
             [field]: value,
         }));
+    };
+
+    const getCategoryLabel = (category: Category) => {
+        if (category.systemDefault && category.name === "MATH") {
+            return t("teacher.taskCreate.subject.math");
+        }
+        if (category.systemDefault && category.name === "CHINESE") {
+            return t("teacher.taskCreate.subject.chinese");
+        }
+        return category.name;
+    };
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            const token = localStorage.getItem("jwt_token");
+            if (!token) {
+                setIsCategoriesLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_BASE_URL}/api/teacher/categories`,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                if (!response.ok) throw new Error("Failed to load categories");
+
+                const loadedCategories: Category[] = await response.json();
+                setCategories(loadedCategories);
+                const defaultCategory = loadedCategories.find((category) => category.name === "MATH")
+                    ?? loadedCategories[0];
+                if (defaultCategory) {
+                    setFormData((previous) => ({
+                        ...previous,
+                        categoryId: previous.categoryId || defaultCategory.id,
+                    }));
+                }
+            } catch (error) {
+                console.error("카테고리 조회 실패:", error);
+                setErrorMessage(t("teacher.taskCreate.errors.categoryLoad"));
+            } finally {
+                setIsCategoriesLoading(false);
+            }
+        };
+
+        loadCategories();
+    }, [t]);
+
+    const handleCreateCategory = async () => {
+        const name = newCategoryName.trim();
+        if (!name) return;
+
+        const token = localStorage.getItem("jwt_token");
+        if (!token) {
+            setErrorMessage(t("teacher.taskCreate.errors.noLoginInfo"));
+            return;
+        }
+
+        try {
+            setIsCreatingCategory(true);
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/api/teacher/categories`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ name }),
+                },
+            );
+            if (!response.ok) throw new Error(await response.text());
+
+            const category: Category = await response.json();
+            setCategories((previous) => [...previous, category]);
+            updateField("categoryId", category.id);
+            setNewCategoryName("");
+        } catch (error) {
+            console.error("카테고리 생성 실패:", error);
+            setErrorMessage(t("teacher.taskCreate.errors.categoryCreate"));
+        } finally {
+            setIsCreatingCategory(false);
+        }
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -114,6 +205,11 @@ export function TaskCreatePage() {
             return;
         }
 
+        if (!formData.categoryId) {
+            setErrorMessage(t("teacher.taskCreate.errors.categoryRequired"));
+            return;
+        }
+
         const token = localStorage.getItem("jwt_token");
 
         if (!token) {
@@ -125,7 +221,7 @@ export function TaskCreatePage() {
             classRoomId,
             taskName: formData.taskName.trim(),
             description: formData.description.trim(),
-            category: formData.category,
+            categoryId: formData.categoryId,
             rewardStamp: formData.rewardStamp,
 
             // 시·분·초는 자동으로 00:00:00 설정
@@ -244,18 +340,47 @@ export function TaskCreatePage() {
 
                                 <select
                                     id="category"
-                                    value={formData.category}
+                                    value={formData.categoryId}
                                     onChange={(event) =>
                                         updateField(
-                                            "category",
-                                            event.target
-                                                .value as TaskCategory,
+                                            "categoryId",
+                                            Number(event.target.value),
                                         )
                                     }
+                                    disabled={isCategoriesLoading}
+                                    required
                                 >
-                                    <option value="MATH">{t("teacher.taskCreate.subject.math")}</option>
-                                    <option value="CHINESE">{t("teacher.taskCreate.subject.chinese")}</option>
+                                    {isCategoriesLoading ? (
+                                        <option>{t("teacher.taskCreate.category.loading")}</option>
+                                    ) : (
+                                        categories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {getCategoryLabel(category)}
+                                                {category.systemDefault ? "" : ` (${t("teacher.taskCreate.category.custom")})`}
+                                            </option>
+                                        ))
+                                    )}
                                 </select>
+
+                                <div className="category-create-row">
+                                    <input
+                                        type="text"
+                                        value={newCategoryName}
+                                        onChange={(event) => setNewCategoryName(event.target.value)}
+                                        placeholder={t("teacher.taskCreate.category.placeholder")}
+                                        maxLength={50}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="category-create-button"
+                                        onClick={handleCreateCategory}
+                                        disabled={isCreatingCategory || !newCategoryName.trim()}
+                                    >
+                                        {isCreatingCategory
+                                            ? t("teacher.taskCreate.category.creating")
+                                            : t("teacher.taskCreate.category.add")}
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="form-field">

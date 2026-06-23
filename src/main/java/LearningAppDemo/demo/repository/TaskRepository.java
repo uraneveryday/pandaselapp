@@ -1,7 +1,6 @@
 package LearningAppDemo.demo.repository;
 
 import LearningAppDemo.demo.domain.task.Task;
-import LearningAppDemo.demo.domain.task.Task.Category;
 import LearningAppDemo.demo.domain.task.Task.Type;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

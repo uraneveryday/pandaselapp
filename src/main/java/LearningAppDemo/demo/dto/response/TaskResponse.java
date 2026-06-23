@@ -18,7 +18,7 @@ public class TaskResponse {
     public TaskResponse(Task task) {
         this.id = task.getId();
         this.taskName = task.getTaskName();
-        this.category = task.getCategory().name(); // Enum -> String
+        this.category = task.getCategory().getName();
         this.description = task.getDescription();
         this.expirationDate = task.getExpiredDate();
         this.isDone = task.isDone();

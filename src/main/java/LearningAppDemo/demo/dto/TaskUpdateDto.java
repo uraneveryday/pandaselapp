@@ -9,7 +9,7 @@ import java.util.List;
 public class TaskUpdateDto {
     private String taskName;
     private String description;
-    private Task.Category category;
+    private Long categoryId;
 
     // ⭐ 프론트엔드에서 수정된 퀴즈 목록을 통째로 받아옵니다.
     private List<QuizUpdateDto> quizzes;

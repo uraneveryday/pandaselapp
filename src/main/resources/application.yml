@@ -42,3 +42,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  flyway:
+    # 기존 Supabase 스키마에는 Flyway 이력이 없으므로 0번 베이스라인 뒤 V1을 적용한다.
+    # 신규 빈 DB에서도 V1은 조건부 ALTER만 수행하므로 Hibernate가 나머지 테이블을 생성할 수 있다.
+    baseline-on-migrate: true
+    baseline-version: "0"

@@ -1,6 +1,5 @@
 package LearningAppDemo.demo.dto.request;
 
-import LearningAppDemo.demo.domain.task.Task;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,7 +12,7 @@ public class CreateTaskRequest {
     private String taskName;
     private String description;
 
-    private Task.Category category;
+    private Long categoryId;
 
     private int rewardStamp;
 

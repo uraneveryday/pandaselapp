@@ -14,6 +14,6 @@ public class TaskSearchCond {
 
     private LocalDateTime fromDate;
     private LocalDateTime untilDate;
-    private Task.Category category;
+    private Long categoryId;
     private Task.Type type;
 }

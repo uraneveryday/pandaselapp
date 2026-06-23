@@ -21,7 +21,7 @@ public class TaskStudentResponseDto {
     public TaskStudentResponseDto(Task task, boolean completed) {
         this.id = task.getId();
         this.taskName = task.getTaskName();
-        this.category = task.getCategory().name();
+        this.category = task.getCategory().getName();
         this.description = task.getDescription();
         this.expirationDate = task.getExpiredDate();
         this.completed = completed;

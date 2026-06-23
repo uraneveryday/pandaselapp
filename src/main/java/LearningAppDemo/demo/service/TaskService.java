@@ -1,6 +1,7 @@
 package LearningAppDemo.demo.service;
 
 import LearningAppDemo.demo.domain.classroom.Classroom;
+import LearningAppDemo.demo.domain.category.Category;
 import LearningAppDemo.demo.domain.task.Task;
 import LearningAppDemo.demo.domain.user.Role;
 import LearningAppDemo.demo.domain.user.User;
@@ -32,6 +33,7 @@ public class TaskService {
     private final TeacherRepository teacherRepository;
     private final TaskResultRepository taskResultRepository;
     private final TaskResultService taskResultService;
+    private final CategoryService categoryService;
 
 
     public Long createTask(CreateTaskRequest request,Long userId,Long classroomId) {
@@ -44,7 +46,8 @@ public class TaskService {
         task.setRewardStamp(request.getRewardStamp());
         task.setTaskName(request.getTaskName());
         task.setDescription(request.getDescription());
-        task.setCategory(request.getCategory());
+        Category category = categoryService.getCategoryUsableByTeacher(request.getCategoryId(), userId);
+        task.setCategory(category);
         task.setExpiredDate(request.getEndDate());
         task.setStartDate(request.getStartDate());
         task.setGeneratedDate(LocalDateTime.now());

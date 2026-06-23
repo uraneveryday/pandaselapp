@@ -31,8 +31,6 @@ public class QuizService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 Task를 찾을 수 없습니다. ID: " + taskId));
 
-
-        quiz.setCategory(task.getCategory());
         quiz.setTask(task);
         quiz.setType(request.getType());
         quiz.setQuestionText(request.getQuestionText());
@@ -126,4 +124,3 @@ public class QuizService {
         return new QuizDetailResponse(quiz);
     }
 }
-

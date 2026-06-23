@@ -1,6 +1,5 @@
 package LearningAppDemo.demo.domain.task;
 
-import LearningAppDemo.demo.domain.task.Task.Category;
 import LearningAppDemo.demo.domain.task.Task.Type;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -26,9 +25,6 @@ public class Quiz {
 
     @Enumerated(EnumType.STRING)
     private Type type;
-
-    @Enumerated(EnumType.STRING)
-    private Category category;
 
     @Column
     private String questionText;

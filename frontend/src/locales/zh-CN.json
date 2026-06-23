@@ -385,6 +385,13 @@
         "math": "数学",
         "chinese": "汉字"
       },
+      "category": {
+        "loading": "正在加载分类...",
+        "placeholder": "新分类名称",
+        "add": "添加",
+        "creating": "添加中...",
+        "custom": "我的分类"
+      },
       "periodTitle": "作业期限",
       "periodDescriptionLine1": "请先选择开始日期",
       "periodDescriptionLine2": "再选择结束日期。",
@@ -405,6 +412,9 @@
         "needStartAndEnd": "请同时选择作业的开始日期和结束日期。",
         "invalidStamp": "印章数量请输入1以上的整数。",
         "noLoginInfo": "没有登录信息，请重新登录。",
+        "categoryLoad": "无法加载分类列表。",
+        "categoryCreate": "无法添加分类。",
+        "categoryRequired": "请选择分类。",
         "serverError": "服务器错误 ({{status}})：{{message}}",
         "unknown": "创建作业时发生错误。"
       },

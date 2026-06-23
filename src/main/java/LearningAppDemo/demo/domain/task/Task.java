@@ -2,6 +2,7 @@ package LearningAppDemo.demo.domain.task;
 
 
 import LearningAppDemo.demo.domain.StudentTask;
+import LearningAppDemo.demo.domain.category.Category;
 import LearningAppDemo.demo.domain.classroom.Classroom;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -31,8 +32,9 @@ public class Task {
     @Column(name = "reward_stamp")
     private int rewardStamp; //이거풀면 스탬프 몇개?
 
-    @Enumerated(EnumType.STRING)
-    private Category category; //한자인지 숫자인지
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
     @Column(nullable = false)
     private String description; //학습목표
@@ -61,9 +63,6 @@ public class Task {
         OX, CHOOSE // CHOOSE는 4지선다 등
     }
 
-    public enum Category {
-        MATH, CHINESE
-    }
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<StudentTask> studentTasks = new ArrayList<>();
 }
