@@ -18,6 +18,7 @@ public class TaskSubmitRequestDto {
     public static class QuizSubmitDto {
         private Long quizId; // 어떤 문제인지 반드시 PK가 필요함!
         private String submittedAnswer; // 학생이 고른 답 (예: "0", "1", "O", "X" 등)
+        private boolean dontKnow; // 답 대신 "모른다"를 선택했는지 여부
     }
 
 }

@@ -171,6 +171,7 @@
       "finalSubmit": "최종 제출하기",
       "submitting": "제출 중...",
       "questionImageAlt": "문제 이미지",
+      "dontKnow": "잘 모르겠어요",
       "alerts": {
         "loadFailed": "문제를 불러오는데 실패했습니다.",
         "unansweredConfirm": "아직 풀지 않은 문제가 있습니다. 그래도 제출하시겠습니까?",

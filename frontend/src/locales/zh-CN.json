@@ -171,6 +171,7 @@
       "finalSubmit": "最终提交",
       "submitting": "提交中...",
       "questionImageAlt": "题目图片",
+      "dontKnow": "我不知道",
       "alerts": {
         "loadFailed": "加载题目失败。",
         "unansweredConfirm": "还有未解答的题目，确定要提交吗？",

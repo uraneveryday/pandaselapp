@@ -2,6 +2,7 @@ package LearningAppDemo.demo.service;
 
 import LearningAppDemo.demo.domain.task.Quiz;
 import LearningAppDemo.demo.domain.task.QuizResult;
+import LearningAppDemo.demo.domain.task.AnswerStatus;
 import LearningAppDemo.demo.domain.task.Task;
 import LearningAppDemo.demo.domain.task.TaskResult;
 import LearningAppDemo.demo.domain.user.Student;
@@ -66,10 +67,13 @@ public class TaskResultService {
 
             QuizResult quizResult = new QuizResult();
             quizResult.setQuiz(quiz);
-            quizResult.setSubmittedAnswer(answerDto.getSubmittedAnswer());
+            boolean dontKnow = answerDto.isDontKnow();
+            quizResult.setAnswerStatus(dontKnow ? AnswerStatus.DONT_KNOW : AnswerStatus.ANSWERED);
+            quizResult.setSubmittedAnswer(dontKnow ? null : answerDto.getSubmittedAnswer());
 
             // ⭐️ 핵심: 서버에서 직접 채점! (String 변환 후 비교 등 로직 필요)
-            boolean isCorrect = quiz.getCorrectAnswer().toString().equals(answerDto.getSubmittedAnswer());
+            boolean isCorrect = !dontKnow
+                    && quiz.getCorrectAnswer().equals(answerDto.getSubmittedAnswer());
             quizResult.setCorrect(isCorrect);
 
             if (isCorrect) correctCount++;

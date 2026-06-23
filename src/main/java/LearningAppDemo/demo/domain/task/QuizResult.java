@@ -28,5 +28,9 @@ public class QuizResult {
     // ⭐️ 선생님이 학생을 지도하기 위해 반드시 필요한 데이터
     private String submittedAnswer; // 학생이 실제로 고른 답안 (예: "3", "O", "스프링부트")
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "answer_status", nullable = false, length = 20)
+    private AnswerStatus answerStatus = AnswerStatus.ANSWERED;
+
     private boolean isCorrect; // 맞았는지 틀렸는지 여부 (채점 결과)
 }

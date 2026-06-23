@@ -21,6 +21,7 @@ export const StudentQuizPage = () => {
 
     // 학생이 선택한 답안을 저장하는 상태 { 0: 2, 1: 0 ... (문제인덱스: 선택한답안인덱스) }
     const [userAnswers, setUserAnswers] = useState<{ [key: number]: number }>({});
+    const [dontKnowAnswers, setDontKnowAnswers] = useState<{ [key: number]: boolean }>({});
     const [startTime, setStartTime] = useState<string>("");
 
     const [isLoading, setIsLoading] = useState(true);
@@ -67,11 +68,28 @@ export const StudentQuizPage = () => {
             ...prev,
             [currentIndex]: answerIndex,
         }));
+        setDontKnowAnswers((prev) => {
+            const next = { ...prev };
+            delete next[currentIndex];
+            return next;
+        });
+    };
+
+    const handleDontKnow = () => {
+        setDontKnowAnswers((prev) => ({ ...prev, [currentIndex]: true }));
+        setUserAnswers((prev) => {
+            const next = { ...prev };
+            delete next[currentIndex];
+            return next;
+        });
     };
 
     // 최종 제출 핸들러
     const handleSubmit = async () => {
-        if (Object.keys(userAnswers).length < quizzes.length) {
+        const answeredCount = quizzes.filter((_, index) =>
+            userAnswers[index] !== undefined || dontKnowAnswers[index],
+        ).length;
+        if (answeredCount < quizzes.length) {
             const confirmSubmit = window.confirm(
                 t("student.quiz.alerts.unansweredConfirm")
             );
@@ -88,7 +106,10 @@ export const StudentQuizPage = () => {
             endTime: new Date().toISOString(),
             answers: quizzes.map((quiz, index) => ({
                 quizId: quiz.quizId, // ⭐️ 백엔드 DTO 필드명과 일치시킴!
-                submittedAnswer: String(userAnswers[index] ?? ""),
+                submittedAnswer: dontKnowAnswers[index]
+                    ? null
+                    : String(userAnswers[index] ?? ""),
+                dontKnow: Boolean(dontKnowAnswers[index]),
             })),
         };
 
@@ -240,6 +261,18 @@ export const StudentQuizPage = () => {
                             </button>
                         </div>
                     )}
+
+                    <button
+                        type="button"
+                        onClick={handleDontKnow}
+                        className={`mt-5 w-full rounded-xl border-2 px-4 py-3 font-bold transition-all ${
+                            dontKnowAnswers[currentIndex]
+                                ? "border-amber-500 bg-amber-50 text-amber-700 shadow-md"
+                                : "border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-400"
+                        }`}
+                    >
+                        {t("student.quiz.dontKnow")}
+                    </button>
                 </div>
             </div>
 
