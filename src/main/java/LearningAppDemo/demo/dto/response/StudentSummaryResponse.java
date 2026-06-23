@@ -17,7 +17,7 @@ public class StudentSummaryResponse {
 
     public StudentSummaryResponse(Student student) {
         this.id = student.getId();
-        this.loginId = student.getLoginId();
+        this.loginId = student.getStudentLoginId();
         this.name = student.getUsername();
         this.gender = student.getGender();
         this.parentPhoneNumber = student.getParentPhoneNumber();

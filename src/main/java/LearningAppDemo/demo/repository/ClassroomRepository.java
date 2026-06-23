@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
@@ -13,4 +14,8 @@ public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
     List<Classroom> findClassroomsById(Long id);
 
     Classroom findClassroomById(Long id);
+
+    boolean existsByStudentLoginCode(String studentLoginCode);
+
+    Optional<Classroom> findByStudentLoginCode(String studentLoginCode);
 }

@@ -37,4 +37,7 @@ public class Student extends User {
     @Column
     private String parentPhoneNumber;
 
+    @Column(name = "student_login_id", nullable = false, length = 20)
+    private String studentLoginId;
+
 }

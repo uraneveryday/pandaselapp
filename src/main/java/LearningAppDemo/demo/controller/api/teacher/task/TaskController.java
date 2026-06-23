@@ -41,6 +41,7 @@ public class TaskController {
                     "it's not teacher role"
             );
         }
+        classRoomService.getClassroomOwnedByTeacher(classroomId, userId);
 
         return ResponseEntity.ok(classRoomService.getTasksList(classroomId));
     }
@@ -49,7 +50,9 @@ public class TaskController {
     @GetMapping("/{taskId}") //quizzes 배열로 나열
     public ResponseEntity<List<QuizzesResponse>> getAllQuizzes(
             @PathVariable("classroomId") Long classroomId,
-            @PathVariable("taskId") Long taskId) {
+            @PathVariable("taskId") Long taskId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        classRoomService.getClassroomOwnedByTeacher(classroomId, userDetails.getUserId());
 
         // Controller는 HTTP 요청을 받고 Service의 결과를 응답하는 역할만 수행
         List<QuizzesResponse> response = quizService.getQuizzesForTask(classroomId, taskId);
@@ -72,7 +75,9 @@ public class TaskController {
 
     @GetMapping("/{taskId}/detail") //task deatil Dto
     public ResponseEntity<TaskDto> TasksDetail(@PathVariable("classroomId") Long classRoomId,
-                                             @PathVariable("taskId") Long taskId){
+                                             @PathVariable("taskId") Long taskId,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails){
+        classRoomService.getClassroomOwnedByTeacher(classRoomId, userDetails.getUserId());
 
         return ResponseEntity.ok(taskService.getTaskDetailWithCompletionRate(classRoomId, taskId));
     }
@@ -92,7 +97,9 @@ public class TaskController {
     @PatchMapping("/{taskId}/finish")    //마감 완료 버튼
     public ResponseEntity<Void> finishTask(
             @PathVariable("classroomId") Long classRoomId, // URL에 있는 {id}를 받아줌 (에러 방지용)
-            @PathVariable("taskId") Long taskId) {
+            @PathVariable("taskId") Long taskId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        classRoomService.getClassroomOwnedByTeacher(classRoomId, userDetails.getUserId());
 
         taskService.completeTask(taskId);
         return ResponseEntity.ok().build();
@@ -101,7 +108,10 @@ public class TaskController {
     @PostMapping("/{taskId}/add-quizzes")
     public ResponseEntity<Void> addQuizzes(
             @PathVariable("taskId") Long taskId,
-            @RequestBody QuizRequestDto request) {
+            @RequestBody QuizRequestDto request,
+            @PathVariable("classroomId") Long classroomId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        classRoomService.getClassroomOwnedByTeacher(classroomId, userDetails.getUserId());
         quizService.createQuiz(request,taskId);
 
         return ResponseEntity.ok().build();

@@ -7,6 +7,7 @@ interface Classroom {
     id: number;
     className: string;
     studentCount: number; // 백엔드에서 배열 전체가 아닌 숫자만 넘겨주도록 최적화 필요
+    studentLoginCode: string;
 }
 
 export function ClassroomListPage() {
@@ -79,6 +80,13 @@ export function ClassroomListPage() {
         navigate(`/teacher/classrooms/${id}/edit`);
     };
 
+    const copyLoginLink = async (e: React.MouseEvent, code: string) => {
+        e.stopPropagation();
+        const url = `${window.location.origin}/login?classCode=${encodeURIComponent(code)}`;
+        await navigator.clipboard.writeText(url);
+        alert(t("teacher.classroomList.loginLinkCopied"));
+    };
+
     return (
         <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -106,10 +114,12 @@ export function ClassroomListPage() {
                                 <span style={{ fontSize: "14px", color: "#666" }}>
                                     {t("teacher.classroomList.studentCount", { count: cls.studentCount || 0 })}
                                 </span>
+                                <span style={{ marginLeft: "10px", fontSize: "13px", color: "#1565C0", fontWeight: "bold" }}>#{cls.studentLoginCode}</span>
                             </div>
-                            <button onClick={(e) => handleEditClick(e, cls.id)} style={editButtonStyle}>
-                                {t("teacher.classroomList.edit")}
-                            </button>
+                            <div style={{ display: "flex", gap: "8px" }}>
+                                <button onClick={(e) => copyLoginLink(e, cls.studentLoginCode)} style={editButtonStyle}>{t("teacher.classroomList.copyLoginLink")}</button>
+                                <button onClick={(e) => handleEditClick(e, cls.id)} style={editButtonStyle}>{t("teacher.classroomList.edit")}</button>
+                            </div>
                         </li>
                     ))}
                 </ul>

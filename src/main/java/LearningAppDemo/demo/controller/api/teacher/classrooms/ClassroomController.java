@@ -1,8 +1,8 @@
 package LearningAppDemo.demo.controller.api.teacher.classrooms;
 
 import LearningAppDemo.demo.common.authority.CustomUserDetails;
-import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.dto.request.StudentSignUpRequest;
+import LearningAppDemo.demo.dto.request.CreateClassroomRequest;
 import LearningAppDemo.demo.dto.response.ClassroomDetailResponse;
 import LearningAppDemo.demo.dto.response.ClassroomListResponse;
 import LearningAppDemo.demo.dto.response.SignUpResopnse;
@@ -29,13 +29,13 @@ public class ClassroomController {
     private final AuthService authService;
 
     @PostMapping("/new")
-    public void createClassroom(@Valid @RequestBody Classroom classroom,
+    public void createClassroom(@Valid @RequestBody CreateClassroomRequest classroom,
                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
 
         String className = classroom.getClassName();
 
-        classRoomService.createClassroom(className, userId);
+        classRoomService.createClassroom(className, classroom.getStudentLoginCode(), userId);
     }
 
 
@@ -54,17 +54,20 @@ public class ClassroomController {
     }
     @GetMapping("/{id}/edit") // 반 정보 수정 등
     public ResponseEntity<ClassroomDetailResponse> editClassroom (
-            @PathVariable("id") Long classroomId) {
+            @PathVariable("id") Long classroomId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
 
-        ClassroomDetailResponse response = classRoomService.getInfo(classroomId);
+        ClassroomDetailResponse response = classRoomService.getInfoForTeacher(classroomId, userDetails.getUserId());
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/edit/student")
     public ResponseEntity<SignUpResopnse> register(@Valid @RequestBody StudentSignUpRequest request,
-                                                   @PathVariable("id") Long classroomId) {
+                                                   @PathVariable("id") Long classroomId,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        classRoomService.getClassroomOwnedByTeacher(classroomId, userDetails.getUserId());
         Long registeredId = authService.registerStudent(request, classroomId);
         SignUpResopnse signUpResopnse = new SignUpResopnse(registeredId, "학생 회원가입 완료");
 
@@ -72,8 +75,10 @@ public class ClassroomController {
     }
 
     @GetMapping("/{id}") //정보출력
-    public ResponseEntity<ClassroomDetailResponse> getClassroomById(@PathVariable("id") Long classroomId)  {
-        return ResponseEntity.ok(classRoomService.getInfo(classroomId));
+    public ResponseEntity<ClassroomDetailResponse> getClassroomById(
+            @PathVariable("id") Long classroomId,
+            @AuthenticationPrincipal CustomUserDetails userDetails)  {
+        return ResponseEntity.ok(classRoomService.getInfoForTeacher(classroomId, userDetails.getUserId()));
     }
 
 

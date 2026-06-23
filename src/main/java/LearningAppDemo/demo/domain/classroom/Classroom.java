@@ -26,6 +26,9 @@ public class Classroom {
     @Column(nullable = false, length = 50)
     private String className; //클래스이름
 
+    @Column(name = "student_login_code", nullable = false, length = 4, unique = true)
+    private String studentLoginCode;
+
     // 연관관계
     // mappedBy = "classRoom"은 Student 엔티티의 classRoom 변수와 연결된다는 뜻입니다.
     @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL, orphanRemoval = true)

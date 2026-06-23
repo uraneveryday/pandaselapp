@@ -72,10 +72,13 @@ export function RegisterPage() {
         e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
+        const sanitizedValue = name === "password" || name === "passwordConfirm"
+            ? value.replace(/[^A-Za-z0-9!@$%^&*]/g, "")
+            : value;
 
         setFormData((previous) => ({
             ...previous,
-            [name]: value,
+            [name]: sanitizedValue,
         }));
     };
 

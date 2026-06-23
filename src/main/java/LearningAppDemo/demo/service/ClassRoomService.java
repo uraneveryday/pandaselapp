@@ -3,6 +3,7 @@ package LearningAppDemo.demo.service;
 import LearningAppDemo.demo.domain.classroom.Classroom;
 import LearningAppDemo.demo.domain.user.Student;
 import LearningAppDemo.demo.domain.user.Teacher;
+import LearningAppDemo.demo.exception.ClassroomAccessDeniedException;
 import LearningAppDemo.demo.dto.response.ClassroomDetailResponse;
 import LearningAppDemo.demo.dto.response.ClassroomListResponse;
 import LearningAppDemo.demo.dto.response.TaskListItemResponse;
@@ -42,12 +43,17 @@ public class ClassRoomService {
 
 
     @Transactional
-    public void createClassroom(String classroomName, Long userId) {
+    public void createClassroom(String classroomName, String studentLoginCode, Long userId) {
 
         Teacher teacher = teacherRepository.findTeacherById(userId)
                         .orElseThrow(() -> new IllegalArgumentException("선생님 정보를 찾을 수 없습니다."));
         Classroom classroom = new Classroom();
         classroom.setClassName(classroomName.trim());
+        if (classRoomRepository.existsByStudentLoginCode(studentLoginCode)) {
+            throw new LearningAppDemo.demo.exception.DuplicateResourceException(
+                    "studentLoginCode", "CLASS_CODE_ALREADY_EXISTS", "이미 사용 중인 반 코드입니다.");
+        }
+        classroom.setStudentLoginCode(studentLoginCode);
         classroom.setCreateDate(LocalDateTime.now());
         classroom.setTeacher(teacher);
 
@@ -55,12 +61,7 @@ public class ClassRoomService {
     }
 
     public ClassroomListResponse getClassroomForEdit(Long classroomId, Long teacherId) throws AccessDeniedException {
-        Classroom classroom = classRoomRepository.findById(classroomId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 클래스룸이 존재하지 않습니다."));
-
-        if (!classroom.getTeacher().getId().equals(teacherId)) {
-            throw new AccessDeniedException("해당 클래스룸을 관리할 권한이 없습니다.");
-        }
+        Classroom classroom = getClassroomOwnedByTeacher(classroomId, teacherId);
 
         // 여기서도 기존의 new ClassroomResponse(classroom) 대신 헬퍼 메서드 사용
         return new ClassroomListResponse(classroom);
@@ -75,6 +76,20 @@ public class ClassRoomService {
         Classroom classrooms = classRoomRepository.findById(classroomId)
                 .orElseThrow();
         return new ClassroomDetailResponse(classrooms);
+    }
+
+    @Transactional
+    public ClassroomDetailResponse getInfoForTeacher(Long classroomId, Long teacherId) {
+        return new ClassroomDetailResponse(getClassroomOwnedByTeacher(classroomId, teacherId));
+    }
+
+    public Classroom getClassroomOwnedByTeacher(Long classroomId, Long teacherId) {
+        Classroom classroom = classRoomRepository.findById(classroomId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 클래스룸이 존재하지 않습니다."));
+        if (classroom.getTeacher() == null || !classroom.getTeacher().getId().equals(teacherId)) {
+            throw new ClassroomAccessDeniedException();
+        }
+        return classroom;
     }
 
     public Long getClassroomIdByStudentId(Long userId) {

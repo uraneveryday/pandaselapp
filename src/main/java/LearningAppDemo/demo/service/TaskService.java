@@ -8,6 +8,7 @@ import LearningAppDemo.demo.domain.user.User;
 import LearningAppDemo.demo.dto.response.TaskDto;
 import LearningAppDemo.demo.dto.request.CreateTaskRequest;
 import LearningAppDemo.demo.exception.FaildToValidate;
+import LearningAppDemo.demo.exception.ClassroomAccessDeniedException;
 import LearningAppDemo.demo.repository.*;
 import LearningAppDemo.demo.dto.TaskUpdateDto;
 import jakarta.persistence.EntityNotFoundException;
@@ -72,11 +73,15 @@ public class TaskService {
         }
 
         // 2. 학급 검증 및 리턴
-        return classRoomRepository.findById(classRoomId)
+        Classroom classroom = classRoomRepository.findById(classRoomId)
                 .orElseThrow(() -> {
                     log.error("학급이 존재하지 않습니다. classRoomId: {}", classRoomId);
                     return new FaildToValidate("존재하지 않는 학급입니다.");
                 });
+        if (classroom.getTeacher() == null || !classroom.getTeacher().getId().equals(teacherId)) {
+            throw new ClassroomAccessDeniedException();
+        }
+        return classroom;
     }
 
 
@@ -115,6 +120,14 @@ public class TaskService {
                     return new FaildToValidate("존재하지않는 task");
                 });
 
+    }
+
+    public void verifyTaskOwnership(Long taskId, Long teacherId) {
+        Task task = findTaskById(taskId);
+        if (task.getClassRoom() == null || task.getClassRoom().getTeacher() == null
+                || !task.getClassRoom().getTeacher().getId().equals(teacherId)) {
+            throw new ClassroomAccessDeniedException();
+        }
     }
 
 

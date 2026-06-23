@@ -30,6 +30,7 @@ interface Student {
 interface ClassroomDetail {
     id: number;
     className: string;
+    studentLoginCode: string;
     studentCount?: number;
     students: Student[];
 }
@@ -257,6 +258,14 @@ export function ClassroomDetailPage() {
         }
     };
 
+    const copyStudentLoginLink = async () => {
+        if (!classroom) return;
+        await navigator.clipboard.writeText(
+            `${window.location.origin}/login?classCode=${encodeURIComponent(classroom.studentLoginCode)}`,
+        );
+        alert(t("teacher.classroomDetail.loginLinkCopied"));
+    };
+
     if (isLoading) {
         return (
             <main className="classroom-page centered-state">
@@ -359,6 +368,9 @@ export function ClassroomDetailPage() {
                 </div>
 
                 <div className="header-actions">
+                    <button type="button" className="task-button" onClick={copyStudentLoginLink}>
+                        {t("teacher.classroomDetail.copyLoginLink")}
+                    </button>
                     <button
                         type="button"
                         className="task-button"

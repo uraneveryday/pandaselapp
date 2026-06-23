@@ -8,6 +8,8 @@ export function ClassroomCreatePage() {
 
     // 입력받을 클래스룸 이름 상태
     const [className, setClassName] = useState("");
+    const generateClassCode = () => String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+    const [studentLoginCode, setStudentLoginCode] = useState(generateClassCode);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -20,6 +22,10 @@ export function ClassroomCreatePage() {
         }
         if (className.length > 50) {
             alert(t("teacher.classroomCreate.alerts.nameTooLong"));
+            return;
+        }
+        if (!/^\d{4}$/.test(studentLoginCode)) {
+            alert(t("teacher.classroomCreate.alerts.codeRequired"));
             return;
         }
 
@@ -41,10 +47,13 @@ export function ClassroomCreatePage() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ className })
+                body: JSON.stringify({ className, studentLoginCode })
             });
 
-            if (!response.ok) throw new Error(t("teacher.classroomCreate.alerts.createFailed"));
+            if (!response.ok) {
+                const body = await response.json().catch(() => null);
+                throw new Error(body?.message || t("teacher.classroomCreate.alerts.createFailed"));
+            }
 
 
             // API 호출을 시뮬레이션하기 위한 임시 딜레이
@@ -96,6 +105,21 @@ export function ClassroomCreatePage() {
                         <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: className.length >= 50 ? "red" : "#666", textAlign: "right" }}>
                             {t("teacher.classroomCreate.charCount", { count: className.length })}
                         </p>
+                    </div>
+
+                    <div>
+                        <label htmlFor="studentLoginCode" style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "#333" }}>
+                            {t("teacher.classroomCreate.loginCode")}
+                        </label>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                            <input id="studentLoginCode" inputMode="numeric" pattern="[0-9]{4}" maxLength={4}
+                                value={studentLoginCode}
+                                onChange={(e) => setStudentLoginCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                                disabled={isLoading} style={{ ...inputStyle, letterSpacing: "0.25em", fontWeight: "bold" }} />
+                            <button type="button" onClick={() => setStudentLoginCode(generateClassCode())} disabled={isLoading} style={cancelButtonStyle}>
+                                {t("teacher.classroomCreate.refreshCode")}
+                            </button>
+                        </div>
                     </div>
 
                     <button

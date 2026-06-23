@@ -9,12 +9,14 @@ import java.util.List;
 public class ClassroomDetailResponse {
     private Long id;
     private String className;
+    private String studentLoginCode;
     private final int studentCount;
     private List<StudentSummaryResponse> students;
 
     public ClassroomDetailResponse(Classroom classroom) {
         this.id = classroom.getId();
         this.className = classroom.getClassName();
+        this.studentLoginCode = classroom.getStudentLoginCode();
         this.students = classroom.getStudents()
                 .stream()
                 .map(StudentSummaryResponse::new)

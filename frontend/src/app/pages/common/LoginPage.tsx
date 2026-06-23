@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Lock, User, UserPlus } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
@@ -39,12 +39,15 @@ async function readResponseBody(response: Response): Promise<LoginResponse> {
 export function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
     const { t, i18n } = useTranslation();
 
     const locationState = location.state as LoginLocationState | null;
     const successMessage = locationState?.successMessage;
 
     const [loginId, setLoginId] = useState("");
+    const [classCode, setClassCode] = useState(searchParams.get("classCode") ?? "");
+    const [studentMode, setStudentMode] = useState(Boolean(searchParams.get("classCode")));
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -59,7 +62,7 @@ export function LoginPage() {
     const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (!loginId.trim() || !password) {
+        if (!loginId.trim() || !password || (studentMode && !/^\d{4}$/.test(classCode))) {
             setErrorMessage(t("login.errors.required"));
             return;
         }
@@ -69,16 +72,17 @@ export function LoginPage() {
 
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+                `${import.meta.env.VITE_API_BASE_URL}/api/auth/${studentMode ? "student/login" : "login"}`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({
-                        loginId: loginId.trim(),
+                    body: JSON.stringify(studentMode ? {
+                        classCode,
+                        studentLoginId: loginId.trim(),
                         password,
-                    }),
+                    } : { loginId: loginId.trim(), password }),
                 }
             );
 
@@ -212,12 +216,20 @@ export function LoginPage() {
                     )}
 
                     <form onSubmit={handleLogin} className="w-full space-y-5">
+                        {studentMode && (
+                            <div className="space-y-1">
+                                <label htmlFor="classCode" className="text-xs font-semibold text-gray-600 ml-1">{t("login.classCode")}</label>
+                                <input id="classCode" type="text" inputMode="numeric" maxLength={4} value={classCode}
+                                    onChange={(e) => setClassCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                                    className="block w-full px-4 py-3.5 border border-gray-200 rounded-2xl text-sm bg-gray-50" required disabled={isLoading} />
+                            </div>
+                        )}
                         <div className="space-y-1">
                             <label
                                 htmlFor="loginId"
                                 className="text-xs font-semibold text-gray-600 ml-1"
                             >
-                                {t("login.loginId")}
+                                {studentMode ? t("login.studentLoginId") : t("login.loginId")}
                             </label>
 
                             <div className="relative">
@@ -234,7 +246,7 @@ export function LoginPage() {
                                     }
                                     className="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all bg-gray-50 focus:bg-white"
                                     placeholder={t(
-                                        "login.loginIdPlaceholder"
+                                        studentMode ? "login.studentLoginIdPlaceholder" : "login.loginIdPlaceholder"
                                     )}
                                     autoComplete="username"
                                     required
@@ -261,7 +273,7 @@ export function LoginPage() {
                                     type="password"
                                     value={password}
                                     onChange={(e) =>
-                                        setPassword(e.target.value)
+                                        setPassword(e.target.value.replace(/[^A-Za-z0-9!@$%^&*]/g, ""))
                                     }
                                     className="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all bg-gray-50 focus:bg-white"
                                     placeholder={t(
@@ -288,6 +300,12 @@ export function LoginPage() {
                                 : t("login.submit")}
                         </button>
                     </form>
+
+                    <button type="button" disabled={isLoading}
+                        onClick={() => { setStudentMode((value) => !value); setErrorMessage(""); }}
+                        className="mt-5 text-sm font-bold text-blue-500 hover:text-blue-700">
+                        {studentMode ? t("login.teacherLogin") : t("login.noClassLink")}
+                    </button>
 
                     <div className="w-full mt-8 pt-7 border-t border-gray-100">
                         <p className="mb-3 text-xs text-center text-gray-500">

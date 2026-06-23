@@ -9,11 +9,13 @@ import java.util.List;
 public class ClassroomListResponse {
     private Long id;
     private String className;
+    private String studentLoginCode;
     private int studentCount;
 
     public ClassroomListResponse(Classroom classroom) {
         this.id = classroom.getId();
         this.className = classroom.getClassName();
+        this.studentLoginCode = classroom.getStudentLoginCode();
         this.studentCount = classroom.getStudents().size();
     }
 }
