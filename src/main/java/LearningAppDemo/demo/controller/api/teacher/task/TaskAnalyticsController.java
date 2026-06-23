@@ -1,6 +1,7 @@
 package LearningAppDemo.demo.controller.api.teacher.task;
 
 import LearningAppDemo.demo.dto.response.data.TaskQuizWrongRateAnalysisResponse;
+import LearningAppDemo.demo.dto.response.data.TaskLearningAnalyticsResponse;
 import LearningAppDemo.demo.service.TaskAnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,12 @@ public class TaskAnalyticsController {
         return ResponseEntity.ok(
                 taskAnalyticsService.getQuizWrongRateAnalysis(taskId)
         );
+    }
+
+    @GetMapping("/{taskId}/analytics/learning-overview")
+    public ResponseEntity<TaskLearningAnalyticsResponse> getLearningOverview(
+            @PathVariable Long taskId) {
+        return ResponseEntity.ok(taskAnalyticsService.getLearningAnalytics(taskId));
     }
     
 }

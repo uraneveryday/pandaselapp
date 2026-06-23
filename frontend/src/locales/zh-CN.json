@@ -528,6 +528,57 @@
       "title": "作业分析",
       "description": "基于各题错误率，定位学生掌握最薄弱的题目。",
       "refresh": "刷新",
+      "loading": "正在分析学生答题记录。",
+      "submissionRate": "当前提交率",
+      "people": "人",
+      "points": "分",
+      "quizLabel": "第{{quizNum}}题",
+      "highestWrong": {
+        "label": "最多错误",
+        "detail": "第{{quizNum}}题"
+      },
+      "highestDontKnow": {
+        "label": "最多不知道",
+        "detail": "第{{quizNum}}题"
+      },
+      "legend": {
+        "correctRate": "正确",
+        "wrongRate": "错误",
+        "dontKnowRate": "不知道"
+      },
+      "itemChart": {
+        "title": "各题学习反应",
+        "description": "用堆叠柱状图比较正确、错误与不知道的比例。",
+        "clickHint": "点击柱状图或题号可查看选项分布。"
+      },
+      "answerChart": {
+        "title": "第{{quizNum}}题选项分布",
+        "count": "选择人数"
+      },
+      "interpretation": {
+        "title": "题目解读",
+        "counts": "正确 {{correct}}人 · 错误 {{wrong}}人 · 不知道 {{dontKnow}}人",
+        "commonWrong": "选择最多的错误选项",
+        "noWrong": "没有错误选项记录。",
+        "dontKnowDominant": "选择“不知道”的人数多于错误作答人数，建议检查概念导入或难度。"
+      },
+      "timeScore": {
+        "title": "解题时间–分数四象限",
+        "description": "每个点代表一名学生，虚线表示本次作业提交者的中位数。",
+        "completed": "已提交学生",
+        "medianTime": "解题时间中位数",
+        "medianScore": "分数中位数",
+        "xAxis": "解题时间",
+        "yAxis": "分数"
+      },
+      "quadrants": {
+        "FAST_HIGH_SCORE": "快且高分",
+        "SLOW_HIGH_SCORE": "慢但高分",
+        "FAST_LOW_SCORE": "快但低分",
+        "SLOW_LOW_SCORE": "慢且低分"
+      },
+      "emptyTitle": "暂时没有可分析的答题记录。",
+      "emptyDescription": "学生完成并提交题目后，将显示分析结果。",
       "currentSubmissionRate": {
         "label": "当前提交率",
         "description": "显示学生们的作业提交情况"

@@ -528,6 +528,57 @@
       "title": "숙제 분석",
       "description": "문제별 오답률을 기준으로 학생들이 가장 어려워한 문항을 확인합니다.",
       "refresh": "새로고침",
+      "loading": "학생 풀이 기록을 분석하고 있습니다.",
+      "submissionRate": "현재 제출률",
+      "people": "명",
+      "points": "점",
+      "quizLabel": "{{quizNum}}번",
+      "highestWrong": {
+        "label": "가장 많은 오답",
+        "detail": "{{quizNum}}번 문제"
+      },
+      "highestDontKnow": {
+        "label": "가장 많은 모름",
+        "detail": "{{quizNum}}번 문제"
+      },
+      "legend": {
+        "correctRate": "정답",
+        "wrongRate": "오답",
+        "dontKnowRate": "모른다"
+      },
+      "itemChart": {
+        "title": "문항별 학습 반응",
+        "description": "정답·오답·모른다 비율을 누적 막대로 비교합니다.",
+        "clickHint": "막대 또는 문항 번호를 클릭하면 선택지 분포를 볼 수 있습니다."
+      },
+      "answerChart": {
+        "title": "{{quizNum}}번 선택지 분포",
+        "count": "선택 학생 수"
+      },
+      "interpretation": {
+        "title": "문항 해석",
+        "counts": "정답 {{correct}}명 · 오답 {{wrong}}명 · 모른다 {{dontKnow}}명",
+        "commonWrong": "가장 많이 선택한 오답",
+        "noWrong": "선택지 오답 기록이 없습니다.",
+        "dontKnowDominant": "오답보다 ‘모른다’가 많습니다. 개념 도입 또는 난이도 점검이 필요합니다."
+      },
+      "timeScore": {
+        "title": "풀이시간–점수 사분면",
+        "description": "각 점은 학생 1명입니다. 점선은 이 과제 제출자의 중앙값입니다.",
+        "completed": "제출 학생",
+        "medianTime": "중앙 풀이시간",
+        "medianScore": "중앙 점수",
+        "xAxis": "풀이시간",
+        "yAxis": "점수"
+      },
+      "quadrants": {
+        "FAST_HIGH_SCORE": "빠르고 고득점",
+        "SLOW_HIGH_SCORE": "느리지만 고득점",
+        "FAST_LOW_SCORE": "빠르지만 저득점",
+        "SLOW_LOW_SCORE": "느리고 저득점"
+      },
+      "emptyTitle": "아직 분석할 풀이 기록이 없습니다.",
+      "emptyDescription": "학생들이 문제를 풀고 제출하면 분석 결과가 표시됩니다.",
       "currentSubmissionRate": {
         "label": "현재 제출률",
         "description": "학생들이 숙제를 얼마나 제출했는지 보여줍니다."
