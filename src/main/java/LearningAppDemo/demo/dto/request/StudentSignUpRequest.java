@@ -16,7 +16,7 @@ public class StudentSignUpRequest {
     private String studentLoginId;
 
     @NotBlank
-    @Pattern(regexp = "^[A-Za-z0-9!@$%^&*]{4,64}$", message = "비밀번호는 영문, 숫자, 허용 특수문자만 사용할 수 있습니다.")
+    @Pattern(regexp = "^[A-Za-z0-9!@$%^&*]{2,64}$", message = "비밀번호는 2자리 이상이며 영문, 숫자, 허용 특수문자만 사용할 수 있습니다.")
     private String studentPassword;
 
     private Gender gender; //studentGender
